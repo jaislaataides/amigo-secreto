@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import imageCompression from "browser-image-compression";
 import { api } from "@/shared/api/client";
 import { Button, Field, Input, Page, PageHeader, Textarea } from "@/shared/components/ui";
 import { ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
@@ -60,6 +61,33 @@ export function PartyEditPage() {
       api.post(`/api/parties/${partyId}/update-rules`, { removeCategoryIds: [categoryId] }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
   });
+
+  const [coverError, setCoverError] = useState<string | null>(null);
+  const [compressingCover, setCompressingCover] = useState(false);
+  const setCover = useMutation({
+    mutationFn: (imageDataUrl: string | null) =>
+      api.post(`/api/parties/${partyId}/set-cover`, { imageDataUrl }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
+  });
+
+  async function handleCoverSelected(file: File | undefined) {
+    setCoverError(null);
+    if (!file) return;
+    setCompressingCover(true);
+    try {
+      const compressed = await imageCompression(file, {
+        maxWidthOrHeight: 640,
+        maxSizeMB: 0.35,
+        fileType: "image/jpeg",
+      });
+      const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
+      setCover.mutate(dataUrl);
+    } catch {
+      setCoverError("Não foi possível processar essa imagem. Tente outra.");
+    } finally {
+      setCompressingCover(false);
+    }
+  }
 
   if (!partyId) return null;
   if (isLoading || !form) return <FullPageSpinner />;
@@ -141,6 +169,19 @@ export function PartyEditPage() {
         >
           Adicionar
         </Button>
+      </div>
+
+      <h2 style={{ fontSize: 16, marginTop: 32 }}>Capa</h2>
+      {data!.imageUrl && (
+        <img src={data!.imageUrl} alt="Capa atual" style={{ maxWidth: 160, borderRadius: 8, marginBottom: 8 }} />
+      )}
+      <div>
+        <input type="file" accept="image/*" onChange={(e) => void handleCoverSelected(e.target.files?.[0])} />
+        {(compressingCover || setCover.isPending) && (
+          <p style={{ fontSize: 13, color: "#71717a" }}>Salvando…</p>
+        )}
+        {coverError && <ErrorBanner message={coverError} />}
+        {setCover.isError && <ErrorBanner message={setCover.error.message} />}
       </div>
     </Page>
   );

@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
-import { ref, uploadBytes } from "firebase/storage";
-import { storage } from "@/shared/firebase/client";
 import { api } from "@/shared/api/client";
 import { Button, Field, Input, Page, PageHeader, Textarea } from "@/shared/components/ui";
 import { ErrorBanner } from "@/shared/components/Feedback";
@@ -23,9 +21,9 @@ export function PartyCreatePage() {
   const [forbiddenItemsText, setForbiddenItemsText] = useState("");
   const [rsvpDeadline, setRsvpDeadline] = useState(defaultDeadline());
   const [customCategories, setCustomCategories] = useState("");
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [createdPartyId, setCreatedPartyId] = useState<string | null>(null);
-  const [uploadingCover, setUploadingCover] = useState(false);
+  const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
+  const [compressingImage, setCompressingImage] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   const createParty = useMutation({
     mutationFn: () =>
@@ -40,30 +38,33 @@ export function PartyCreatePage() {
           .split(",")
           .map((c) => c.trim())
           .filter(Boolean),
+        imageDataUrl: imageDataUrl ?? undefined,
       }),
-    onSuccess: async (data) => {
-      setCreatedPartyId(data.partyId);
-      if (coverFile) {
-        await uploadCover(data.partyId, coverFile);
-      }
-      navigate(`/owner/parties/${data.partyId}/participants`);
-    },
+    onSuccess: (data) => navigate(`/owner/parties/${data.partyId}/participants`),
   });
 
-  async function uploadCover(partyId: string, file: File) {
-    setUploadingCover(true);
+  async function handleImageSelected(file: File | undefined) {
+    setImageError(null);
+    if (!file) {
+      setImageDataUrl(null);
+      return;
+    }
+    setCompressingImage(true);
     try {
+      // Sem Firebase Storage (passou a exigir plano pago) — a capa vira um
+      // thumbnail pequeno guardado direto no documento da party no Firestore.
       const compressed = await imageCompression(file, {
-        maxWidthOrHeight: 1600,
-        maxSizeMB: 2,
+        maxWidthOrHeight: 640,
+        maxSizeMB: 0.35,
         fileType: "image/jpeg",
       });
-      await uploadBytes(ref(storage, `partyImages/${partyId}/cover.jpg`), compressed, {
-        contentType: "image/jpeg",
-      });
-      await api.post(`/api/parties/${partyId}/set-cover`, { imageVersion: Date.now() });
+      const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
+      setImageDataUrl(dataUrl);
+    } catch {
+      setImageError("Não foi possível processar essa imagem. Tente outra.");
+      setImageDataUrl(null);
     } finally {
-      setUploadingCover(false);
+      setCompressingImage(false);
     }
   }
 
@@ -85,8 +86,17 @@ export function PartyCreatePage() {
           <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
         </Field>
 
-        <Field label="Capa (opcional)" hint="Uma imagem de até 5MB — aparece na página e nos e-mails.">
-          <input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)} />
+        <Field label="Capa (opcional)" hint="A imagem é comprimida e guardada como um thumbnail pequeno.">
+          <input type="file" accept="image/*" onChange={(e) => void handleImageSelected(e.target.files?.[0])} />
+          {compressingImage && <p style={{ fontSize: 13, color: "#71717a" }}>Processando imagem…</p>}
+          {imageError && <ErrorBanner message={imageError} />}
+          {imageDataUrl && (
+            <img
+              src={imageDataUrl}
+              alt="Pré-visualização da capa"
+              style={{ marginTop: 8, maxWidth: 160, borderRadius: 8 }}
+            />
+          )}
         </Field>
 
         <div style={{ display: "flex", gap: 12 }}>
@@ -126,12 +136,10 @@ export function PartyCreatePage() {
 
         {createParty.isError && <ErrorBanner message={createParty.error.message} />}
 
-        <Button type="submit" disabled={createParty.isPending || uploadingCover}>
-          {createParty.isPending || uploadingCover ? "Criando…" : "Criar party"}
+        <Button type="submit" disabled={createParty.isPending || compressingImage}>
+          {createParty.isPending ? "Criando…" : "Criar party"}
         </Button>
       </form>
-
-      {createdPartyId && <p style={{ color: "#71717a", fontSize: 13, marginTop: 12 }}>Party criada! Redirecionando…</p>}
     </Page>
   );
 }

@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { wrapDek, generatePartyDek } from "../_lib/crypto/envelope";
+import { validateImageDataUrl } from "../_lib/image";
 import { adminDb } from "../_lib/firebaseAdmin";
 import { ApiError, normalizeEmail, requireMethod, requireOwner, verifyAuth } from "../_lib/auth";
 import { readJsonBody, requireString, withErrorHandling } from "../_lib/http";
@@ -16,6 +17,7 @@ interface CreatePartyBody {
   forbiddenItemsText?: string;
   rsvpDeadline: string; // ISO date string
   customCategories?: string[];
+  imageDataUrl?: string;
 }
 
 export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
@@ -49,8 +51,7 @@ export default withErrorHandling(async (req: VercelRequest, res: VercelResponse)
   } = {
     name,
     description: body.description?.trim() ?? "",
-    imageUrl: null,
-    imageVersion: 0,
+    imageUrl: body.imageDataUrl ? validateImageDataUrl(body.imageDataUrl) : null,
     ownerUid: decoded.uid,
     ownerEmail: normalizeEmail(decoded.email),
     status: "draft",

@@ -1,13 +1,14 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Timestamp } from "firebase-admin/firestore";
-import { adminBucket, adminDb } from "../_lib/firebaseAdmin";
+import { adminDb } from "../_lib/firebaseAdmin";
 import { requireMethod, verifyCronSecret } from "../_lib/auth";
 import { withErrorHandling } from "../_lib/http";
 
 /**
  * Exclui permanentemente parties sorteadas há mais de 15 dias (doc +
- * subcoleções + imagem no Storage). Disparada 1x/dia pelo Cron da Vercel —
- * é a única forma de "retenção de dados" deste app: nada fica para sempre.
+ * subcoleções — a imagem de capa já mora dentro do próprio doc, não há
+ * Storage envolvido). Disparada 1x/dia pelo Cron da Vercel — é a única
+ * forma de "retenção de dados" deste app: nada fica para sempre.
  */
 export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["GET", "POST"])) return;
@@ -22,7 +23,6 @@ export default withErrorHandling(async (req: VercelRequest, res: VercelResponse)
 
   let purged = 0;
   for (const partyDoc of expiredSnap.docs) {
-    await adminBucket.deleteFiles({ prefix: `partyImages/${partyDoc.id}/` }).catch(() => undefined);
     await adminDb.recursiveDelete(partyDoc.ref);
     purged++;
   }

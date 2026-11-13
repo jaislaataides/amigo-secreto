@@ -12,12 +12,15 @@ com duas provas de identidade.
 - **Front-end**: React + Vite + TypeScript, hospedado na Vercel.
 - **Backend**: Vercel Serverless Functions (`api/`) — não Firebase Cloud
   Functions, de propósito: isso mantém o Firebase inteiro no plano gratuito
-  Spark (Auth + Firestore + Storage), sem precisar de cartão de crédito.
+  Spark (Auth + Firestore), sem precisar de cartão de crédito.
 - **Criptografia**: envelope encryption (AES-256-GCM) para o resultado do
   sorteio, com a chave mestra guardada como variável de ambiente da Vercel.
+- **Imagem de capa**: sem Firebase Storage (passou a exigir plano pago) —
+  vira um thumbnail pequeno comprimido no navegador e guardado como data URI
+  direto no documento da party no Firestore.
 - **E-mail**: Resend, com templates em React Email.
-- **Retenção**: parties sorteadas são excluídas automaticamente 15 dias depois
-  (Firestore + Storage), via cron job diário.
+- **Retenção**: parties sorteadas são excluídas automaticamente 15 dias
+  depois, via cron job diário.
 
 Detalhes completos da arquitetura e das decisões de design estão no plano
 original da implementação.

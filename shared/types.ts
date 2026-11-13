@@ -22,8 +22,14 @@ export interface ValueRange {
 export interface Party {
   name: string;
   description: string;
+  /**
+   * Data URI (ex: "data:image/jpeg;base64,...") de um thumbnail pequeno da
+   * capa, guardado direto no documento — sem Firebase Storage, que passou a
+   * exigir o plano pago Blaze mesmo para uso gratuito. Limitado a ~700KB
+   * (ver MAX_IMAGE_DATA_URL_BYTES) pra caber com folga no limite de 1MiB por
+   * documento do Firestore.
+   */
   imageUrl: string | null;
-  imageVersion: number;
   ownerUid: string;
   ownerEmail: string;
   status: PartyStatus;

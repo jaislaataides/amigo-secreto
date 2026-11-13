@@ -1,14 +1,19 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
-import { adminBucket } from "../../_lib/firebaseAdmin";
-import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth";
+import { validateImageDataUrl } from "../../_lib/image";
+import { requireMethod, verifyAuth } from "../../_lib/auth";
 import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http";
 import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party";
 
 interface SetCoverBody {
-  imageVersion: number;
+  imageDataUrl: string | null;
 }
 
+/**
+ * Grava (ou remove, se imageDataUrl for null) a capa da party, direto como
+ * data URI no documento — ver api/_lib/image.ts pro porquê de não usar
+ * Firebase Storage aqui.
+ */
 export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["POST"])) return;
 
@@ -18,26 +23,9 @@ export default withErrorHandling(async (req: VercelRequest, res: VercelResponse)
   requirePartyOwnerOrAdmin(party, decoded);
 
   const body = readJsonBody<SetCoverBody>(req);
-  if (typeof body.imageVersion !== "number" || body.imageVersion < 0) {
-    throw new ApiError(400, "invalid-body", "imageVersion é obrigatório.");
-  }
+  const imageUrl = body.imageDataUrl === null ? null : validateImageDataUrl(body.imageDataUrl);
 
-  // O client já subiu o arquivo direto pro Storage (ver storage.rules);
-  // aqui só confirmamos que ele existe antes de gravar a URL na party.
-  const objectPath = `partyImages/${partyId}/cover.jpg`;
-  const [exists] = await adminBucket.file(objectPath).exists();
-  if (!exists) {
-    throw new ApiError(400, "upload-missing", "Nenhuma imagem foi enviada para esta party ainda.");
-  }
+  await ref.update({ imageUrl, updatedAt: FieldValue.serverTimestamp() });
 
-  const encodedPath = encodeURIComponent(objectPath);
-  const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${adminBucket.name}/o/${encodedPath}?alt=media&v=${body.imageVersion}`;
-
-  await ref.update({
-    imageUrl,
-    imageVersion: body.imageVersion,
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-
-  res.status(200).json({ imageUrl });
+  res.status(200).json({ ok: true });
 });

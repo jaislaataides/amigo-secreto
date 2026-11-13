@@ -14,9 +14,10 @@ Guia operacional: setup inicial, segredos, deploy e manutenção.
 1. [console.firebase.google.com](https://console.firebase.google.com) → criar projeto novo.
 2. **Authentication** → Sign-in method → ativar **Google**.
 3. **Firestore Database** → criar banco (modo produção, escolha a região mais próxima dos usuários).
-4. **Storage** → ativar (bucket padrão).
-5. Em **Project settings → General**, copie `projectId`, e em **Web apps** registre um app web pra pegar o resto da config (`apiKey`, `authDomain`, `storageBucket`, `appId`, `messagingSenderId`) — isso vai nas variáveis `VITE_FIREBASE_*`.
-6. Em **Project settings → Service accounts**, clique em "Generate new private key" — baixa um JSON com `project_id`, `client_email` e `private_key`. Esses três valores vão em `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL` e `FIREBASE_ADMIN_PRIVATE_KEY` (mantenha os `\n` literais da private key — o código já faz o replace pra quebra de linha real).
+4. Em **Project settings → General**, copie `projectId`, e em **Web apps** registre um app web pra pegar o resto da config (`apiKey`, `authDomain`, `appId`, `messagingSenderId`) — isso vai nas variáveis `VITE_FIREBASE_*`.
+5. Em **Project settings → Service accounts**, clique em "Generate new private key" — baixa um JSON com `project_id`, `client_email` e `private_key`. Esses três valores vão em `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL` e `FIREBASE_ADMIN_PRIVATE_KEY` (mantenha os `\n` literais da private key — o código já faz o replace pra quebra de linha real).
+
+**Nota sobre o Firebase Storage**: o Google passou a exigir o plano pago Blaze pra usar o Storage, mesmo gratuitamente — por isso este app **não usa Firebase Storage**. A imagem de capa da party é comprimida no navegador e guardada como um thumbnail pequeno (data URI) direto no documento da party no Firestore (ver `api/_lib/image.ts`), sem precisar de nenhum serviço extra nem cartão de crédito.
 
 ## 3. Gerar os segredos do app
 
@@ -42,14 +43,12 @@ Copie `.env.example` para `.env.local` e preencha tudo. As mesmas variáveis pre
 
 `APP_BASE_URL` é a URL pública do deploy (ex: `https://seu-app.vercel.app`) — usada só pra montar os links dos e-mails.
 
-## 6. Deploy das regras do Firestore/Storage
+## 6. Publicar as regras do Firestore
 
-```bash
-npm install -g firebase-tools   # se ainda não tiver
-firebase login
-firebase use --add              # selecione o projeto criado no passo 2
-firebase deploy --only firestore:rules,firestore:indexes,storage
-```
+Mais simples direto pelo console, sem precisar instalar nada:
+
+1. No Firebase Console → **Firestore Database → Regras**, cole o conteúdo de `firestore.rules` e clique em **Publicar**.
+2. (Opcional, via CLI, se preferir): `npm install -g firebase-tools && firebase login && firebase use --add && firebase deploy --only firestore:rules,firestore:indexes`.
 
 ## 7. Popular dados iniciais
 
@@ -101,7 +100,7 @@ vercel dev
 
 (`vite.config.ts` já faz proxy de `/api/*` pra `http://localhost:3000`, onde o `vercel dev` roda por padrão — então `npm run dev` sozinho também funciona pra telas que não chamam a API.)
 
-Pra testar Auth/Firestore/Storage sem tocar no projeto real, rode o Firebase Emulator Suite (`firebase emulators:start`) e defina `VITE_USE_FIREBASE_EMULATORS=true` no `.env.local`.
+Pra testar Auth/Firestore sem tocar no projeto real, rode o Firebase Emulator Suite (`firebase emulators:start`) e defina `VITE_USE_FIREBASE_EMULATORS=true` no `.env.local`.
 
 ## 12. Rotação da KEK (manutenção, raramente necessário)
 
