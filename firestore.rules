@@ -1,0 +1,93 @@
+rules_version = '2';
+
+// Princípio central deste arquivo: o client só tem permissão de LEITURA,
+// e só onde o papel do usuário justifica (admin ou owner da própria party).
+// TODA escrita passa por uma API route da Vercel usando o Admin SDK, que
+// ignora estas regras — por isso "allow write: if false" aparece em todo
+// lugar, mesmo em coleções que um usuário "deveria" poder editar.
+//
+// Participantes não têm NENHUM acesso direto ao Firestore (nem leitura):
+// a visão do participante é sempre resolvida por uma API route (GET) que
+// verifica a identidade dele no servidor. Isso evita ter que denormalizar
+// uma lista de uids/emails só para viabilizar uma regra de leitura, e
+// mantém um único caminho de acesso para auditar.
+//
+// `assignments`, `possessionTokens` e `dekMeta` são bloqueados para
+// QUALQUER client, incluindo o owner e o admin — são subcoleções
+// filhas de `parties/{partyId}` e, como as regras do Firestore não são
+// recursivas, precisam do próprio "allow read, write: if false" aqui,
+// mesmo que a regra do documento pai libere leitura pro owner/admin.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    function isPartyOwner(partyId) {
+      return isSignedIn()
+        && get(/databases/$(database)/documents/parties/$(partyId)).data.ownerUid == request.auth.uid;
+    }
+
+    match /admins/{uid} {
+      allow read: if isAdmin();
+      allow write: if false; // só script local (scripts/bootstrap-admin.ts)
+    }
+
+    match /authorizedOwners/{email} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.token.email == email);
+      allow write: if false; // criação/aprovação só via /api/owners/*
+    }
+
+    match /platformCategories/{categoryId} {
+      allow read: if true; // precisa ser lido até antes do login (tela de convite)
+      allow write: if false; // seed manual (scripts/seed-platform-categories.ts)
+    }
+
+    match /mail/{mailId} {
+      allow read, write: if false; // só Admin SDK (rotas de negócio + /api/cron/process-mail)
+    }
+
+    match /parties/{partyId} {
+      allow read: if isAdmin() || isPartyOwner(partyId);
+      allow write: if false;
+
+      match /categories/{categoryId} {
+        allow read: if isAdmin() || isPartyOwner(partyId);
+        allow write: if false;
+      }
+
+      match /participants/{participantId} {
+        allow read: if isAdmin() || isPartyOwner(partyId);
+        allow write: if false;
+
+        match /referenceLinks/{linkId} {
+          allow read: if isAdmin() || isPartyOwner(partyId);
+          allow write: if false;
+        }
+      }
+
+      match /exclusions/{exclusionId} {
+        allow read: if isAdmin() || isPartyOwner(partyId);
+        allow write: if false;
+      }
+
+      match /assignments/{giverParticipantId} {
+        allow read, write: if false;
+      }
+
+      match /possessionTokens/{participantId} {
+        allow read, write: if false;
+      }
+
+      match /dekMeta/{docId} {
+        allow read, write: if false;
+      }
+    }
+  }
+}
