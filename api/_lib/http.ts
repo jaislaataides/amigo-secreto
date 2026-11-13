@@ -33,3 +33,12 @@ export function requireString(value: unknown, field: string): string {
   }
   return value.trim();
 }
+
+/** Lê o segmento dinâmico `[id]` de uma rota `api/parties/[id]/...`. */
+export function requireQueryParam(req: VercelRequest, name: string): string {
+  const value = req.query[name];
+  if (typeof value !== "string" || value.length === 0) {
+    throw new ApiError(400, "invalid-param", `Parâmetro de rota ausente: ${name}.`);
+  }
+  return value;
+}
