@@ -13,7 +13,7 @@ import type { DekMeta, Participant } from "../../../shared/types";
 const MIN_GOING_PARTICIPANTS = 3;
 const PURGE_AFTER_DAYS = 15;
 
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const runDraw = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["POST"])) return;
 
   const decoded = await verifyAuth(req);

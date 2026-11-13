@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Timestamp } from "firebase-admin/firestore";
-import { adminDb } from "../_lib/firebaseAdmin";
-import { requireMethod, verifyCronSecret } from "../_lib/auth";
-import { withErrorHandling } from "../_lib/http";
+import { adminDb } from "../../_lib/firebaseAdmin";
+import { requireMethod, verifyCronSecret } from "../../_lib/auth";
+import { withErrorHandling } from "../../_lib/http";
 
 /**
  * Exclui permanentemente parties sorteadas há mais de 15 dias (doc +
@@ -10,7 +10,7 @@ import { withErrorHandling } from "../_lib/http";
  * Storage envolvido). Disparada 1x/dia pelo Cron da Vercel — é a única
  * forma de "retenção de dados" deste app: nada fica para sempre.
  */
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const purgeExpiredParties = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["GET", "POST"])) return;
   verifyCronSecret(req);
 

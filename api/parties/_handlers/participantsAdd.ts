@@ -1,16 +1,16 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
-import { enqueueAndSend } from "../../../_lib/mail/send";
-import { getAppBaseUrl } from "../../../_lib/env";
-import { ApiError, normalizeEmail, requireMethod, verifyAuth } from "../../../_lib/auth";
-import { readJsonBody, requireQueryParam, withErrorHandling } from "../../../_lib/http";
-import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../../_lib/party";
+import { enqueueAndSend } from "../../_lib/mail/send";
+import { getAppBaseUrl } from "../../_lib/env";
+import { ApiError, normalizeEmail, requireMethod, verifyAuth } from "../../_lib/auth";
+import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http";
+import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party";
 
 interface AddParticipantsBody {
   participants: { name: string; email: string }[];
 }
 
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const addParticipants = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["POST"])) return;
 
   const decoded = await verifyAuth(req);

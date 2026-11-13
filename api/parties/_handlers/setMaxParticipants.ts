@@ -8,7 +8,7 @@ interface SetMaxParticipantsBody {
   maxParticipants: number;
 }
 
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const setMaxParticipants = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["POST"])) return;
 
   const decoded = await verifyAuth(req);

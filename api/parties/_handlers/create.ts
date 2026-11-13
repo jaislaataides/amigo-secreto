@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { wrapDek, generatePartyDek } from "../_lib/crypto/envelope";
-import { validateImageDataUrl } from "../_lib/image";
-import { adminDb } from "../_lib/firebaseAdmin";
-import { ApiError, normalizeEmail, requireMethod, requireOwner, verifyAuth } from "../_lib/auth";
-import { readJsonBody, requireString, withErrorHandling } from "../_lib/http";
-import type { Party } from "../../shared/types";
+import { wrapDek, generatePartyDek } from "../../_lib/crypto/envelope";
+import { validateImageDataUrl } from "../../_lib/image";
+import { adminDb } from "../../_lib/firebaseAdmin";
+import { ApiError, normalizeEmail, requireMethod, requireOwner, verifyAuth } from "../../_lib/auth";
+import { readJsonBody, requireString, withErrorHandling } from "../../_lib/http";
+import type { Party } from "../../../shared/types";
 
 const DEFAULT_MAX_PARTICIPANTS = 10;
 
@@ -20,7 +20,7 @@ interface CreatePartyBody {
   imageDataUrl?: string;
 }
 
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const createParty = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["POST"])) return;
 
   const decoded = await verifyAuth(req);

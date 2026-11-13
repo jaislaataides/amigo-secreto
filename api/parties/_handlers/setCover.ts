@@ -14,7 +14,7 @@ interface SetCoverBody {
  * data URI no documento — ver api/_lib/image.ts pro porquê de não usar
  * Firebase Storage aqui.
  */
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const setCover = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["POST"])) return;
 
   const decoded = await verifyAuth(req);

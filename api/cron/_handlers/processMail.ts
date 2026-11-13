@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { redeliver, type MailInput } from "../_lib/mail/send";
-import { adminDb } from "../_lib/firebaseAdmin";
-import { requireMethod, verifyCronSecret } from "../_lib/auth";
-import { withErrorHandling } from "../_lib/http";
+import { redeliver, type MailInput } from "../../_lib/mail/send";
+import { adminDb } from "../../_lib/firebaseAdmin";
+import { requireMethod, verifyCronSecret } from "../../_lib/auth";
+import { withErrorHandling } from "../../_lib/http";
 
 const MAX_ATTEMPTS = 3;
 
@@ -10,7 +10,7 @@ const MAX_ATTEMPTS = 3;
  * Reprocessa e-mails que falharam no envio imediato (ver api/_lib/mail/send.ts).
  * Disparada 1x/dia pelo Cron da Vercel.
  */
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const processMail = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["GET", "POST"])) return;
   verifyCronSecret(req);
 

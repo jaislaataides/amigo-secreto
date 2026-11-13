@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { ApiError, requireMethod, verifyAuth } from "../../../_lib/auth";
-import { requireQueryParam, withErrorHandling } from "../../../_lib/http";
-import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../../_lib/party";
+import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth";
+import { requireQueryParam, withErrorHandling } from "../../_lib/http";
+import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party";
 
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const removeParticipant = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["DELETE"])) return;
 
   const decoded = await verifyAuth(req);

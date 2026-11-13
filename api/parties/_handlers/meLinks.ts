@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
-import { fetchOpenGraphPreview } from "../../../_lib/linkPreview/fetchOg";
-import { ApiError, verifyAuth } from "../../../_lib/auth";
-import { readJsonBody, requireString, withErrorHandling } from "../../../_lib/http";
-import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../../_lib/party";
+import { fetchOpenGraphPreview } from "../../_lib/linkPreview/fetchOg";
+import { ApiError, verifyAuth } from "../../_lib/auth";
+import { readJsonBody, requireString, withErrorHandling } from "../../_lib/http";
+import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party";
 
 const MAX_LINKS = 10;
 
@@ -11,7 +11,7 @@ interface AddLinkBody {
   url: string;
 }
 
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const handleMyLinks = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   const decoded = await verifyAuth(req);
   const partyId = req.query.id;
   if (typeof partyId !== "string") throw new ApiError(400, "invalid-param", "Party inválida.");

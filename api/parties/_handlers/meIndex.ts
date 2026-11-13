@@ -1,13 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { requireMethod, verifyAuth } from "../../../_lib/auth";
-import { requireQueryParam, withErrorHandling } from "../../../_lib/http";
-import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../../_lib/party";
+import { requireMethod, verifyAuth } from "../../_lib/auth";
+import { requireQueryParam, withErrorHandling } from "../../_lib/http";
+import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party";
 
 /**
  * GET /api/parties/:id/me — visão do participante: dados públicos da party
  * (nunca o que outro participante escolheu) + o próprio cadastro + refs.
  */
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const getMe = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["GET"])) return;
 
   const decoded = await verifyAuth(req);

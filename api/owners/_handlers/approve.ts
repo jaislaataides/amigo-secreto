@@ -1,16 +1,16 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
-import { adminAuth, adminDb } from "../_lib/firebaseAdmin";
-import { ApiError, normalizeEmail, requireAdmin, requireMethod, verifyAuth } from "../_lib/auth";
-import { readJsonBody, requireString, withErrorHandling } from "../_lib/http";
-import type { AuthorizedOwner } from "../../shared/types";
+import { adminAuth, adminDb } from "../../_lib/firebaseAdmin";
+import { ApiError, normalizeEmail, requireAdmin, requireMethod, verifyAuth } from "../../_lib/auth";
+import { readJsonBody, requireString, withErrorHandling } from "../../_lib/http";
+import type { AuthorizedOwner } from "../../../shared/types";
 
 interface ApproveBody {
   email: string;
   decision: "approved" | "rejected";
 }
 
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const approveOwner = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["POST"])) return;
 
   const decoded = await verifyAuth(req);

@@ -16,7 +16,7 @@ interface UpdateRulesBody {
   removeCategoryIds?: string[];
 }
 
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const updateRules = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["POST"])) return;
 
   const decoded = await verifyAuth(req);

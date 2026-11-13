@@ -15,7 +15,7 @@ interface SetExclusionsBody {
 }
 
 /** PUT /api/parties/:id/exclusions — substitui a lista inteira de exclusões. */
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const setExclusions = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["PUT"])) return;
 
   const decoded = await verifyAuth(req);

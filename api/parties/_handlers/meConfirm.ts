@@ -1,15 +1,15 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
-import { enqueueAndSend } from "../../../_lib/mail/send";
-import { ApiError, requireMethod, verifyAuth } from "../../../_lib/auth";
-import { readJsonBody, requireQueryParam, withErrorHandling } from "../../../_lib/http";
-import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../../_lib/party";
+import { enqueueAndSend } from "../../_lib/mail/send";
+import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth";
+import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http";
+import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party";
 
 interface ConfirmBody {
   rsvp: "going" | "not_going";
 }
 
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const confirmRsvp = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["POST"])) return;
 
   const decoded = await verifyAuth(req);

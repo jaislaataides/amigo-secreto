@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { adminDb } from "../_lib/firebaseAdmin";
-import { requireMethod, verifyAuth } from "../_lib/auth";
-import { withErrorHandling } from "../_lib/http";
+import { adminDb } from "../../_lib/firebaseAdmin";
+import { requireMethod, verifyAuth } from "../../_lib/auth";
+import { withErrorHandling } from "../../_lib/http";
 
 /** GET /api/parties — lista as parties do owner logado (ou todas, se admin). */
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const listParties = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["GET"])) return;
 
   const decoded = await verifyAuth(req);

@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { adminDb } from "../_lib/firebaseAdmin";
-import { normalizeEmail, requireMethod, verifyAuth } from "../_lib/auth";
-import { withErrorHandling } from "../_lib/http";
 import { FieldValue } from "firebase-admin/firestore";
-import type { AuthorizedOwner } from "../../shared/types";
+import { adminDb } from "../../_lib/firebaseAdmin";
+import { normalizeEmail, requireMethod, verifyAuth } from "../../_lib/auth";
+import { withErrorHandling } from "../../_lib/http";
+import type { AuthorizedOwner } from "../../../shared/types";
 
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const requestOwnerAccess = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["POST"])) return;
 
   const decoded = await verifyAuth(req);

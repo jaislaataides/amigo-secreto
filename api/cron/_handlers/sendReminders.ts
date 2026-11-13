@@ -1,13 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getAppBaseUrl } from "../_lib/env";
-import { enqueueAndSend } from "../_lib/mail/send";
-import { adminDb } from "../_lib/firebaseAdmin";
-import { requireMethod, verifyCronSecret } from "../_lib/auth";
-import { withErrorHandling } from "../_lib/http";
-import type { Participant, Party } from "../../shared/types";
+import { getAppBaseUrl } from "../../_lib/env";
+import { enqueueAndSend } from "../../_lib/mail/send";
+import { adminDb } from "../../_lib/firebaseAdmin";
+import { requireMethod, verifyCronSecret } from "../../_lib/auth";
+import { withErrorHandling } from "../../_lib/http";
+import type { Participant, Party } from "../../../shared/types";
 
 /** Disparada 1x/dia pelo Cron da Vercel (ver vercel.json). */
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const sendReminders = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["GET", "POST"])) return;
   verifyCronSecret(req);
 

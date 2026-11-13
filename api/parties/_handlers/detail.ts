@@ -7,7 +7,7 @@ import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party";
  * GET /api/parties/:id — detalhe completo pra tela do owner/admin: dados da
  * party, categorias e participantes (sem nunca tocar em assignments/tokens).
  */
-export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
+export const getPartyDetail = withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["GET"])) return;
 
   const decoded = await verifyAuth(req);
