@@ -14,7 +14,7 @@ export interface MailInput {
 
 async function deliver(ref: DocumentReference, input: MailInput): Promise<void> {
   try {
-    const { subject, html } = renderMailTemplate(input.template, input.payload);
+    const { subject, html } = await renderMailTemplate(input.template, input.payload);
     await getResendClient().emails.send({ from: getMailFrom(), to: input.to, subject, html });
     await ref.update({ status: "sent", sentAt: FieldValue.serverTimestamp() });
   } catch (err) {
