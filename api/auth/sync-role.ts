@@ -9,6 +9,14 @@ import type { AuthorizedOwner } from "../../shared/types";
  * `authorizedOwners/{email}`, recalcula os custom claims (`admin`, `owner`)
  * e devolve o papel resolvido. O front então força `getIdToken(true)` para
  * pegar um token já com os claims atualizados.
+ *
+ * `hasAccess` responde a uma pergunta diferente: "esse e-mail tem QUALQUER
+ * vínculo legítimo com o sistema?" (admin, owner aprovado ou pendente, ou
+ * participante de alguma party). O front usa isso pra deslogar na hora
+ * quem não tem vínculo nenhum — o Google Sign-In em si não tem como ser
+ * bloqueado de antemão no plano gratuito (isso exigiria Blocking Functions,
+ * que só existem no plano pago Blaze), então essa é a camada de reforço:
+ * ninguém sem vínculo chega a ver nada além da tela de solicitar acesso.
  */
 export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {
   if (!requireMethod(req, res, ["POST"])) return;
@@ -19,9 +27,10 @@ export default withErrorHandling(async (req: VercelRequest, res: VercelResponse)
   }
   const email = normalizeEmail(decoded.email);
 
-  const [adminSnapshot, ownerSnapshot] = await Promise.all([
+  const [adminSnapshot, ownerSnapshot, participantSnapshot] = await Promise.all([
     adminDb.collection("admins").doc(decoded.uid).get(),
     adminDb.collection("authorizedOwners").doc(email).get(),
+    adminDb.collectionGroup("participants").where("email", "==", email).limit(1).get(),
   ]);
 
   const isAdmin = adminSnapshot.exists;
@@ -40,5 +49,7 @@ export default withErrorHandling(async (req: VercelRequest, res: VercelResponse)
 
   await adminAuth.setCustomUserClaims(decoded.uid, { admin: isAdmin, owner: isOwner });
 
-  res.status(200).json({ admin: isAdmin, owner: isOwner });
+  const hasAccess = isAdmin || isOwner || ownerSnapshot.exists || !participantSnapshot.empty;
+
+  res.status(200).json({ admin: isAdmin, owner: isOwner, hasAccess });
 });

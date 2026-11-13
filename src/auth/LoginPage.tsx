@@ -4,7 +4,7 @@ import { FullPageSpinner } from "@/shared/components/Feedback";
 import { useAuth } from "./AuthContext";
 
 export function LoginPage() {
-  const { user, loading, role, signInWithGoogle, signOutUser } = useAuth();
+  const { user, loading, role, unauthorized, signInWithGoogle, signOutUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
   const from = (location.state as { from?: Location } | null)?.from;
@@ -41,6 +41,13 @@ export function LoginPage() {
     <main style={pageStyle}>
       <h1 style={titleStyle}>🎁 Amigo Secreto</h1>
       <p style={{ color: "#52525b", marginBottom: 24 }}>Organize o amigo secreto do seu grupo, sem complicação.</p>
+      {unauthorized && (
+        <p style={{ color: "#991b1b", marginBottom: 16, fontSize: 14 }}>
+          Esse e-mail não tem acesso a nada neste app (não é organizador, admin, nem participante de nenhuma
+          party). Se você deveria ter acesso, peça pra quem organiza te cadastrar, ou{" "}
+          <a href="/solicitar-acesso">solicite virar organizador</a>.
+        </p>
+      )}
       <button
         onClick={async () => {
           setError(null);
