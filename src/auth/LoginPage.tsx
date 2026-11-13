@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation, type Location } from "react-router-dom";
 import { useState, type CSSProperties } from "react";
 import { FullPageSpinner } from "@/shared/components/Feedback";
 import { useAuth } from "./AuthContext";
@@ -6,10 +6,16 @@ import { useAuth } from "./AuthContext";
 export function LoginPage() {
   const { user, loading, role, signInWithGoogle, signOutUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+  const from = (location.state as { from?: Location } | null)?.from;
 
   if (loading) return <FullPageSpinner />;
 
   if (user) {
+    // Quem chegou aqui via AuthGuard (ex: link de convite/revelação sem
+    // estar logado) volta pro link original em vez de cair num dashboard
+    // genérico — isso vale pra qualquer papel, não só participante.
+    if (from) return <Navigate to={`${from.pathname}${from.search}`} replace />;
     if (role.admin) return <Navigate to="/admin" replace />;
     if (role.owner) return <Navigate to="/owner" replace />;
     return (
