@@ -99,6 +99,23 @@ export default withErrorHandling(async (req: VercelRequest, res: VercelResponse)
     createdAt: now,
   });
 
+  // O owner também participa do amigo secreto por padrão (conta como um dos
+  // maxParticipants) — ele pode se remover depois via DELETE .../participants/:pid
+  // se preferir só organizar. Como ele mesmo está logado agora, já sabemos o
+  // uid na hora (diferente de um participante convidado comum).
+  const ownerDisplayName = decoded.name?.trim() || decoded.email!.split("@")[0]!;
+  batch.set(partyRef.collection("participants").doc(), {
+    name: ownerDisplayName,
+    email: normalizeEmail(decoded.email),
+    uid: decoded.uid,
+    inviteStatus: "sent",
+    isOwner: true,
+    rsvp: "pending",
+    preferredCategories: [],
+    createdAt: now,
+    updatedAt: now,
+  });
+
   await batch.commit();
 
   res.status(201).json({ partyId: partyRef.id });

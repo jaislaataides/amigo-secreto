@@ -53,6 +53,13 @@ export interface Participant {
   preferredCategories: string[];
   createdAt: FirestoreTimestampLike;
   updatedAt: FirestoreTimestampLike;
+  /**
+   * O owner também participa do amigo secreto por padrão: ao criar a party,
+   * um participante com isOwner:true é criado automaticamente pra ele,
+   * contando para o maxParticipants como qualquer outro. Ele pode se
+   * remover da lista (DELETE .../participants/:pid) se quiser só organizar.
+   */
+  isOwner?: boolean;
 }
 
 export interface ReferenceLink {
