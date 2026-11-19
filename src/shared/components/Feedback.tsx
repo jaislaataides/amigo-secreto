@@ -46,7 +46,7 @@ export function EmptyState(props: { children: ReactNode; title?: string; icon?: 
   return (
     <div className="empty">
       <span className="empty__icon">
-        <Icon name={props.icon ?? "gift"} size={26} />
+        <Icon name={props.icon ?? "gift"} size={28} strokeWidth={1.75} />
       </span>
       {props.title && <p className="empty__title">{props.title}</p>}
       <p>{props.children}</p>
