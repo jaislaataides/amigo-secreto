@@ -713,6 +713,16 @@ select {
   margin-top: var(--space-2);
 }
 
+/* Último campo + ação principal na mesma linha (botão à direita, alinhado
+   pela base com o campo). No celular, o botão desce pra linha de baixo. */
+.form-row-end {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  flex-wrap: wrap;
+}
+
 /* Opções selecionáveis (checkbox em formato de chip) */
 .options {
   display: grid;

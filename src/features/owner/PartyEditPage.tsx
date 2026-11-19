@@ -159,21 +159,22 @@ export function PartyEditPage() {
                   />
                 </Field>
               </div>
-              <Field label="Prazo de confirmação (RSVP)" htmlFor="rsvp-deadline">
-                <DateInputBR
-                  id="rsvp-deadline"
-                  value={form.rsvpDeadline}
-                  onChange={(v) => setForm({ ...form, rsvpDeadline: v })}
-                />
-              </Field>
-
-              {save.isError && <ErrorBanner message={save.error.message} />}
-              {save.isSuccess && !save.isPending && <Alert tone="success">Alterações salvas.</Alert>}
-              <div className="form-actions">
+              {/* Prazo e salvar na mesma linha: o botão fecha o formulário à direita. */}
+              <div className="form-row-end">
+                <Field label="Prazo de confirmação (RSVP)" htmlFor="rsvp-deadline">
+                  <DateInputBR
+                    id="rsvp-deadline"
+                    value={form.rsvpDeadline}
+                    onChange={(v) => setForm({ ...form, rsvpDeadline: v })}
+                  />
+                </Field>
                 <Button type="submit" loading={save.isPending}>
                   {save.isPending ? "Salvando…" : "Salvar alterações"}
                 </Button>
               </div>
+
+              {save.isError && <ErrorBanner message={save.error.message} />}
+              {save.isSuccess && !save.isPending && <Alert tone="success">Alterações salvas.</Alert>}
             </Stack>
           </Card>
         </form>
