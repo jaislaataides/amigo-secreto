@@ -151,9 +151,10 @@ export function PartyEditPage() {
                   />
                 </Field>
               </div>
-              <Field label="Itens proibidos ou não recomendados" htmlFor="forbidden" optional>
+              <Field label="Lista de micos" htmlFor="forbidden" hint="Presentes que ninguém quer ganhar." optional>
                 <Textarea
                   id="forbidden"
+                  aria-describedby="forbidden-hint"
                   value={form.forbiddenItemsText}
                   onChange={(e) => setForm({ ...form, forbiddenItemsText: e.target.value })}
                 />

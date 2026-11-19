@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Badge, ButtonLink, Page, PageHeader } from "@/shared/components/ui";
 import { EmptyState, ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
-import { Icon } from "@/shared/components/Icon";
 import { STATUS_LABEL, STATUS_TONE } from "./partyStatus";
 
 interface PartyRow {
@@ -55,8 +54,8 @@ export function OwnerDashboardPage() {
                 {party.imageUrl ? (
                   <img src={party.imageUrl} alt="" className="party-card__cover" loading="lazy" />
                 ) : (
-                  <div className="party-card__cover party-card__cover--placeholder">
-                    <Icon name="gift" size={40} strokeWidth={1.5} />
+                  <div className="party-card__cover party-card__cover--placeholder" aria-hidden="true">
+                    {initials(party.name)}
                   </div>
                 )}
                 <div className="party-card__body">
@@ -74,4 +73,14 @@ export function OwnerDashboardPage() {
       )}
     </Page>
   );
+}
+
+function initials(name: string) {
+  return name
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
 }

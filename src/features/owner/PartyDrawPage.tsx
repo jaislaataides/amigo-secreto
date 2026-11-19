@@ -36,12 +36,14 @@ export function PartyDrawPage() {
         </div>
 
         {alreadyDrawn || draw.isSuccess ? (
-          <Card className="reveal" style={{ padding: "40px 24px" }}>
-            <div className="reveal__gift" style={{ width: 80, height: 80, borderRadius: 24 }}>
-              <Icon name="checkCircle" size={36} />
-            </div>
-            <h2 style={{ fontSize: 24 }}>Sorteio realizado!</h2>
-            <p className="muted" style={{ marginTop: 8 }}>
+          <Card>
+            <h2 className="section-title" style={{ margin: 0 }}>
+              <span style={{ color: "var(--color-success-fg)", display: "inline-flex" }}>
+                <Icon name="checkCircle" size={20} />
+              </span>
+              Sorteio realizado
+            </h2>
+            <p className="muted" style={{ marginTop: 6 }}>
               {draw.isSuccess
                 ? `${draw.data.assignedCount} participantes receberam o link de revelação por e-mail.`
                 : "Cada participante recebeu por e-mail um link pessoal com quem tirou."}

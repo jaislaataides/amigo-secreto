@@ -18,9 +18,7 @@ export function PartyLayout(props: {
         back={PARTY_BACK}
         title={props.name}
         subtitle={props.subtitle}
-        actions={
-          <Badge tone={STATUS_TONE[props.status] ?? "neutral"}>{STATUS_LABEL[props.status] ?? props.status}</Badge>
-        }
+        meta={<Badge tone={STATUS_TONE[props.status] ?? "neutral"}>{STATUS_LABEL[props.status] ?? props.status}</Badge>}
       />
       <PartyTabs partyId={props.partyId} />
       {props.children}

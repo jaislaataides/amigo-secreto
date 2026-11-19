@@ -103,9 +103,7 @@ export function PartyParticipantsPage() {
                     <div className="list-row__title">
                       {p.name}{" "}
                       {p.isOwner && (
-                        <Badge tone="brand" icon="sparkles">
-                          organizador
-                        </Badge>
+<Badge>organizador</Badge>
                       )}
                     </div>
                     <div className="list-row__meta">{p.email}</div>

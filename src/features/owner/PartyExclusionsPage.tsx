@@ -61,7 +61,7 @@ export function PartyExclusionsPage() {
                   <li key={i} className="list-row">
                     <div className="list-row__main row" style={{ gap: 6 }}>
                       {g.participantIds.map((id) => (
-                        <Badge key={id} tone="brand">
+                        <Badge key={id}>
                           {nameById.get(id) ?? id}
                         </Badge>
                       ))}
