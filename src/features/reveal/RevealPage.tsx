@@ -56,7 +56,7 @@ export function RevealPage() {
           </div>
           <p className="reveal__eyebrow">O sorteio saiu!</p>
           <h1 style={{ fontSize: 30, marginTop: 8 }}>Seu amigo secreto está aqui dentro</h1>
-          <p className="reveal__hint">Confira se ninguém está espiando a sua tela antes de abrir.</p>
+          <p className="reveal__hint">Pra não pagar mico: confira se ninguém está espiando sua tela.</p>
           <Button size="lg" icon="sparkles" onClick={() => setOpened(true)}>
             Abrir presente
           </Button>

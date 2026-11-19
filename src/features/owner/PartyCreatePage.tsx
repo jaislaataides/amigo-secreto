@@ -155,9 +155,9 @@ export function PartyCreatePage() {
               </div>
 
               <Field
-                label="Itens proibidos ou não recomendados"
+                label="Lista de micos"
                 htmlFor="forbidden"
-                hint="Aperte Enter depois de cada item."
+                hint="Presentes que ninguém quer ganhar. Aperte Enter depois de cada item."
                 optional
               >
                 <TagInput
@@ -165,7 +165,7 @@ export function PartyCreatePage() {
                   aria-describedby="forbidden-hint"
                   value={forbiddenTags}
                   onChange={setForbiddenTags}
-                  placeholder="ex: perfumes, roupas íntimas"
+                  placeholder="ex: perfume, meia, caneca de piada"
                 />
               </Field>
 

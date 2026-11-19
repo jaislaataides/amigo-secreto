@@ -25,12 +25,23 @@ export function LoginPage() {
     <main className="center-screen">
       <Card className="auth-card fade-up">
         <div className="auth-card__mark">
-          <Icon name="gift" size={32} />
+          <Icon name="monkey" size={36} />
         </div>
-        <h1>Amigo Secreto</h1>
-        <p className="muted" style={{ margin: "8px 0 28px" }}>
-          Organize o amigo secreto do seu grupo, sem complicação.
+        <h1>Amico Secreto</h1>
+        <p className="muted" style={{ margin: "8px 0 20px" }}>
+          O amigo secreto em que ninguém paga mico.
         </p>
+        <ul className="promise-list">
+          <li>
+            <Icon name="lock" size={18} /> Sorteio sem spoiler: cada um vê só quem tirou
+          </li>
+          <li>
+            <Icon name="link" size={18} /> Ideias e referências de quem você tirou
+          </li>
+          <li>
+            <Icon name="ban" size={18} /> Lista de micos: o que ninguém quer ganhar
+          </li>
+        </ul>
 
         {from && !unauthorized && (
           <div style={{ marginBottom: 16, textAlign: "left" }}>

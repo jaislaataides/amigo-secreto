@@ -15,9 +15,9 @@ export function AppLayout(props: { children: ReactNode }) {
         <div className="app-header__inner">
           <Link to="/home" className="brand">
             <span className="brand__mark">
-              <Icon name="gift" size={20} />
+              <Icon name="monkey" size={22} />
             </span>
-            Amigo Secreto
+            Amico Secreto
           </Link>
 
           <nav className="app-nav" aria-label="Principal">

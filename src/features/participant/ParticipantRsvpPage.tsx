@@ -39,7 +39,7 @@ export function ParticipantRsvpPage() {
               <p className="hint">Faixa de valor do presente</p>
               {party.forbiddenItemsText && (
                 <p className="small" style={{ marginTop: 10 }}>
-                  <strong>Evite:</strong> <span className="muted">{party.forbiddenItemsText}</span>
+                  <strong>Lista de micos:</strong> <span className="muted">{party.forbiddenItemsText}</span>
                 </p>
               )}
             </div>

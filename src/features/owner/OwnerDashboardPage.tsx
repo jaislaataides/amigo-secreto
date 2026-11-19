@@ -23,7 +23,7 @@ export function OwnerDashboardPage() {
     <Page maxWidth={960}>
       <PageHeader
         title="Minhas parties"
-        subtitle="Seus amigos secretos, do convite ao sorteio."
+        subtitle="Seus amigos secretos, do convite ao sorteio — sem mico."
         actions={
           <ButtonLink to="/owner/parties/new" icon="plus">
             Nova party

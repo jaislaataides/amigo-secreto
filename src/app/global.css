@@ -1,5 +1,7 @@
 /* ==========================================================================
-   Amigo Secreto — design system
+   Amico Secreto — design system
+   (trocadilho com "pagar mico": o app existe pra ninguém pagar mico
+   no amigo secreto — presente errado, spoiler, gente esquecida).
    Festivo e acolhedor: roxo + verde sobre neutro levemente lilás.
    Títulos em Fredoka (arredondada, alegre), texto em Nunito (legível).
    Toda cor passa por token — nada de hex solto nos componentes.
@@ -1448,4 +1450,29 @@ select {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ---------- Promessas (login) ---------- */
+
+.promise-list {
+  list-style: none;
+  margin: 0 0 28px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  font-size: 15px;
+}
+
+.promise-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.promise-list svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--color-accent);
 }
