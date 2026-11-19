@@ -1,6 +1,6 @@
 /* ==========================================================================
    Amigo Secreto — design system
-   Festivo e acolhedor: cranberry + verde-pinheiro sobre creme quente.
+   Festivo e acolhedor: roxo + verde sobre neutro levemente lilás.
    Títulos em Fredoka (arredondada, alegre), texto em Nunito (legível).
    Toda cor passa por token — nada de hex solto nos componentes.
    ========================================================================== */
@@ -9,41 +9,41 @@
   color-scheme: light dark;
 
   /* Superfícies */
-  --color-bg: #fbf7f2;
+  --color-bg: #f8f6fb;
   --color-surface: #ffffff;
-  --color-surface-2: #f5eee5;
-  --color-border: #e8ddd1;
-  --color-border-strong: #d6c7b8;
+  --color-surface-2: #f0ecf6;
+  --color-border: #e4ddee;
+  --color-border-strong: #cfc5de;
 
   /* Texto */
-  --color-fg: #2a1e1a;
-  --color-fg-muted: #6b5d55;
-  --color-fg-subtle: #8a7b72;
+  --color-fg: #1f1a2b;
+  --color-fg-muted: #5f5873;
+  --color-fg-subtle: #847c96;
 
   /* Marca */
-  --color-primary: #b42318;
-  --color-primary-hover: #93190f;
+  --color-primary: #6d28d9;
+  --color-primary-hover: #5b21b6;
   --color-on-primary: #ffffff;
-  --color-primary-soft: #fdecea;
-  --color-primary-soft-fg: #93190f;
-  --color-accent: #1f6f4a;
-  --color-accent-soft: #e3f3ea;
+  --color-primary-soft: #f1ebfd;
+  --color-primary-soft-fg: #5b21b6;
+  --color-accent: #15803d;
+  --color-accent-soft: #e2f5e8;
 
   /* Estados */
-  --color-success-bg: #e3f3ea;
-  --color-success-fg: #1a5e3e;
+  --color-success-bg: #e2f5e8;
+  --color-success-fg: #166534;
   --color-warning-bg: #fcf1d6;
   --color-warning-fg: #7a4f00;
   --color-danger-bg: #fdecea;
-  --color-danger-fg: #a0201a;
+  --color-danger-fg: #b42318;
   --color-danger-border: #f6c9c3;
   --color-info-bg: #eaf0fb;
   --color-info-fg: #274a87;
 
-  --color-ring: #b42318;
-  --shadow-sm: 0 1px 2px rgb(42 30 26 / 0.06);
-  --shadow-md: 0 4px 16px rgb(42 30 26 / 0.08);
-  --shadow-lg: 0 12px 40px rgb(42 30 26 / 0.12);
+  --color-ring: #6d28d9;
+  --shadow-sm: 0 1px 2px rgb(31 26 43 / 0.06);
+  --shadow-md: 0 4px 16px rgb(31 26 43 / 0.08);
+  --shadow-lg: 0 12px 40px rgb(31 26 43 / 0.12);
 
   --font-heading: "Fredoka", ui-rounded, system-ui, sans-serif;
   --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -68,26 +68,26 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: #16100e;
-    --color-surface: #211916;
-    --color-surface-2: #2b211d;
-    --color-border: #3a2d28;
-    --color-border-strong: #4d3d36;
+    --color-bg: #13101a;
+    --color-surface: #1c1825;
+    --color-surface-2: #262131;
+    --color-border: #352e44;
+    --color-border-strong: #463d58;
 
-    --color-fg: #f6eee8;
-    --color-fg-muted: #bfb0a6;
-    --color-fg-subtle: #9a8b82;
+    --color-fg: #f3effa;
+    --color-fg-muted: #b8afc9;
+    --color-fg-subtle: #948ba6;
 
-    --color-primary: #f0715f;
-    --color-primary-hover: #f58c7d;
-    --color-on-primary: #1d0c09;
-    --color-primary-soft: #3d1a16;
-    --color-primary-soft-fg: #f7a99e;
-    --color-accent: #6fcf9c;
-    --color-accent-soft: #163323;
+    --color-primary: #a78bfa;
+    --color-primary-hover: #c4b5fd;
+    --color-on-primary: #1a0f2e;
+    --color-primary-soft: #2a1f45;
+    --color-primary-soft-fg: #cbbcfd;
+    --color-accent: #5fd394;
+    --color-accent-soft: #14301f;
 
-    --color-success-bg: #163323;
-    --color-success-fg: #8ddbb0;
+    --color-success-bg: #14301f;
+    --color-success-fg: #86dfae;
     --color-warning-bg: #3a2c0e;
     --color-warning-fg: #f2c86a;
     --color-danger-bg: #3d1a16;
@@ -96,7 +96,7 @@
     --color-info-bg: #18243d;
     --color-info-fg: #a9c2f0;
 
-    --color-ring: #f0715f;
+    --color-ring: #a78bfa;
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
     --shadow-md: 0 4px 16px rgb(0 0 0 / 0.35);
     --shadow-lg: 0 12px 40px rgb(0 0 0 / 0.45);
