@@ -1,21 +1,21 @@
-import { useState, type KeyboardEvent } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
+import { Icon } from "./Icon";
 
 /** Input que vira "pills" removíveis ao apertar Enter — usado pra listas curtas de strings. */
 export function TagInput(props: {
+  id?: string;
   value: string[];
   onChange: (next: string[]) => void;
   placeholder?: string;
+  "aria-describedby"?: string;
 }) {
   const [draft, setDraft] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   function commitDraft() {
-    const trimmed = draft.trim();
+    const trimmed = draft.trim().replace(/,$/, "");
     if (!trimmed) return;
-    if (props.value.includes(trimmed)) {
-      setDraft("");
-      return;
-    }
-    props.onChange([...props.value, trimmed]);
+    if (!props.value.includes(trimmed)) props.onChange([...props.value, trimmed]);
     setDraft("");
   }
 
@@ -29,65 +29,32 @@ export function TagInput(props: {
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 6,
-        padding: "8px 10px",
-        borderRadius: 8,
-        border: "1px solid #d4d4d8",
-        alignItems: "center",
-      }}
-    >
+    <div className="tag-input" onClick={() => inputRef.current?.focus()}>
       {props.value.map((tag) => (
-        <span
-          key={tag}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            background: "#f4f4f5",
-            color: "#18181b",
-            borderRadius: 999,
-            padding: "3px 10px",
-            fontSize: 13,
-          }}
-        >
+        <span key={tag} className="tag">
           {tag}
           <button
             type="button"
-            onClick={() => props.onChange(props.value.filter((t) => t !== tag))}
-            aria-label={`Remover ${tag}`}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#71717a",
-              fontSize: 13,
-              lineHeight: 1,
-              padding: 0,
+            onClick={(e) => {
+              e.stopPropagation();
+              props.onChange(props.value.filter((t) => t !== tag));
             }}
+            aria-label={`Remover ${tag}`}
           >
-            ×
+            <Icon name="x" size={14} strokeWidth={2.5} />
           </button>
         </span>
       ))}
       <input
+        ref={inputRef}
+        id={props.id}
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={commitDraft}
-        placeholder={props.value.length === 0 ? props.placeholder : undefined}
-        style={{
-          border: "none",
-          outline: "none",
-          flex: 1,
-          minWidth: 120,
-          fontSize: 14,
-          background: "transparent",
-          color: "inherit",
-        }}
+        enterKeyHint="done"
+        aria-describedby={props["aria-describedby"]}
+        placeholder={props.value.length === 0 ? props.placeholder : "Adicionar mais…"}
       />
     </div>
   );

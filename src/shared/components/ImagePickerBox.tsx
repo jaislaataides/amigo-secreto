@@ -1,66 +1,52 @@
 import { useRef } from "react";
+import { Icon } from "./Icon";
 
-/** Caixa clicável de imagem: mostra placeholder vazio ou a prévia, sem expor o <input type="file"> cru. */
+/** Área clicável de capa: placeholder vazio ou prévia, sem expor o <input type="file"> cru. */
 export function ImagePickerBox(props: {
   imageUrl: string | null;
   onFileSelected: (file: File | undefined) => void;
-  size?: number;
+  busy?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const size = props.size ?? 180;
+  const hasImage = Boolean(props.imageUrl);
 
   return (
-    <div>
+    <>
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        style={{
-          width: size,
-          height: size,
-          borderRadius: 12,
-          border: props.imageUrl ? "1px solid #e4e4e7" : "2px dashed #d4d4d8",
-          background: props.imageUrl ? `url(${props.imageUrl}) center/cover no-repeat` : "transparent",
-          cursor: "pointer",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 6,
-          color: "#71717a",
-          padding: 0,
-        }}
+        disabled={props.busy}
+        aria-label={hasImage ? "Trocar imagem de capa" : "Adicionar imagem de capa"}
+        className={`image-picker${hasImage ? " has-image" : ""}`}
+        style={hasImage ? { backgroundImage: `url(${props.imageUrl})` } : undefined}
       >
-        {!props.imageUrl && (
+        {!hasImage && (
           <>
-            <span style={{ fontSize: 28 }}>🖼️</span>
-            <span style={{ fontSize: 13 }}>Adicionar capa</span>
+            <Icon name="image" size={28} />
+            <span>Adicionar capa</span>
+            <span className="hint" style={{ fontWeight: 400 }}>
+              JPG ou PNG — opcional
+            </span>
           </>
+        )}
+        {hasImage && (
+          <span className="image-picker__overlay">
+            {props.busy ? <span className="spinner" aria-hidden="true" /> : <Icon name="image" size={16} />}
+            {props.busy ? "Salvando…" : "Trocar capa"}
+          </span>
         )}
       </button>
       <input
         ref={inputRef}
         type="file"
         accept="image/*"
-        onChange={(e) => props.onFileSelected(e.target.files?.[0])}
-        style={{ display: "none" }}
+        onChange={(e) => {
+          props.onFileSelected(e.target.files?.[0]);
+          // Permite escolher o mesmo arquivo de novo depois de um erro.
+          e.target.value = "";
+        }}
+        hidden
       />
-      {props.imageUrl && (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          style={{
-            marginTop: 8,
-            background: "none",
-            border: "none",
-            color: "#71717a",
-            textDecoration: "underline",
-            cursor: "pointer",
-            fontSize: 13,
-          }}
-        >
-          Trocar imagem
-        </button>
-      )}
-    </div>
+    </>
   );
 }

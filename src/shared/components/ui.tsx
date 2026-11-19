@@ -6,123 +6,253 @@ import type {
   ReactNode,
   TextareaHTMLAttributes,
 } from "react";
+import { Link, NavLink, type LinkProps } from "react-router-dom";
+import { Icon, type IconName } from "./Icon";
 
-export function PageHeader(props: { title: string; subtitle?: string; actions?: ReactNode }) {
+function cx(...classes: (string | false | null | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
+}
+
+/* ---------- Layout ---------- */
+
+export function Page(props: { children: ReactNode; maxWidth?: number }) {
   return (
-    <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
-      <div>
-        <h1 style={{ fontSize: 24, margin: 0 }}>{props.title}</h1>
-        {props.subtitle && <p style={{ color: "#71717a", margin: "4px 0 0", fontSize: 14 }}>{props.subtitle}</p>}
+    <main className="page" style={props.maxWidth ? ({ "--page-max": `${props.maxWidth}px` } as CSSProperties) : undefined}>
+      {props.children}
+    </main>
+  );
+}
+
+export function PageHeader(props: {
+  title: string;
+  subtitle?: ReactNode;
+  actions?: ReactNode;
+  back?: { to: string; label: string };
+}) {
+  return (
+    <header className="page-header">
+      <div className="page-header__text">
+        {props.back && (
+          <Link to={props.back.to} className="page-header__back">
+            <Icon name="arrowLeft" size={16} />
+            {props.back.label}
+          </Link>
+        )}
+        <h1 className="page-title">{props.title}</h1>
+        {props.subtitle && <p className="page-subtitle">{props.subtitle}</p>}
       </div>
       {props.actions}
     </header>
   );
 }
 
-export function Page(props: { children: ReactNode; maxWidth?: number }) {
-  return (
-    <main style={{ maxWidth: props.maxWidth ?? 720, margin: "0 auto", padding: "40px 20px 80px" }}>
-      {props.children}
-    </main>
-  );
-}
-
-export function Card(props: { children: ReactNode; style?: CSSProperties }) {
+export function Stack(props: { children: ReactNode; gap?: number; className?: string }) {
   return (
     <div
-      style={{
-        border: "1px solid #e4e4e7",
-        borderRadius: 12,
-        padding: 20,
-        marginBottom: 16,
-        background: "#fff",
-        ...props.style,
-      }}
+      className={cx("stack", props.className)}
+      style={props.gap !== undefined ? ({ "--stack-gap": `${props.gap}px` } as CSSProperties) : undefined}
     >
       {props.children}
     </div>
   );
 }
 
-export function Field(props: { label: string; htmlFor?: string; children: ReactNode; hint?: string }) {
+export function Section(props: { title: string; count?: number; children: ReactNode; actions?: ReactNode }) {
   return (
-    <div style={{ marginBottom: 16 }}>
-      <Label htmlFor={props.htmlFor}>{props.label}</Label>
+    <section className="section">
+      <div className="row row--between" style={{ marginBottom: 12 }}>
+        <h2 className="section-title" style={{ margin: 0 }}>
+          {props.title}
+          {props.count !== undefined && <span className="count">{props.count}</span>}
+        </h2>
+        {props.actions}
+      </div>
       {props.children}
-      {props.hint && <p style={{ fontSize: 12, color: "#71717a", margin: "4px 0 0" }}>{props.hint}</p>}
+    </section>
+  );
+}
+
+export function Card(props: { children: ReactNode; style?: CSSProperties; flush?: boolean; className?: string }) {
+  return (
+    <div className={cx("card", props.flush && "card--flush", props.className)} style={props.style}>
+      {props.children}
+    </div>
+  );
+}
+
+export function Avatar(props: { name: string }) {
+  const initials = props.name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+  return (
+    <span className="avatar" aria-hidden="true">
+      {initials || "?"}
+    </span>
+  );
+}
+
+/* ---------- Form ---------- */
+
+export function Field(props: {
+  label: string;
+  htmlFor?: string;
+  children: ReactNode;
+  hint?: ReactNode;
+  optional?: boolean;
+}) {
+  const hintId = props.hint && props.htmlFor ? `${props.htmlFor}-hint` : undefined;
+  return (
+    <div className="field">
+      <Label htmlFor={props.htmlFor}>
+        {props.label}
+        {props.optional && <span className="label__optional"> (opcional)</span>}
+      </Label>
+      {props.children}
+      {props.hint && (
+        <p className="hint" id={hintId}>
+          {props.hint}
+        </p>
+      )}
     </div>
   );
 }
 
 export function Label(props: LabelHTMLAttributes<HTMLLabelElement>) {
-  return <label {...props} style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 6, ...props.style }} />;
+  const { className, ...rest } = props;
+  return <label {...rest} className={cx("label", className)} />;
 }
-
-const inputStyle: CSSProperties = {
-  width: "100%",
-  padding: "8px 12px",
-  borderRadius: 8,
-  border: "1px solid #d4d4d8",
-  fontSize: 14,
-  boxSizing: "border-box",
-};
 
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} style={{ ...inputStyle, ...props.style }} />;
+  const { className, ...rest } = props;
+  return <input {...rest} className={cx("input", className)} />;
 }
 
-export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} style={{ ...inputStyle, minHeight: 80, fontFamily: "inherit", ...props.style }} />;
-}
-
-export function Button(
-  props: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "danger" },
-) {
-  const { variant = "primary", style, ...rest } = props;
-  const palette = {
-    primary: { background: "#18181b", color: "#fff" },
-    secondary: { background: "#f4f4f5", color: "#18181b" },
-    danger: { background: "#fef2f2", color: "#991b1b" },
-  }[variant];
-
+export function MoneyInput(props: InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <button
-      {...rest}
-      style={{
-        border: "none",
-        borderRadius: 8,
-        padding: "9px 16px",
-        fontSize: 14,
-        fontWeight: 600,
-        cursor: rest.disabled ? "not-allowed" : "pointer",
-        opacity: rest.disabled ? 0.6 : 1,
-        ...palette,
-        ...style,
-      }}
-    />
+    <div className="input-prefix">
+      <span aria-hidden="true">R$</span>
+      <Input type="number" inputMode="decimal" min={0} {...props} />
+    </div>
   );
 }
 
-export function Badge(props: { children: ReactNode; tone?: "neutral" | "success" | "warning" | "danger" }) {
-  const tones = {
-    neutral: { background: "#f4f4f5", color: "#52525b" },
-    success: { background: "#dcfce7", color: "#166534" },
-    warning: { background: "#fef9c3", color: "#854d0e" },
-    danger: { background: "#fef2f2", color: "#991b1b" },
-  };
-  const palette = tones[props.tone ?? "neutral"];
+export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const { className, ...rest } = props;
+  return <textarea {...rest} className={cx("textarea", className)} />;
+}
+
+/** Checkbox em formato de chip — área de toque grande e estado bem visível. */
+export function CheckOption(props: {
+  label: ReactNode;
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (checked: boolean) => void;
+}) {
   return (
-    <span
-      style={{
-        ...palette,
-        borderRadius: 999,
-        padding: "2px 10px",
-        fontSize: 12,
-        fontWeight: 600,
-        display: "inline-block",
-      }}
+    <label className={cx("option", props.checked && "is-checked", props.disabled && "is-disabled")}>
+      <input
+        type="checkbox"
+        checked={props.checked}
+        disabled={props.disabled}
+        onChange={(e) => props.onChange(e.target.checked)}
+      />
+      <span className="option__box">
+        <Icon name="check" size={14} strokeWidth={3} />
+      </span>
+      <span>{props.label}</span>
+    </label>
+  );
+}
+
+/* ---------- Buttons ---------- */
+
+type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+type ButtonSize = "sm" | "md" | "lg";
+
+function buttonClass(variant: ButtonVariant, size: ButtonSize, block?: boolean, extra?: string) {
+  return cx("btn", `btn--${variant}`, size !== "md" && `btn--${size}`, block && "btn--block", extra);
+}
+
+export function Button(
+  props: ButtonHTMLAttributes<HTMLButtonElement> & {
+    variant?: ButtonVariant;
+    size?: ButtonSize;
+    block?: boolean;
+    loading?: boolean;
+    icon?: IconName;
+  },
+) {
+  const { variant = "primary", size = "md", block, loading, icon, className, children, disabled, ...rest } = props;
+  return (
+    <button
+      type="button"
+      {...rest}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      className={buttonClass(variant, size, block, className)}
     >
+      {loading ? <span className="spinner" aria-hidden="true" /> : icon && <Icon name={icon} size={18} />}
+      {children}
+    </button>
+  );
+}
+
+/** Botão apenas com ícone — exige um rótulo acessível. */
+export function IconButton(
+  props: ButtonHTMLAttributes<HTMLButtonElement> & { icon: IconName; label: string; variant?: ButtonVariant; size?: ButtonSize },
+) {
+  const { icon, label, variant = "ghost", size = "md", className, ...rest } = props;
+  return (
+    <button
+      type="button"
+      {...rest}
+      aria-label={label}
+      title={label}
+      className={buttonClass(variant, size, false, cx("btn--icon", className))}
+    >
+      <Icon name={icon} size={size === "sm" ? 16 : 18} />
+    </button>
+  );
+}
+
+/** Link com cara de botão (evita <button> dentro de <a>, que é HTML inválido). */
+export function ButtonLink(props: LinkProps & { variant?: ButtonVariant; size?: ButtonSize; icon?: IconName; block?: boolean }) {
+  const { variant = "primary", size = "md", icon, block, className, children, ...rest } = props;
+  return (
+    <Link {...rest} className={buttonClass(variant, size, block, className as string | undefined)}>
+      {icon && <Icon name={icon} size={18} />}
+      {children}
+    </Link>
+  );
+}
+
+/* ---------- Badge ---------- */
+
+export type BadgeTone = "neutral" | "success" | "warning" | "danger" | "brand";
+
+export function Badge(props: { children: ReactNode; tone?: BadgeTone; icon?: IconName }) {
+  return (
+    <span className={cx("badge", `badge--${props.tone ?? "neutral"}`)}>
+      {props.icon && <Icon name={props.icon} size={14} strokeWidth={2.5} />}
       {props.children}
     </span>
+  );
+}
+
+/* ---------- Tabs ---------- */
+
+export function Tabs(props: { label: string; items: { to: string; label: string; icon?: IconName }[] }) {
+  return (
+    <nav className="tabs" aria-label={props.label}>
+      {props.items.map((item) => (
+        <NavLink key={item.to} to={item.to} className="tab">
+          {item.icon && <Icon name={item.icon} size={16} />}
+          {item.label}
+        </NavLink>
+      ))}
+    </nav>
   );
 }

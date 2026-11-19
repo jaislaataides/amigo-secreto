@@ -1,9 +1,13 @@
-/** Placeholder — substituído nas tasks de front-end "admin + owner pages" e "participant + reveal pages". */
+import { EmptyState } from "./Feedback";
+import { Page } from "./ui";
+
+/** Placeholder pra telas ainda não implementadas. */
 export function UnderConstruction(props: { title: string }) {
   return (
-    <main style={{ maxWidth: 640, margin: "10vh auto", padding: "0 24px" }}>
-      <h1 style={{ fontSize: 22 }}>{props.title}</h1>
-      <p style={{ color: "#71717a" }}>Em construção.</p>
-    </main>
+    <Page maxWidth={640}>
+      <EmptyState icon="sparkles" title={props.title}>
+        Em construção.
+      </EmptyState>
+    </Page>
   );
 }

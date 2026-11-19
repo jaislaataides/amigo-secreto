@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { Icon } from "./Icon";
 
 /**
  * Mantém o calendário nativo do navegador (bom de usar, acessível), mas
@@ -7,7 +8,7 @@ import { useRef } from "react";
  * app em português). O <input> real fica invisível só pra guardar o valor
  * e abrir o seletor nativo; o que aparece pro usuário é sempre dd/mm/aaaa.
  */
-export function DateInputBR(props: { value: string; onChange: (next: string) => void }) {
+export function DateInputBR(props: { id?: string; value: string; onChange: (next: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   function openPicker() {
@@ -25,27 +26,18 @@ export function DateInputBR(props: { value: string; onChange: (next: string) => 
     el.focus();
   }
 
+  const formatted = formatBR(props.value);
+
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
+    <div className="date-input">
       <button
+        id={props.id}
         type="button"
         onClick={openPicker}
-        style={{
-          padding: "8px 36px 8px 12px",
-          borderRadius: 8,
-          border: "1px solid #d4d4d8",
-          fontSize: 14,
-          background: "none",
-          color: props.value ? "inherit" : "#71717a",
-          cursor: "pointer",
-          textAlign: "left",
-          width: 160,
-        }}
+        className={`date-input__button${formatted ? "" : " is-empty"}`}
       >
-        {formatBR(props.value) || "dd/mm/aaaa"}
-        <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
-          📅
-        </span>
+        {formatted || "dd/mm/aaaa"}
+        <Icon name="calendar" size={18} />
       </button>
       <input
         ref={inputRef}
@@ -54,14 +46,6 @@ export function DateInputBR(props: { value: string; onChange: (next: string) => 
         onChange={(e) => props.onChange(e.target.value)}
         tabIndex={-1}
         aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          opacity: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
-        }}
       />
     </div>
   );
