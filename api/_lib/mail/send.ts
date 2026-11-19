@@ -15,13 +15,20 @@ export interface MailInput {
 async function deliver(ref: DocumentReference, input: MailInput): Promise<void> {
   try {
     const { subject, html } = await renderMailTemplate(input.template, input.payload);
-    await getResendClient().emails.send({ from: getMailFrom(), to: input.to, subject, html });
+    // O SDK do Resend NÃO lança exceção quando a API rejeita o envio (ex:
+    // modo sandbox sem domínio verificado só aceita o e-mail da própria
+    // conta) — ele devolve { data, error } normalmente, sem throw. Por
+    // isso precisa checar `error` explicitamente, senão isso vira um
+    // "sucesso" silencioso que nunca entrega nada.
+    const result = await getResendClient().emails.send({ from: getMailFrom(), to: input.to, subject, html });
+    if (result.error) {
+      throw new Error(`${result.error.name}: ${result.error.message}`);
+    }
     await ref.update({ status: "sent", sentAt: FieldValue.serverTimestamp() });
   } catch (err) {
-    await ref.update({
-      status: "failed",
-      error: err instanceof Error ? err.message : String(err),
-    });
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[mail] falha ao enviar para ${input.to} (template: ${input.template}): ${message}`);
+    await ref.update({ status: "failed", error: message });
   }
 }
 

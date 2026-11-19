@@ -19,6 +19,17 @@ const RSVP_TONE: Record<string, "neutral" | "success" | "warning"> = {
   not_going: "neutral",
 };
 
+const INVITE_LABEL: Record<string, string> = {
+  pending: "convite: enviando…",
+  sent: "convite: enviado",
+  failed: "convite: falhou",
+};
+const INVITE_TONE: Record<string, "neutral" | "success" | "warning" | "danger"> = {
+  pending: "warning",
+  sent: "neutral",
+  failed: "danger",
+};
+
 export function PartyParticipantsPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const { data, isLoading, isError, error } = usePartyDetail(partyId);
@@ -63,6 +74,9 @@ export function PartyParticipantsPage() {
             <div style={{ fontSize: 13, color: "#71717a" }}>{p.email}</div>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {p.inviteStatus === "failed" && (
+              <Badge tone={INVITE_TONE[p.inviteStatus]}>{INVITE_LABEL[p.inviteStatus]}</Badge>
+            )}
             <Badge tone={RSVP_TONE[p.rsvp]}>{RSVP_LABEL[p.rsvp]}</Badge>
             {data!.status !== "drawn" && data!.status !== "canceled" && (
               <Button variant="danger" onClick={() => removeParticipant.mutate(p.id)}>
