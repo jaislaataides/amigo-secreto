@@ -68,8 +68,21 @@ export function AuthProvider(props: { children: ReactNode }) {
         });
         setUnauthorized(false);
       } catch {
-        setUser(nextUser);
-        setRole(NO_ROLE);
+        // sync-role falhou (erro de rede/servidor) — não sabemos se a conta
+        // tem acesso ou não, então não deslogamos ninguém às cegas. Em vez
+        // de simplesmente zerar o papel, lê os claims que já estão no token
+        // atual (podem já estar corretos de uma sincronização anterior).
+        try {
+          const tokenResult = await nextUser.getIdTokenResult(true);
+          setUser(nextUser);
+          setRole({
+            admin: tokenResult.claims.admin === true,
+            owner: tokenResult.claims.owner === true,
+          });
+        } catch {
+          setUser(nextUser);
+          setRole(NO_ROLE);
+        }
       } finally {
         setLoading(false);
       }
