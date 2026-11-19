@@ -4,7 +4,7 @@ import { issueLinkToken, verifyLinkToken } from "./crypto/linkTokens.js";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { adminDb } from "./firebaseAdmin.js";
 import { ApiError, requireVerifiedEmail } from "./auth.js";
-import type { Participant, Party } from "../../shared/types.js";
+import type { Participant, Party, Rsvp } from "../../shared/types.js";
 
 export async function loadPartyOrThrow(
   partyId: string,
@@ -118,4 +118,15 @@ export async function requireParticipantAccess(
   );
   found.participant.claimedByUid = decoded.uid;
   return found;
+}
+
+/**
+ * O organizador participa por padrão e não recebe convite por e-mail,
+ * então não faz sentido ele "confirmar presença": já entra confirmado.
+ * Parties antigas criaram o participante do organizador como "pending";
+ * aqui ele conta como confirmado mesmo assim. Ele ainda pode recusar
+ * (not_going) pela tela de confirmação ou se remover da lista.
+ */
+export function effectiveRsvp(p: Pick<Participant, "rsvp" | "isOwner">): Rsvp {
+  return p.isOwner === true && p.rsvp === "pending" ? "going" : p.rsvp;
 }

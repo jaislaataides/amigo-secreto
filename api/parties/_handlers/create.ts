@@ -114,7 +114,9 @@ export const createParty = withErrorHandling(async (req: VercelRequest, res: Ver
     uid: decoded.uid,
     inviteStatus: "sent",
     isOwner: true,
-    rsvp: "pending",
+    // Quem cria já está dentro: não recebe convite, então não confirma.
+    rsvp: "going",
+    rsvpAt: now,
     preferredCategories: [],
     createdAt: now,
     updatedAt: now,

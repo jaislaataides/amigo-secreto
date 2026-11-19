@@ -20,6 +20,8 @@ export const sendReminders = withErrorHandling(async (req: VercelRequest, res: V
 
     for (const participantDoc of pendingSnap.docs) {
       const participant = participantDoc.data() as Participant;
+      // Organizador não recebe convite nem lembrete: já conta como confirmado.
+      if (participant.isOwner) continue;
       // Sem código de acesso (convidado antes dessa proteção): o link não
       // abriria nada. O organizador precisa reenviar o convite.
       const accessSnap = await partyDoc.ref.collection("accessTokens").doc(participantDoc.id).get();

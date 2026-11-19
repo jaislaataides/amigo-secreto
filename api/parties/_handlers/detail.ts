@@ -1,7 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { Participant } from "../../../shared/types.js";
 import { requireMethod, verifyAuth } from "../../_lib/auth.js";
 import { requireQueryParam, withErrorHandling } from "../../_lib/http.js";
-import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
+import { effectiveRsvp, loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
 
 /**
  * GET /api/parties/:id — detalhe completo pra tela do owner/admin: dados da
@@ -25,7 +26,10 @@ export const getPartyDetail = withErrorHandling(async (req: VercelRequest, res: 
     id: partyId,
     ...party,
     categories: categoriesSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
-    participants: participantsSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
+    participants: participantsSnap.docs.map((d) => {
+      const data = d.data() as Participant;
+      return { id: d.id, ...data, rsvp: effectiveRsvp(data) };
+    }),
     exclusions: exclusionsSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
   });
 });

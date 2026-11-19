@@ -7,7 +7,7 @@ import { enqueueAndSend } from "../../_lib/mail/send.js";
 import { adminDb } from "../../_lib/firebaseAdmin.js";
 import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth.js";
 import { requireQueryParam, withErrorHandling } from "../../_lib/http.js";
-import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
+import { effectiveRsvp, loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
 import type { DekMeta, Participant } from "../../../shared/types.js";
 
 const MIN_GOING_PARTICIPANTS = 3;
@@ -31,8 +31,8 @@ export const runDraw = withErrorHandling(async (req: VercelRequest, res: VercelR
   ]);
 
   const participants = participantsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Participant) }));
-  const going = participants.filter((p) => p.rsvp === "going");
-  const pending = participants.filter((p) => p.rsvp === "pending");
+  const going = participants.filter((p) => effectiveRsvp(p) === "going");
+  const pending = participants.filter((p) => effectiveRsvp(p) === "pending");
 
   const allResponded = pending.length === 0;
   const deadlinePassed = Date.now() >= party.rsvpDeadline.toMillis();

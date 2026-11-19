@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { requireMethod, verifyAuth } from "../../_lib/auth.js";
 import { requireQueryParam, withErrorHandling } from "../../_lib/http.js";
-import { loadPartyOrThrow, requireParticipantAccess } from "../../_lib/party.js";
+import { effectiveRsvp, loadPartyOrThrow, requireParticipantAccess } from "../../_lib/party.js";
 
 /**
  * GET /api/parties/:id/me — visão do participante: dados públicos da party
@@ -36,7 +36,7 @@ export const getMe = withErrorHandling(async (req: VercelRequest, res: VercelRes
       id: doc.id,
       name: participant.name,
       email: participant.email,
-      rsvp: participant.rsvp,
+      rsvp: effectiveRsvp(participant),
       preferredCategories: participant.preferredCategories,
       sizes: participant.sizes ?? null,
       referenceLinks: linksSnap.docs.map((d) => ({ id: d.id, ...d.data() })),

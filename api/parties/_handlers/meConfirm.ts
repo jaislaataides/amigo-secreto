@@ -3,7 +3,8 @@ import { FieldValue } from "firebase-admin/firestore";
 import { enqueueAndSend } from "../../_lib/mail/send.js";
 import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth.js";
 import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http.js";
-import { loadPartyOrThrow, requireParticipantAccess } from "../../_lib/party.js";
+import { effectiveRsvp, loadPartyOrThrow, requireParticipantAccess } from "../../_lib/party.js";
+import type { Participant } from "../../../shared/types.js";
 
 interface ConfirmBody {
   rsvp: "going" | "not_going";
@@ -31,7 +32,7 @@ export const confirmRsvp = withErrorHandling(async (req: VercelRequest, res: Ver
   const allParticipants = await ref.collection("participants").get();
   const stillPending = allParticipants.docs.some((d) => {
     const data = d.data();
-    return d.id === doc.id ? false : data.rsvp === "pending";
+    return d.id === doc.id ? false : effectiveRsvp(data as Participant) === "pending";
   });
   if (!stillPending && party.status === "collecting") {
     await ref.update({ status: "ready_to_draw", updatedAt: FieldValue.serverTimestamp() });

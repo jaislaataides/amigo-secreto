@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
 import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth.js";
 import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http.js";
-import { loadPartyOrThrow, requireParticipantAccess } from "../../_lib/party.js";
+import { effectiveRsvp, loadPartyOrThrow, requireParticipantAccess } from "../../_lib/party.js";
 import type { Sizes } from "../../../shared/types.js";
 
 const MAX_LENGTH = 16;
@@ -22,7 +22,7 @@ export const setMySizes = withErrorHandling(async (req: VercelRequest, res: Verc
   const { ref, party } = await loadPartyOrThrow(partyId);
   const { doc, participant } = await requireParticipantAccess(req, ref, party, decoded);
 
-  if (participant.rsvp !== "going") {
+  if (effectiveRsvp(participant) !== "going") {
     throw new ApiError(409, "not-going", "Confirme sua presença antes de informar as medidas.");
   }
 
