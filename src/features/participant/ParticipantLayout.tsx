@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { GeneratedCover } from "@/shared/components/GeneratedCover";
 import { Page, PageHeader } from "@/shared/components/ui";
 import { ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
 import { ParticipantTabs } from "./ParticipantTabs";
@@ -13,7 +14,11 @@ export function ParticipantLayout(props: {
 }) {
   return (
     <Page>
-      {props.imageUrl && <img src={props.imageUrl} alt="" className="cover" />}
+      {props.imageUrl ? (
+        <img src={props.imageUrl} alt="" className="cover" />
+      ) : (
+        <GeneratedCover seed={props.partyId} className="cover" ratio={3} />
+      )}
       <PageHeader title={props.name} subtitle={props.subtitle} />
       <ParticipantTabs partyId={props.partyId} />
       {props.children}
