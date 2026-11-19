@@ -25,7 +25,7 @@ export function ImagePickerBox(props: {
             <Icon name="image" size={28} />
             <span>Adicionar capa</span>
             <span className="hint" style={{ fontWeight: 400 }}>
-              JPG ou PNG — opcional
+              JPG ou PNG
             </span>
           </>
         )}

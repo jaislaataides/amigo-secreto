@@ -3,18 +3,21 @@
    (trocadilho com "pagar mico": o app existe pra ninguém pagar mico
    no amigo secreto — presente errado, spoiler, gente esquecida).
 
-   Regras fixas (não abrir exceção sem motivo):
-   - Cor de ação ÚNICA: verde. Botão principal, estado ativo, seleção,
-     progresso, foco. Nada de roxo em botão.
-   - Roxo-berinjela é identidade, não ação: cabeçalho, painel do login,
-     tela de revelação, selos de marca. Os cinzas são todos levemente
-     arroxeados (uma família só).
-   - Cantos: controles (botão, input, opção) 10px · cards e imagens
-     16px · selos e tags pílula · avatar círculo · checkbox 4px.
-   - Sem gradiente, sem sombra decorativa, sem "brilhinho". Card se
-     separa por borda, não por sombra.
-   - Tipografia: Bricolage Grotesque em tudo; hierarquia por peso e
-     tamanho, nunca misturando outra família.
+   ESTRATÉGIA VISUAL — três regras, sem exceção:
+
+   1. A tipografia faz a hierarquia, não as caixas. Tamanho e peso
+      dizem o que é título, conteúdo e detalhe. Nada de card em volta
+      de tudo: seções e listas se separam por linha fina.
+   2. Duas tintas com papéis fixos. Berinjela = blocos de marca
+      chapados (cabeçalho, login, revelação). Verde = só ação e estado
+      ativo (botão principal, aba atual, seleção, progresso, foco).
+      Os cinzas são todos levemente arroxeados.
+   3. Geometria reta. Estrutura (seções, imagens, painéis) sem canto
+      arredondado; controles (botão, input, opção, tag) com 4px.
+      Nenhuma pílula. Círculo só no pontinho de status e no rádio.
+
+   Ícone só quando carrega significado (lixeira, sair, calendário).
+   Sem gradiente, sem sombra, sem "brilhinho".
    ========================================================================== */
 
 :root {
@@ -51,6 +54,7 @@
   --color-success-fg: #1d5f2b;
   --color-warning-bg: #fbf0d4;
   --color-warning-fg: #744b00;
+  --color-warning-dot: #d99a1e;
   --color-danger-bg: #fcebe9;
   --color-danger-fg: #b0261c;
   --color-danger-border: #f3c6c0;
@@ -61,9 +65,9 @@
 
   --font: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --radius-control: 10px;
-  --radius-card: 16px;
-  --radius-pill: 999px;
+  --radius-control: 4px;
+  --radius-card: 0;
+  --radius-pill: 4px;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -107,6 +111,7 @@
     --color-success-fg: #a9eb8f;
     --color-warning-bg: #3a2c0e;
     --color-warning-fg: #f2c86a;
+    --color-warning-dot: #e8b04a;
     --color-danger-bg: #3b1915;
     --color-danger-fg: #f6a69b;
     --color-danger-border: #5a2720;
@@ -298,11 +303,7 @@ select {
 .brand__mark {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-control);
-  background: var(--color-primary);
-  color: var(--color-brand);
+  color: var(--color-primary);
 }
 
 .app-nav {
@@ -349,7 +350,6 @@ select {
   right: 0;
   bottom: 6px;
   height: 3px;
-  border-radius: var(--radius-pill);
   background: var(--color-primary);
 }
 
@@ -420,16 +420,24 @@ select {
 }
 
 .page-title {
-  font-size: clamp(30px, 6vw, 42px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  font-size: clamp(28px, 5vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.page-meta {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 15px;
+  color: var(--color-fg-muted);
 }
 
 .page-subtitle {
   color: var(--color-fg-muted);
   margin-top: 8px;
   max-width: 60ch;
-  font-size: 17px;
 }
 
 .cover {
@@ -477,7 +485,7 @@ select {
   transform: scale(0.985);
 }
 
-/* Linha de lista dentro de um card: avatar + texto + ações */
+/* Linha de lista dentro de um card */
 .list {
   list-style: none;
   margin: 0;
@@ -519,18 +527,6 @@ select {
   flex-wrap: wrap;
 }
 
-.avatar {
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  font-size: 15px;
-  background: var(--color-primary-soft);
-  color: var(--color-primary-soft-fg);
-}
 
 /* ---------- Buttons ---------- */
 
@@ -765,7 +761,7 @@ select {
   place-items: center;
   width: 20px;
   height: 20px;
-  border-radius: 4px;
+  border-radius: 2px;
   border: 2px solid var(--color-border-strong);
   background: var(--color-surface);
   color: transparent;
@@ -815,8 +811,8 @@ select {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 4px 4px 4px 12px;
-  border-radius: var(--radius-pill);
+  padding: 3px 3px 3px 10px;
+  border-radius: var(--radius-control);
   background: var(--color-surface-2);
   font-size: 14px;
   font-weight: 600;
@@ -828,7 +824,7 @@ select {
   width: 26px;
   height: 26px;
   border: none;
-  border-radius: 50%;
+  border-radius: 2px;
   background: transparent;
   color: var(--color-fg-muted);
   cursor: pointer;
@@ -1017,7 +1013,6 @@ select {
   right: 0;
   bottom: 0;
   height: 3px;
-  border-radius: var(--radius-pill);
   background: var(--color-primary-ink);
 }
 
@@ -1063,22 +1058,15 @@ select {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-5);
+  gap: 4px;
+  padding: var(--space-5) 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
   color: var(--color-fg-muted);
-  background: var(--color-surface-2);
-  border-radius: var(--radius-card);
-}
-
-.empty__icon {
-  color: var(--color-fg-subtle);
-  margin-bottom: var(--space-1);
 }
 
 .empty__title {
-  font-weight: 700;
-  font-size: 19px;
-  letter-spacing: -0.01em;
+  font-weight: 600;
   color: var(--color-fg);
 }
 
@@ -1122,14 +1110,16 @@ select {
 .stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
-  background: var(--color-surface);
-  overflow: hidden;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .stat {
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-4) var(--space-4) 0;
+}
+
+.stat + .stat {
+  padding-left: var(--space-4);
 }
 
 .stat + .stat {
@@ -1155,8 +1145,7 @@ select {
 }
 
 .progress {
-  height: 8px;
-  border-radius: var(--radius-pill);
+  height: 6px;
   background: var(--color-surface-2);
   overflow: hidden;
 }
@@ -1171,56 +1160,170 @@ select {
 
 /* ---------- Party grid (dashboard) ---------- */
 
-.party-grid {
-  display: grid;
-  gap: var(--space-4);
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+
+/* ---------- Linhas (listas sem caixa) ---------- */
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-border);
 }
 
-.party-card__cover {
-  aspect-ratio: 16 / 9;
-  width: 100%;
-  object-fit: cover;
+.rows > li {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.row-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  padding: 14px 0;
+  flex-wrap: wrap;
+  min-height: 64px;
+}
+
+a.row-item {
+  color: inherit;
+  text-decoration: none;
+  font-weight: inherit;
+  margin: 0 calc(-1 * var(--space-3));
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
+  border-radius: var(--radius-control);
+  transition: background var(--dur-fast);
+}
+
+a.row-item:hover {
   background: var(--color-surface-2);
 }
 
-
-.party-card__body {
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
+.row-item__main {
+  flex: 1 1 200px;
+  min-width: 0;
 }
 
-.party-card__name {
-  font-weight: 700;
-  font-size: 19px;
-  letter-spacing: -0.01em;
+.row-item__title {
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
-/* Atalhos da home */
-.home-link {
+.row-item__meta {
+  font-size: 14px;
+  color: var(--color-fg-muted);
+  overflow-wrap: anywhere;
+}
+
+.row-item__aside {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
-.home-link__icon {
+a.row-item {
+  flex-wrap: nowrap;
+}
+
+/* No celular, o lado direito sempre desce pra baixo do conteúdo. */
+@media (max-width: 559px) {
+  .row-item:not(a) .row-item__main {
+    flex-basis: 100%;
+  }
+}
+
+.row-item__thumb {
   flex: none;
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-control);
-  background: var(--color-brand);
-  color: var(--color-primary);
+  width: 56px;
+  height: 40px;
+  object-fit: cover;
 }
 
-.home-link__arrow {
-  margin-left: auto;
-  color: var(--color-fg-subtle);
+/* Status: pontinho + texto, em vez de selo colorido */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  color: var(--color-fg-muted);
+  white-space: nowrap;
+}
+
+.status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-fg-subtle);
+}
+
+.status--success::before {
+  background: var(--color-primary-ink);
+}
+
+.status--warning::before {
+  background: var(--color-warning-dot);
+}
+
+.status--danger::before {
+  background: var(--color-danger-fg);
+}
+
+.status--danger {
+  color: var(--color-danger-fg);
+}
+
+.status--brand::before {
+  background: var(--color-brand-soft-fg);
+}
+
+/* ---------- Formulário em seções (título à esquerda, campos à direita) ---------- */
+
+.form-section {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.form-section:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+@media (min-width: 760px) {
+  .form-section {
+    grid-template-columns: 220px 1fr;
+    gap: 40px;
+  }
+}
+
+.form-section__intro h2 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.form-section__intro p {
+  font-size: 14px;
+  color: var(--color-fg-muted);
+  margin-top: 4px;
+}
+
+.form-section__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.form-footer {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex-wrap: wrap;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
 }
 
 /* ---------- Choice cards (RSVP) ---------- */
@@ -1241,14 +1344,14 @@ select {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 72px;
+  min-height: 64px;
   padding: var(--space-4);
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-control);
   border: 2px solid var(--color-border);
   background: var(--color-surface);
   text-align: left;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 17px;
   transition: border-color var(--dur-fast), background var(--dur-fast), transform var(--dur-fast) var(--ease-out);
 }
@@ -1265,15 +1368,18 @@ select {
   cursor: progress;
 }
 
-.choice__icon {
+.choice__radio {
   flex: none;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: var(--color-surface-2);
-  color: var(--color-fg-muted);
+  border: 2px solid var(--color-border-strong);
+  background: var(--color-surface);
+  transition: border-color var(--dur-fast), border-width var(--dur-fast);
+}
+
+.choice[aria-pressed="true"] .choice__radio {
+  border: 7px solid var(--color-primary-ink);
 }
 
 .choice[aria-pressed="true"].choice--yes {
@@ -1282,29 +1388,23 @@ select {
   color: var(--color-primary-soft-fg);
 }
 
-.choice[aria-pressed="true"].choice--yes .choice__icon {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-}
+
 
 .choice[aria-pressed="true"].choice--no {
   border-color: var(--color-fg-subtle);
   background: var(--color-surface-2);
 }
 
-.choice[aria-pressed="true"].choice--no .choice__icon {
-  background: var(--color-fg-muted);
-  color: var(--color-surface);
+.choice[aria-pressed="true"].choice--no .choice__radio {
+  border-color: var(--color-fg-muted);
 }
 
 /* Faixa de regras (RSVP) */
 .rules {
   display: grid;
   grid-template-columns: 1fr;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
-  background: var(--color-surface);
-  overflow: hidden;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 @media (min-width: 560px) {
@@ -1314,7 +1414,17 @@ select {
 }
 
 .rules__item {
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-4) 0;
+}
+
+@media (min-width: 560px) {
+  .rules__item {
+    padding-right: var(--space-6);
+  }
+
+  .rules__item + .rules__item {
+    padding-left: var(--space-6);
+  }
 }
 
 .rules__item + .rules__item {
@@ -1329,11 +1439,8 @@ select {
 }
 
 .rules__label {
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-fg-subtle);
+  font-size: 14px;
+  color: var(--color-fg-muted);
 }
 
 .rules__value {
@@ -1347,15 +1454,15 @@ select {
 
 .link-card {
   display: flex;
-  gap: var(--space-3);
+  gap: var(--space-4);
   align-items: center;
+  padding: 14px 0;
 }
 
 .link-card__thumb {
   flex: none;
   width: 64px;
   height: 64px;
-  border-radius: var(--radius-control);
   object-fit: cover;
   background: var(--color-surface-2);
   display: grid;
@@ -1451,9 +1558,9 @@ select {
   padding: 0;
   display: none;
   flex-direction: column;
-  gap: 12px;
   color: var(--color-on-brand-muted);
   font-size: 16px;
+  max-width: 420px;
 }
 
 @media (min-width: 880px) {
@@ -1463,15 +1570,13 @@ select {
 }
 
 .auth__promises li {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
+  padding: 12px 0;
+  border-top: 1px solid color-mix(in srgb, var(--color-on-brand) 14%, transparent);
 }
 
-.auth__promises svg {
-  flex: none;
-  margin-top: 2px;
-  color: var(--color-primary);
+.auth__promises strong {
+  color: var(--color-on-brand);
+  font-weight: 600;
 }
 
 .auth__form {
@@ -1561,11 +1666,8 @@ select {
 }
 
 .reveal__eyebrow {
-  font-weight: 600;
   color: var(--color-on-brand-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 13px;
+  font-size: 17px;
 }
 
 .reveal__title {
