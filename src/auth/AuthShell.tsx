@@ -11,7 +11,9 @@ export function AuthShell(props: { children: ReactNode }) {
           <span className="brand__mark">
             <MonkeyMark />
           </span>
-          Amico Secreto
+          <span>
+            A<em className="brand__mico">mico</em> Secreto
+          </span>
         </span>
         <p className="auth__headline">
           Amigo secreto <em>sem pagar mico.</em>

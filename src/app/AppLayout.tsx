@@ -21,7 +21,9 @@ export function AppLayout(props: { children: ReactNode }) {
             <span className="brand__mark">
               <MonkeyMark />
             </span>
-            Amico Secreto
+            <span>
+              A<em className="brand__mico">mico</em> Secreto
+            </span>
           </Link>
 
           <nav className="app-nav" aria-label="Principal">

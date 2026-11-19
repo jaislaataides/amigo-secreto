@@ -296,6 +296,12 @@ select {
   border-radius: var(--radius-control);
 }
 
+/* O "mico" dentro de "Amico" é o trocadilho do nome: destacado em verde. */
+.brand__mico {
+  font-style: normal;
+  color: var(--color-primary);
+}
+
 .brand__mark {
   display: grid;
   place-items: center;
