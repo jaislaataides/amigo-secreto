@@ -1,23 +1,9 @@
-import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/shared/api/client";
-import { Badge, ButtonLink, Page, PageHeader } from "@/shared/components/ui";
+import { ButtonLink, Page, PageHeader } from "@/shared/components/ui";
+import { PartyCard, useOwnerParties } from "./PartyCard";
 import { EmptyState, ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
-import { GeneratedCover } from "@/shared/components/GeneratedCover";
-import { STATUS_LABEL, STATUS_TONE } from "./partyStatus";
-
-interface PartyRow {
-  id: string;
-  name: string;
-  status: string;
-  imageUrl: string | null;
-}
 
 export function OwnerDashboardPage() {
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["owner", "parties"],
-    queryFn: () => api.get<{ parties: PartyRow[] }>("/api/parties"),
-  });
+  const { data, isLoading, isError, error } = useOwnerParties();
 
   return (
     <Page maxWidth={960}>
@@ -52,17 +38,7 @@ export function OwnerDashboardPage() {
         <ul className="party-grid list">
           {data.parties.map((party) => (
             <li key={party.id}>
-              <Link to={`/owner/parties/${party.id}/participants`} className="card card--flush card--interactive">
-                {party.imageUrl ? (
-                  <img src={party.imageUrl} alt="" className="party-card__cover" loading="lazy" />
-                ) : (
-                  <GeneratedCover seed={party.id} className="party-card__cover" />
-                )}
-                <div className="party-card__body">
-                  <span className="party-card__name">{party.name}</span>
-                  <Badge tone={STATUS_TONE[party.status] ?? "neutral"}>{STATUS_LABEL[party.status] ?? party.status}</Badge>
-                </div>
-              </Link>
+              <PartyCard party={party} />
             </li>
           ))}
         </ul>

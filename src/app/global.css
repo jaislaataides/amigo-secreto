@@ -1282,9 +1282,84 @@ select {
   color: var(--color-primary);
 }
 
-.home-link__arrow {
-  margin-left: auto;
-  color: var(--color-fg-subtle);
+/* Home: card "Nova party" do mesmo tamanho dos cards de party. */
+.new-party-card {
+  height: 100%;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--space-2);
+  border-style: dashed;
+  border-color: var(--color-border-strong);
+  background: transparent;
+}
+
+.new-party-card__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  transition: transform var(--dur-med) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .new-party-card:hover .new-party-card__icon {
+    transform: rotate(90deg);
+  }
+}
+
+.party-grid > li {
+  display: flex;
+}
+
+.party-grid > li > * {
+  flex: 1;
+}
+
+/* Home: aviso de pedidos pendentes (admin). */
+.notice-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-2);
+}
+
+.notice-card__text {
+  flex: 1 1 220px;
+}
+
+/* Home do participante: três passos. */
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.steps__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.steps__number {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-5);
+  font-weight: 800;
+  font-size: 34px;
+  line-height: 1;
+  color: var(--color-border-strong);
 }
 
 /* ---------- Choice cards (RSVP) ---------- */
