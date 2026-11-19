@@ -17,6 +17,7 @@ import { ParticipantPreferencesPage } from "@/features/participant/ParticipantPr
 import { ParticipantReferencesPage } from "@/features/participant/ParticipantReferencesPage";
 import { ParticipantRsvpPage } from "@/features/participant/ParticipantRsvpPage";
 import { RevealPage } from "@/features/reveal/RevealPage";
+import { OverlayProvider } from "@/shared/components/Overlay";
 import { AppLayout } from "./AppLayout";
 import { HomePage } from "./HomePage";
 import { NotFoundPage } from "./NotFoundPage";
@@ -34,6 +35,7 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <OverlayProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LoginPage />} />
@@ -145,6 +147,7 @@ export function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </BrowserRouter>
+        </OverlayProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
