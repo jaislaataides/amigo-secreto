@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Card, Stack } from "@/shared/components/ui";
+import { Stack } from "@/shared/components/ui";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
 import { Icon } from "@/shared/components/Icon";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
@@ -25,23 +25,8 @@ export function ParticipantRsvpPage() {
   const current = confirm.isPending ? confirm.variables : me.rsvp;
 
   return (
-    <ParticipantLayout partyId={partyId} name={party.name} imageUrl={party.imageUrl} subtitle={party.description}>
+    <ParticipantLayout partyId={partyId} view={data} subtitle={party.description}>
       <Stack gap={24}>
-        <Card>
-          <dl className="facts">
-            <dt>Valor</dt>
-            <dd>
-              R$ {party.valueRange.min} a R$ {party.valueRange.max}
-            </dd>
-            {party.forbiddenItemsText && (
-              <>
-                <dt>Lista de micos</dt>
-                <dd style={{ fontWeight: 400 }}>{party.forbiddenItemsText}</dd>
-              </>
-            )}
-          </dl>
-        </Card>
-
         <section>
           <h2 className="section-title">Você vai participar?</h2>
           <div className="choices" role="group" aria-label="Confirmação de presença">

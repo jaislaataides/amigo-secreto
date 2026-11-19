@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api, ApiClientError } from "@/shared/api/client";
-import { Badge, Button, Card, Page, Stack } from "@/shared/components/ui";
+import { Badge, Button, Card, Page, Stack, Wordmark } from "@/shared/components/ui";
 import { EmptyState, FullPageSpinner } from "@/shared/components/Feedback";
 import { Icon } from "@/shared/components/Icon";
 import { LinkPreview } from "@/shared/components/LinkPreview";
@@ -49,59 +49,72 @@ export function RevealPage() {
 
   if (!opened) {
     return (
-      <main className="center-screen">
-        <Card className="auth-card">
-          <p className="reveal__eyebrow">O sorteio saiu</p>
-          <h1 style={{ fontSize: 28, marginTop: 6 }}>Quem será que você tirou?</h1>
-          <p className="reveal__hint">Confira se ninguém está espiando a sua tela antes de abrir.</p>
-          <Button size="lg" icon="gift" block onClick={() => setOpened(true)}>
-            Abrir meu papelzinho
-          </Button>
-        </Card>
+      <main className="center-screen center-screen--brand">
+        <div className="reveal-envelope">
+          <Wordmark />
+          <Card className="auth-card" style={{ marginTop: 20 }}>
+            <p className="reveal__eyebrow">O sorteio saiu</p>
+            <h1 style={{ fontSize: 26, marginTop: 4 }}>Quem será que você tirou?</h1>
+            <p className="reveal__hint" style={{ margin: "8px 0 20px" }}>
+              Confira se ninguém está espiando a sua tela antes de abrir.
+            </p>
+            <Button size="lg" icon="gift" block onClick={() => setOpened(true)}>
+              Abrir meu papelzinho
+            </Button>
+          </Card>
+        </div>
       </main>
     );
   }
 
   return (
-    <Page maxWidth={560}>
-      <Card className="reveal">
-        <p className="reveal__eyebrow">Você tirou</p>
-        <h1 className="reveal__name" aria-live="polite">
-          {data.receiverName}
-        </h1>
-        {data.receiverCategories.length > 0 && (
-          <>
-            <p className="hint" style={{ marginBottom: 8 }}>
-              Curte presentes de
-            </p>
-            <div className="reveal__chips">
-              {data.receiverCategories.map((c) => (
-                <Badge key={c}>{c}</Badge>
-              ))}
-            </div>
-          </>
-        )}
-      </Card>
-
-      <section className="section">
-        <h2 className="section-title">Ideias de presente</h2>
-        {data.referenceLinks.length === 0 ? (
-          <EmptyState icon="link">
-            {data.receiverName} ainda não deixou referências. Use as categorias acima como pista — e fuja do mico.
-          </EmptyState>
-        ) : (
-          <Stack gap={10}>
-            {data.referenceLinks.map((link) => (
-              <LinkPreview key={link.id} {...link} />
-            ))}
-          </Stack>
-        )}
-      </section>
-
-      <p className="hint" style={{ textAlign: "center", marginTop: 40, display: "flex", gap: 6, justifyContent: "center" }}>
-        <Icon name="lock" size={16} />
-        Só você vê isso. Disponível por 15 dias após o sorteio.
+    <Page maxWidth={1040}>
+      <p style={{ fontSize: 20, marginBottom: 20 }}>
+        <Wordmark />
       </p>
+      <div className="with-aside reveal-layout">
+        <section aria-labelledby="ideas-title">
+          <h2 className="section-title" id="ideas-title">
+            Ideias de presente <span className="count">{data.referenceLinks.length}</span>
+          </h2>
+          {data.referenceLinks.length === 0 ? (
+            <EmptyState icon="link">
+              {data.receiverName} ainda não deixou referências. Use as categorias como pista — e fuja do mico.
+            </EmptyState>
+          ) : (
+            <Stack gap={10}>
+              {data.referenceLinks.map((link) => (
+                <LinkPreview key={link.id} {...link} />
+              ))}
+            </Stack>
+          )}
+        </section>
+
+        <aside>
+          <Card className="reveal">
+            <p className="reveal__eyebrow">Você tirou</p>
+            <h1 className="reveal__name" aria-live="polite">
+              <span className="highlight">{data.receiverName}</span>
+            </h1>
+            {data.receiverCategories.length > 0 && (
+              <>
+                <p className="hint" style={{ marginBottom: 8 }}>
+                  Curte presentes de
+                </p>
+                <div className="reveal__chips">
+                  {data.receiverCategories.map((c) => (
+                    <Badge key={c}>{c}</Badge>
+                  ))}
+                </div>
+              </>
+            )}
+            <p className="hint" style={{ marginTop: 20, display: "flex", gap: 6, justifyContent: "center" }}>
+              <Icon name="lock" size={16} />
+              Só você vê isso. Fica disponível por 15 dias.
+            </p>
+          </Card>
+        </aside>
+      </div>
     </Page>
   );
 }

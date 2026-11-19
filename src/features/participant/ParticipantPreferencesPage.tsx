@@ -28,7 +28,7 @@ export function ParticipantPreferencesPage() {
   const dirty = [...selected].sort().join("|") !== [...data.me.preferredCategories].sort().join("|");
 
   return (
-    <ParticipantLayout partyId={partyId} name={data.party.name} imageUrl={data.party.imageUrl}>
+    <ParticipantLayout partyId={partyId} view={data}>
       <Stack gap={20}>
         <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
           <legend className="section-title" style={{ padding: 0 }}>
