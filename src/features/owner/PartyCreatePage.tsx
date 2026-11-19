@@ -39,6 +39,10 @@ export function PartyCreatePage() {
     }
   }, [platformCategories.data]);
 
+  // "Livre" já significa qualquer categoria — com ela marcada, trava as
+  // outras como selecionadas também, sem dar pra desmarcar nenhuma.
+  const isLivreSelected = baseCategoryIds.includes("livre");
+
   const createParty = useMutation({
     mutationFn: () =>
       api.post<{ partyId: string }>("/api/parties/create", {
@@ -113,22 +117,41 @@ export function PartyCreatePage() {
           <TagInput value={forbiddenTags} onChange={setForbiddenTags} placeholder="ex: perfumes, roupas íntimas" />
         </Field>
 
-        <Field label="Categorias">
+        <Field label="Categorias" hint={isLivreSelected ? "Com \"Livre\" marcado, vale qualquer categoria." : undefined}>
           {platformCategories.isLoading && <FullPageSpinner />}
-          {platformCategories.data?.map((c) => (
-            <label key={c.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
-              <input
-                type="checkbox"
-                checked={baseCategoryIds.includes(c.id)}
-                onChange={(e) =>
-                  setBaseCategoryIds(
-                    e.target.checked ? [...baseCategoryIds, c.id] : baseCategoryIds.filter((id) => id !== c.id),
-                  )
-                }
-              />
-              {c.label}
-            </label>
-          ))}
+          {platformCategories.data?.map((c) => {
+            const isLivre = c.id === "livre";
+            const locked = isLivreSelected && !isLivre;
+            return (
+              <label
+                key={c.id}
+                style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", opacity: locked ? 0.6 : 1 }}
+              >
+                <input
+                  type="checkbox"
+                  checked={baseCategoryIds.includes(c.id)}
+                  disabled={locked}
+                  onChange={(e) => {
+                    if (isLivre) {
+                      // Marcar "livre" força todas as outras como selecionadas
+                      // também; desmarcar só tira o "livre" (as outras ficam
+                      // como estavam, livres pra ajustar de novo).
+                      setBaseCategoryIds(
+                        e.target.checked
+                          ? (platformCategories.data ?? []).map((cat) => cat.id)
+                          : baseCategoryIds.filter((id) => id !== "livre"),
+                      );
+                      return;
+                    }
+                    setBaseCategoryIds(
+                      e.target.checked ? [...baseCategoryIds, c.id] : baseCategoryIds.filter((id) => id !== c.id),
+                    );
+                  }}
+                />
+                {c.label}
+              </label>
+            );
+          })}
         </Field>
 
         <Field label="Categorias extras (opcional)" hint="Digite e aperte Enter pra cada categoria.">
