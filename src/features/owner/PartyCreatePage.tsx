@@ -18,6 +18,7 @@ import {
 } from "@/shared/components/ui";
 import { TagInput } from "@/shared/components/TagInput";
 import { DateInputBR } from "@/shared/components/DateInputBR";
+import { joinMicos } from "@/shared/micos";
 import { ImagePickerBox } from "@/shared/components/ImagePickerBox";
 import { ErrorBanner, InlineLoading } from "@/shared/components/Feedback";
 import { PARTY_BACK } from "./partyStatus";
@@ -62,7 +63,7 @@ export function PartyCreatePage() {
         description,
         valueMin: Number(valueMin),
         valueMax: Number(valueMax),
-        forbiddenItemsText: forbiddenTags.join(", "),
+        forbiddenItemsText: joinMicos(forbiddenTags),
         baseCategoryIds,
         customCategories,
         rsvpDeadline: new Date(rsvpDeadline).toISOString(),

@@ -1,10 +1,11 @@
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Stack } from "@/shared/components/ui";
+import { Badge, Stack } from "@/shared/components/ui";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
 import { useMyPartyView } from "./useMyPartyView";
+import { parseMicos } from "@/shared/micos";
 
 export function ParticipantRsvpPage() {
   const { partyId } = useParams<{ partyId: string }>();
@@ -36,7 +37,11 @@ export function ParticipantRsvpPage() {
           {party.forbiddenItemsText && (
             <div className="rules__item">
               <div className="rules__label">Lista de micos</div>
-              <p style={{ marginTop: 4 }}>{party.forbiddenItemsText}</p>
+              <div className="row" style={{ gap: 6, marginTop: 6 }}>
+                {parseMicos(party.forbiddenItemsText).map((m) => (
+                  <Badge key={m}>{m}</Badge>
+                ))}
+              </div>
             </div>
           )}
         </div>
