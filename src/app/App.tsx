@@ -20,7 +20,6 @@ import { RevealPage } from "@/features/reveal/RevealPage";
 import { AppLayout } from "./AppLayout";
 import { HomePage } from "./HomePage";
 import { NotFoundPage } from "./NotFoundPage";
-import { useViewTransitionLocation } from "./useViewTransitionLocation";
 
 /** AuthGuard + cabeçalho de navegação, combinados — a maioria das rotas logadas usa os dois. */
 function Protected(props: { requireRole?: "admin" | "owner"; children: ReactNode }) {
@@ -36,124 +35,117 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
-          <AppRoutes />
+          <Routes>
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/solicitar-acesso" element={<RequestOwnerAccessPage />} />
+
+            <Route
+              path="/home"
+              element={
+                <Protected>
+                  <HomePage />
+                </Protected>
+              }
+            />
+
+            <Route
+              path="/admin"
+              element={
+                <Protected requireRole="admin">
+                  <AdminDashboardPage />
+                </Protected>
+              }
+            />
+
+            <Route
+              path="/owner"
+              element={
+                <Protected requireRole="owner">
+                  <OwnerDashboardPage />
+                </Protected>
+              }
+            />
+            <Route
+              path="/owner/parties/new"
+              element={
+                <Protected requireRole="owner">
+                  <PartyCreatePage />
+                </Protected>
+              }
+            />
+            <Route
+              path="/owner/parties/:partyId/edit"
+              element={
+                <Protected requireRole="owner">
+                  <PartyEditPage />
+                </Protected>
+              }
+            />
+            <Route
+              path="/owner/parties/:partyId/participants"
+              element={
+                <Protected requireRole="owner">
+                  <PartyParticipantsPage />
+                </Protected>
+              }
+            />
+            <Route
+              path="/owner/parties/:partyId/exclusions"
+              element={
+                <Protected requireRole="owner">
+                  <PartyExclusionsPage />
+                </Protected>
+              }
+            />
+            <Route
+              path="/owner/parties/:partyId/draw"
+              element={
+                <Protected requireRole="owner">
+                  <PartyDrawPage />
+                </Protected>
+              }
+            />
+
+            <Route
+              path="/p/:partyId/preferences"
+              element={
+                <Protected>
+                  <ParticipantPreferencesPage />
+                </Protected>
+              }
+            />
+            <Route
+              path="/p/:partyId/references"
+              element={
+                <Protected>
+                  <ParticipantReferencesPage />
+                </Protected>
+              }
+            />
+            <Route
+              path="/p/:partyId/rsvp"
+              element={
+                <Protected>
+                  <ParticipantRsvpPage />
+                </Protected>
+              }
+            />
+
+            {/* Sem AppLayout de propósito: a revelação é uma tela de foco único,
+                sem navegação de distração — a pessoa só quer ver quem tirou. */}
+            <Route
+              path="/reveal/:partyId/:participantId"
+              element={
+                <AuthGuard>
+                  <RevealPage />
+                </AuthGuard>
+              }
+            />
+
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>
-  );
-}
-
-function AppRoutes() {
-  const location = useViewTransitionLocation();
-  return (
-    <Routes location={location}>
-      <Route path="/" element={<LoginPage />} />
-      <Route path="/solicitar-acesso" element={<RequestOwnerAccessPage />} />
-
-      <Route
-        path="/home"
-        element={
-          <Protected>
-            <HomePage />
-          </Protected>
-        }
-      />
-
-      <Route
-        path="/admin"
-        element={
-          <Protected requireRole="admin">
-            <AdminDashboardPage />
-          </Protected>
-        }
-      />
-
-      <Route
-        path="/owner"
-        element={
-          <Protected requireRole="owner">
-            <OwnerDashboardPage />
-          </Protected>
-        }
-      />
-      <Route
-        path="/owner/parties/new"
-        element={
-          <Protected requireRole="owner">
-            <PartyCreatePage />
-          </Protected>
-        }
-      />
-      <Route
-        path="/owner/parties/:partyId/edit"
-        element={
-          <Protected requireRole="owner">
-            <PartyEditPage />
-          </Protected>
-        }
-      />
-      <Route
-        path="/owner/parties/:partyId/participants"
-        element={
-          <Protected requireRole="owner">
-            <PartyParticipantsPage />
-          </Protected>
-        }
-      />
-      <Route
-        path="/owner/parties/:partyId/exclusions"
-        element={
-          <Protected requireRole="owner">
-            <PartyExclusionsPage />
-          </Protected>
-        }
-      />
-      <Route
-        path="/owner/parties/:partyId/draw"
-        element={
-          <Protected requireRole="owner">
-            <PartyDrawPage />
-          </Protected>
-        }
-      />
-
-      <Route
-        path="/p/:partyId/preferences"
-        element={
-          <Protected>
-            <ParticipantPreferencesPage />
-          </Protected>
-        }
-      />
-      <Route
-        path="/p/:partyId/references"
-        element={
-          <Protected>
-            <ParticipantReferencesPage />
-          </Protected>
-        }
-      />
-      <Route
-        path="/p/:partyId/rsvp"
-        element={
-          <Protected>
-            <ParticipantRsvpPage />
-          </Protected>
-        }
-      />
-
-      {/* Sem AppLayout de propósito: a revelação é uma tela de foco único,
-                sem navegação de distração — a pessoa só quer ver quem tirou. */}
-      <Route
-        path="/reveal/:partyId/:participantId"
-        element={
-          <AuthGuard>
-            <RevealPage />
-          </AuthGuard>
-        }
-      />
-
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
   );
 }
