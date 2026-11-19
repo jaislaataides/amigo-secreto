@@ -98,6 +98,8 @@ export interface EncryptedAssignment {
 
 export interface PossessionToken {
   tokenHash: string;
+  /** Pra remontar o link de revelação no reenvio de e-mail (ver crypto/linkTokens.ts). */
+  nonce?: string;
   createdAt: FirestoreTimestampLike;
   usedCount: number;
   lastUsedAt?: FirestoreTimestampLike | null;

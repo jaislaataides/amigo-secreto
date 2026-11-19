@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { requireMethod, verifyAuth } from "../../_lib/auth.js";
 import { requireQueryParam, withErrorHandling } from "../../_lib/http.js";
-import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party.js";
+import { loadPartyOrThrow, requireParticipantAccess } from "../../_lib/party.js";
 
 /**
  * GET /api/parties/:id/me — visão do participante: dados públicos da party
@@ -13,7 +13,7 @@ export const getMe = withErrorHandling(async (req: VercelRequest, res: VercelRes
   const decoded = await verifyAuth(req);
   const partyId = requireQueryParam(req, "id");
   const { ref, party } = await loadPartyOrThrow(partyId);
-  const { doc, participant } = await findMyParticipantOrThrow(ref, decoded);
+  const { doc, participant } = await requireParticipantAccess(req, ref, party, decoded);
 
   const [categoriesSnap, linksSnap] = await Promise.all([
     ref.collection("categories").get(),

@@ -3,6 +3,7 @@ import {
   createCipheriv,
   createDecipheriv,
   createHash,
+  hkdfSync,
   timingSafeEqual,
 } from "node:crypto";
 
@@ -32,6 +33,14 @@ function getMasterKek(): Buffer {
     );
   }
   return key;
+}
+
+/**
+ * Subchave derivada da KEK (HKDF-SHA256) pra um uso específico. Separa os
+ * papéis: a mesma KEK nunca é usada direto pra assinar links e pra cifrar.
+ */
+export function deriveSubkey(info: string): Buffer {
+  return Buffer.from(hkdfSync("sha256", getMasterKek(), Buffer.alloc(0), info, KEY_LENGTH_BYTES));
 }
 
 function seal(key: Buffer, plaintext: Buffer, aad?: Buffer): SealedPayload {

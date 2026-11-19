@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
 import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth.js";
 import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http.js";
-import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party.js";
+import { loadPartyOrThrow, requireParticipantAccess } from "../../_lib/party.js";
 
 interface PreferencesBody {
   categoryIds: string[];
@@ -13,8 +13,8 @@ export const setMyPreferences = withErrorHandling(async (req: VercelRequest, res
 
   const decoded = await verifyAuth(req);
   const partyId = requireQueryParam(req, "id");
-  const { ref } = await loadPartyOrThrow(partyId);
-  const { doc } = await findMyParticipantOrThrow(ref, decoded);
+  const { ref, party } = await loadPartyOrThrow(partyId);
+  const { doc } = await requireParticipantAccess(req, ref, party, decoded);
 
   const body = readJsonBody<PreferencesBody>(req);
   if (!Array.isArray(body.categoryIds)) {

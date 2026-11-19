@@ -85,6 +85,11 @@ service cloud.firestore {
         allow read, write: if false;
       }
 
+      // Códigos de acesso dos links de convite (só nonce + hash).
+      match /accessTokens/{participantId} {
+        allow read, write: if false;
+      }
+
       match /dekMeta/{docId} {
         allow read, write: if false;
       }

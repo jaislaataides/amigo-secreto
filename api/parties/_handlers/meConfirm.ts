@@ -3,7 +3,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { enqueueAndSend } from "../../_lib/mail/send.js";
 import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth.js";
 import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http.js";
-import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party.js";
+import { loadPartyOrThrow, requireParticipantAccess } from "../../_lib/party.js";
 
 interface ConfirmBody {
   rsvp: "going" | "not_going";
@@ -15,7 +15,7 @@ export const confirmRsvp = withErrorHandling(async (req: VercelRequest, res: Ver
   const decoded = await verifyAuth(req);
   const partyId = requireQueryParam(req, "id");
   const { ref, party } = await loadPartyOrThrow(partyId);
-  const { doc, participant } = await findMyParticipantOrThrow(ref, decoded);
+  const { doc, participant } = await requireParticipantAccess(req, ref, party, decoded);
 
   const body = readJsonBody<ConfirmBody>(req);
   if (body.rsvp !== "going" && body.rsvp !== "not_going") {

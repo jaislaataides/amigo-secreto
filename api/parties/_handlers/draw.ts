@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Timestamp } from "firebase-admin/firestore";
-import { encryptAssignment, generatePossessionToken, hashPossessionToken, unwrapDek } from "../../_lib/crypto/envelope.js";
+import { encryptAssignment, unwrapDek } from "../../_lib/crypto/envelope.js";
 import { runDerangementDraw, type ExclusionInput } from "../../_lib/draw/derangement.js";
-import { getAppBaseUrl } from "../../_lib/env.js";
+import { issueLinkToken } from "../../_lib/crypto/linkTokens.js";
 import { enqueueAndSend } from "../../_lib/mail/send.js";
 import { adminDb } from "../../_lib/firebaseAdmin.js";
 import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth.js";
@@ -93,7 +93,7 @@ export const runDraw = withErrorHandling(async (req: VercelRequest, res: VercelR
   const now = Timestamp.now();
   const purgeAt = Timestamp.fromMillis(now.toMillis() + PURGE_AFTER_DAYS * 24 * 60 * 60 * 1000);
 
-  const rawTokensByParticipant = new Map<string, string>();
+  const revealNonceByParticipant = new Map<string, string>();
 
   await adminDb.runTransaction(async (tx) => {
     const freshSnap = await tx.get(ref);
@@ -112,10 +112,13 @@ export const runDraw = withErrorHandling(async (req: VercelRequest, res: VercelR
         revealCount: 0,
       });
 
-      const rawToken = generatePossessionToken();
-      rawTokensByParticipant.set(giverId, rawToken);
+      // Código de revelação derivado (ver crypto/linkTokens.ts): no banco
+      // ficam só nonce + hash; o e-mail remonta o link a partir do nonce.
+      const { nonce, tokenHash } = issueLinkToken("reveal", partyId, giverId);
+      revealNonceByParticipant.set(giverId, nonce);
       tx.set(ref.collection("possessionTokens").doc(giverId), {
-        tokenHash: hashPossessionToken(rawToken),
+        tokenHash,
+        nonce,
         createdAt: now,
         usedCount: 0,
       });
@@ -124,18 +127,16 @@ export const runDraw = withErrorHandling(async (req: VercelRequest, res: VercelR
     tx.update(ref, { status: "drawn", drawnAt: now, purgeAt, updatedAt: now });
   });
 
-  const baseUrl = getAppBaseUrl();
   await Promise.all(
     going.map(async (p) => {
-      const token = rawTokensByParticipant.get(p.id);
-      if (!token) return;
-      const revealUrl = `${baseUrl}/reveal/${partyId}/${p.id}?t=${token}`;
+      const nonce = revealNonceByParticipant.get(p.id);
+      if (!nonce) return;
       await enqueueAndSend({
         template: "reveal_link",
         to: p.email,
         partyId,
         participantId: p.id,
-        payload: { participantName: p.name, partyName: party.name, revealUrl },
+        payload: { participantName: p.name, partyName: party.name, link: { purpose: "reveal", nonce } },
       }).catch(() => undefined);
     }),
   );

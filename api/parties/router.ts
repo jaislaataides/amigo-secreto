@@ -14,6 +14,7 @@ import { handleMyLinks } from "./_handlers/meLinks.js";
 import { confirmRsvp } from "./_handlers/meConfirm.js";
 import { addParticipants } from "./_handlers/participantsAdd.js";
 import { removeParticipant } from "./_handlers/participantRemove.js";
+import { resendInvite } from "./_handlers/participantResend.js";
 
 /**
  * Roteador único pra tudo em /api/parties/** — um arquivo sem colchetes,
@@ -89,6 +90,11 @@ export default async function router(req: VercelRequest, res: VercelResponse) {
       req.query.pid = third;
       return removeParticipant(req, res);
     }
+  }
+
+  if (segments.length === 4 && section === "participants" && segments[3] === "resend") {
+    req.query.pid = third;
+    return resendInvite(req, res);
   }
 
   res.status(404).json({ error: { code: "not-found", message: "Rota não encontrada." } });

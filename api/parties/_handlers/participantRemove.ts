@@ -26,6 +26,7 @@ export const removeParticipant = withErrorHandling(async (req: VercelRequest, re
   const batch = ref.firestore.batch();
   for (const link of linksSnap.docs) batch.delete(link.ref);
   batch.delete(participantRef);
+  batch.delete(ref.collection("accessTokens").doc(participantId));
   await batch.commit();
 
   res.status(200).json({ ok: true });

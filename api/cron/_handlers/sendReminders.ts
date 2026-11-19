@@ -1,5 +1,4 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getAppBaseUrl } from "../../_lib/env.js";
 import { enqueueAndSend } from "../../_lib/mail/send.js";
 import { adminDb } from "../../_lib/firebaseAdmin.js";
 import { requireMethod, verifyCronSecret } from "../../_lib/auth.js";
@@ -11,16 +10,24 @@ export const sendReminders = withErrorHandling(async (req: VercelRequest, res: V
   if (!requireMethod(req, res, ["GET", "POST"])) return;
   verifyCronSecret(req);
 
-  const baseUrl = getAppBaseUrl();
   const partiesSnap = await adminDb.collection("parties").where("status", "==", "collecting").get();
 
   let remindersSent = 0;
+  let skippedWithoutLink = 0;
   for (const partyDoc of partiesSnap.docs) {
     const party = partyDoc.data() as Party;
     const pendingSnap = await partyDoc.ref.collection("participants").where("rsvp", "==", "pending").get();
 
     for (const participantDoc of pendingSnap.docs) {
       const participant = participantDoc.data() as Participant;
+      // Sem código de acesso (convidado antes dessa proteção): o link não
+      // abriria nada. O organizador precisa reenviar o convite.
+      const accessSnap = await partyDoc.ref.collection("accessTokens").doc(participantDoc.id).get();
+      const nonce = (accessSnap.data() as { nonce?: string } | undefined)?.nonce;
+      if (!nonce) {
+        skippedWithoutLink++;
+        continue;
+      }
       try {
         await enqueueAndSend({
           template: "reminder",
@@ -30,7 +37,7 @@ export const sendReminders = withErrorHandling(async (req: VercelRequest, res: V
           payload: {
             participantName: participant.name,
             partyName: party.name,
-            joinUrl: `${baseUrl}/p/${partyDoc.id}/rsvp`,
+            link: { purpose: "access", nonce },
           },
         });
         remindersSent++;
@@ -40,5 +47,5 @@ export const sendReminders = withErrorHandling(async (req: VercelRequest, res: V
     }
   }
 
-  res.status(200).json({ remindersSent });
+  res.status(200).json({ remindersSent, skippedWithoutLink });
 });

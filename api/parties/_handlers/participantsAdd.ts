@@ -1,10 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
 import { enqueueAndSend } from "../../_lib/mail/send.js";
-import { getAppBaseUrl } from "../../_lib/env.js";
 import { ApiError, normalizeEmail, requireMethod, verifyAuth } from "../../_lib/auth.js";
 import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http.js";
-import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
+import { issueAccessToken, loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
 
 interface AddParticipantsBody {
   participants: { name: string; email: string }[];
@@ -86,18 +85,19 @@ export const addParticipants = withErrorHandling(async (req: VercelRequest, res:
 
   await batch.commit();
 
-  const joinUrl = `${getAppBaseUrl()}/p/${partyId}/rsvp`;
   await Promise.all(
     created.map(async (p) => {
       try {
-        await enqueueAndSend({
+        // O link do convite leva o código de acesso; a fila guarda só o nonce.
+        const nonce = await issueAccessToken(ref, p.id);
+        const sent = await enqueueAndSend({
           template: "invite",
           to: p.email,
           partyId,
           participantId: p.id,
-          payload: { participantName: p.name, partyName: party.name, joinUrl },
+          payload: { participantName: p.name, partyName: party.name, link: { purpose: "access", nonce } },
         });
-        await ref.collection("participants").doc(p.id).update({ inviteStatus: "sent" });
+        await ref.collection("participants").doc(p.id).update({ inviteStatus: sent ? "sent" : "failed" });
       } catch {
         await ref.collection("participants").doc(p.id).update({ inviteStatus: "failed" });
       }

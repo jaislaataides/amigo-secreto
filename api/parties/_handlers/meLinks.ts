@@ -3,7 +3,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { fetchOpenGraphPreview } from "../../_lib/linkPreview/fetchOg.js";
 import { ApiError, verifyAuth } from "../../_lib/auth.js";
 import { readJsonBody, requireString, withErrorHandling } from "../../_lib/http.js";
-import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party.js";
+import { loadPartyOrThrow, requireParticipantAccess } from "../../_lib/party.js";
 
 const MAX_LINKS = 10;
 
@@ -15,8 +15,8 @@ export const handleMyLinks = withErrorHandling(async (req: VercelRequest, res: V
   const decoded = await verifyAuth(req);
   const partyId = req.query.id;
   if (typeof partyId !== "string") throw new ApiError(400, "invalid-param", "Party inválida.");
-  const { ref } = await loadPartyOrThrow(partyId);
-  const { doc } = await findMyParticipantOrThrow(ref, decoded);
+  const { ref, party } = await loadPartyOrThrow(partyId);
+  const { doc } = await requireParticipantAccess(req, ref, party, decoded);
   const linksCollection = doc.ref.collection("referenceLinks");
 
   if (req.method === "POST") {

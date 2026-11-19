@@ -1,4 +1,6 @@
-import type { DocumentReference, DocumentSnapshot, QueryDocumentSnapshot } from "firebase-admin/firestore";
+import type { VercelRequest } from "@vercel/node";
+import { FieldValue, type DocumentReference, type DocumentSnapshot, type QueryDocumentSnapshot } from "firebase-admin/firestore";
+import { issueLinkToken, verifyLinkToken } from "./crypto/linkTokens.js";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { adminDb } from "./firebaseAdmin.js";
 import { ApiError, requireVerifiedEmail } from "./auth.js";
@@ -46,4 +48,55 @@ export async function findMyParticipantOrThrow(
   }
 
   return { doc, participant };
+}
+
+/**
+ * Gera (ou troca) o código de acesso do participante. Guarda só nonce +
+ * hash em `parties/{id}/accessTokens/{participantId}` (bloqueado pra
+ * qualquer client nas regras). Devolve o nonce pra montar o link do e-mail;
+ * o link anterior deixa de valer.
+ */
+export async function issueAccessToken(partyRef: DocumentReference, participantId: string): Promise<string> {
+  const { nonce, tokenHash } = issueLinkToken("access", partyRef.id, participantId);
+  await partyRef.collection("accessTokens").doc(participantId).set({
+    nonce,
+    tokenHash,
+    createdAt: FieldValue.serverTimestamp(),
+  });
+  return nonce;
+}
+
+export const ACCESS_TOKEN_HEADER = "x-access-token";
+
+/**
+ * Porta de entrada de toda rota "/me": exige as DUAS provas — sessão com o
+ * e-mail (verificado) do participante E o código do link que chegou no
+ * e-mail dele. Sessão roubada sozinha ou link encaminhado sozinho não
+ * bastam pra ver ou mudar nada.
+ *
+ * Exceção: o organizador participando da própria party (participante
+ * isOwner) não recebe convite por e-mail; ele entra só pela sessão de dono.
+ */
+export async function requireParticipantAccess(
+  req: VercelRequest,
+  partyRef: DocumentReference,
+  party: Party,
+  decoded: DecodedIdToken,
+): Promise<{ doc: QueryDocumentSnapshot; participant: Participant }> {
+  const found = await findMyParticipantOrThrow(partyRef, decoded);
+  if (found.participant.isOwner === true && party.ownerUid === decoded.uid) {
+    return found;
+  }
+
+  const header = req.headers[ACCESS_TOKEN_HEADER];
+  const token = Array.isArray(header) ? header[0] : header;
+  const linkRequired = () =>
+    new ApiError(403, "link-required", "Abra esta party pelo link que chegou no seu e-mail.");
+  if (!token) throw linkRequired();
+
+  const tokenSnap = await partyRef.collection("accessTokens").doc(found.doc.id).get();
+  const stored = tokenSnap.data() as { tokenHash?: string } | undefined;
+  if (!stored?.tokenHash || !verifyLinkToken(token, stored.tokenHash)) throw linkRequired();
+
+  return found;
 }
