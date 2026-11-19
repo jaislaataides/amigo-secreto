@@ -56,7 +56,7 @@ Mais simples direto pelo console, sem precisar instalar nada:
 npm run seed-categories
 ```
 
-Cria as 5 categorias base (`livre`, `acessorios`, `vestimentas`, `objetos`, `decoracoes`) em `platformCategories`.
+Cria as categorias base (livre, doces, livros & HQs, jogos, beleza, casa & cozinha, moda & acessórios, tecnologia, plantas, bebidas, pet lover) em `platformCategories` — a lista fica em `scripts/seed-platform-categories.ts`, edite ali e rode de novo pra mudar.
 
 ## 8. Deploy na Vercel
 
