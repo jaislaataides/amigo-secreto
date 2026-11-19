@@ -52,7 +52,7 @@ export function ParticipantReferencesPage() {
                   Adicionar referência
                 </label>
                 <p className="hint" id="ref-url-hint">
-                  Cole o link de um produto que você gostaria de ganhar (Amazon, Shopee, AliExpress…).
+                  Cole o link de algo que você gostaria de ganhar (Amazon, Shopee, AliExpress…).
                 </p>
                 <div className="row" style={{ flexWrap: "nowrap" }}>
                   <Input
@@ -81,7 +81,7 @@ export function ParticipantReferencesPage() {
           </h2>
           {links.length === 0 ? (
             <EmptyState icon="link" title="Nenhum link ainda">
-              Referências ajudam muito quem te tirou a acertar no presente.
+              Quanto mais pistas, menor o risco de ganhar um mico.
             </EmptyState>
           ) : (
             <Stack gap={10}>

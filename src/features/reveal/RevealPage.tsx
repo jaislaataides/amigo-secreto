@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api, ApiClientError } from "@/shared/api/client";
-import { Badge, Button, Page, Stack } from "@/shared/components/ui";
+import { Badge, Button, Card, Page, Stack } from "@/shared/components/ui";
 import { EmptyState, FullPageSpinner } from "@/shared/components/Feedback";
 import { Icon } from "@/shared/components/Icon";
 import { LinkPreview } from "@/shared/components/LinkPreview";
@@ -50,52 +50,44 @@ export function RevealPage() {
   if (!opened) {
     return (
       <main className="center-screen">
-        <div className="reveal fade-up">
-          <div className="reveal__gift reveal__gift--wiggle">
-            <Icon name="gift" size={52} strokeWidth={1.75} />
-          </div>
-          <p className="reveal__eyebrow">O sorteio saiu!</p>
-          <h1 style={{ fontSize: 30, marginTop: 8 }}>Seu amigo secreto está aqui dentro</h1>
+        <Card className="auth-card">
+          <p className="reveal__eyebrow">O sorteio saiu</p>
+          <h1 style={{ fontSize: 28, marginTop: 6 }}>Quem será que você tirou?</h1>
           <p className="reveal__hint">Confira se ninguém está espiando a sua tela antes de abrir.</p>
-          <Button size="lg" icon="sparkles" onClick={() => setOpened(true)}>
-            Abrir presente
+          <Button size="lg" icon="gift" block onClick={() => setOpened(true)}>
+            Abrir meu papelzinho
           </Button>
-        </div>
+        </Card>
       </main>
     );
   }
 
   return (
     <Page maxWidth={560}>
-      <div className="reveal" style={{ paddingTop: 16 }}>
-        <div className="reveal__gift" style={{ width: 88, height: 88, borderRadius: 26 }}>
-          <Icon name="gift" size={40} strokeWidth={1.75} />
-        </div>
+      <Card className="reveal">
         <p className="reveal__eyebrow">Você tirou</p>
         <h1 className="reveal__name" aria-live="polite">
           {data.receiverName}
         </h1>
         {data.receiverCategories.length > 0 && (
-          <div className="fade-up" style={{ animationDelay: "200ms" }}>
+          <>
             <p className="hint" style={{ marginBottom: 8 }}>
               Curte presentes de
             </p>
             <div className="reveal__chips">
               {data.receiverCategories.map((c) => (
-                <Badge key={c} tone="brand">
-                  {c}
-                </Badge>
+                <Badge key={c}>{c}</Badge>
               ))}
             </div>
-          </div>
+          </>
         )}
-      </div>
+      </Card>
 
-      <section className="fade-up" style={{ animationDelay: "320ms" }}>
+      <section className="section">
         <h2 className="section-title">Ideias de presente</h2>
         {data.referenceLinks.length === 0 ? (
           <EmptyState icon="link">
-            {data.receiverName} ainda não adicionou nenhuma referência. Vale usar as categorias acima como pista!
+            {data.receiverName} ainda não deixou referências. Use as categorias acima como pista — e fuja do mico.
           </EmptyState>
         ) : (
           <Stack gap={10}>

@@ -35,7 +35,7 @@ export function ParticipantPreferencesPage() {
             Que tipo de presente você curte?
           </legend>
           <p className="hint" style={{ marginBottom: 12 }}>
-            Marque quantas quiser — quem te tirar vai ver essas categorias.
+            Marque quantas quiser — quem te tirar usa isso pra não pagar mico.
           </p>
           <div className="options">
             {data.party.categories.map((c) => (

@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Card, Stack } from "@/shared/components/ui";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
-import { Icon, type IconName } from "@/shared/components/Icon";
+import { Icon } from "@/shared/components/Icon";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
 import { useMyPartyView } from "./useMyPartyView";
 
@@ -28,39 +28,33 @@ export function ParticipantRsvpPage() {
     <ParticipantLayout partyId={partyId} name={party.name} imageUrl={party.imageUrl} subtitle={party.description}>
       <Stack gap={24}>
         <Card>
-          <div className="row" style={{ gap: 16, alignItems: "flex-start", flexWrap: "nowrap" }}>
-            <span className="choice__icon" style={{ background: "var(--color-primary-soft)", color: "var(--color-primary)" }}>
-              <Icon name="ticket" />
-            </span>
-            <div>
-              <div className="label">
-                De R$ {party.valueRange.min} a R$ {party.valueRange.max}
-              </div>
-              <p className="hint">Faixa de valor do presente</p>
-              {party.forbiddenItemsText && (
-                <p className="small" style={{ marginTop: 10 }}>
-                  <strong>Evite:</strong> <span className="muted">{party.forbiddenItemsText}</span>
-                </p>
-              )}
-            </div>
-          </div>
+          <dl className="facts">
+            <dt>Valor</dt>
+            <dd>
+              R$ {party.valueRange.min} a R$ {party.valueRange.max}
+            </dd>
+            {party.forbiddenItemsText && (
+              <>
+                <dt>Lista de micos</dt>
+                <dd style={{ fontWeight: 400 }}>{party.forbiddenItemsText}</dd>
+              </>
+            )}
+          </dl>
         </Card>
 
         <section>
           <h2 className="section-title">Você vai participar?</h2>
           <div className="choices" role="group" aria-label="Confirmação de presença">
             <Choice
-              kind="yes"
-              icon="thumbsUp"
               label="Vou participar"
+              detail="Entro no sorteio"
               pressed={current === "going"}
               disabled={confirm.isPending}
               onClick={() => confirm.mutate("going")}
             />
             <Choice
-              kind="no"
-              icon="x"
               label="Não vou dessa vez"
+              detail="Fico de fora do sorteio"
               pressed={current === "not_going"}
               disabled={confirm.isPending}
               onClick={() => confirm.mutate("not_going")}
@@ -75,7 +69,7 @@ export function ParticipantRsvpPage() {
         {confirm.isError && <ErrorBanner message={confirm.error.message} />}
         {confirm.isSuccess && me.rsvp === "going" && (
           <Alert tone="success">
-            Presença confirmada! Aproveite pra marcar suas categorias favoritas e deixar referências de presente.
+            Presença confirmada. Aproveite pra marcar suas categorias e deixar referências de presente.
           </Alert>
         )}
       </Stack>
@@ -83,26 +77,20 @@ export function ParticipantRsvpPage() {
   );
 }
 
-function Choice(props: {
-  kind: "yes" | "no";
-  icon: IconName;
-  label: string;
-  pressed: boolean;
-  disabled: boolean;
-  onClick: () => void;
-}) {
+function Choice(props: { label: string; detail: string; pressed: boolean; disabled: boolean; onClick: () => void }) {
   return (
     <button
       type="button"
-      className={`choice choice--${props.kind}`}
+      className="choice"
       aria-pressed={props.pressed}
       disabled={props.disabled}
       onClick={props.onClick}
     >
-      <span className="choice__icon">
-        <Icon name={props.pressed ? "check" : props.icon} />
+      <span className="choice__radio" aria-hidden="true" />
+      <span className="choice__text">
+        {props.label}
+        <small>{props.detail}</small>
       </span>
-      {props.label}
     </button>
   );
 }
