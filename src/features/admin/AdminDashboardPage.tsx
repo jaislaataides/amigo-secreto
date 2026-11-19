@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Button, FormSection, Input, Page, PageHeader, Status } from "@/shared/components/ui";
+import { Avatar, Badge, Button, Card, Input, Page, PageHeader, Section } from "@/shared/components/ui";
 import { STATUS_LABEL, STATUS_TONE } from "@/features/owner/partyStatus";
-import { ErrorBanner, InlineLoading } from "@/shared/components/Feedback";
+import { EmptyState, ErrorBanner, InlineLoading } from "@/shared/components/Feedback";
 
 interface AuthorizedOwnerRow {
   email: string;
@@ -34,12 +34,9 @@ export function AdminDashboardPage() {
 
   return (
     <Page maxWidth={860}>
-      <PageHeader title="Painel do admin" />
+      <PageHeader title="Painel do admin" subtitle="Aprove organizadores e ajuste o tamanho das parties." />
 
-      <FormSection
-        title="Pedidos de organizador"
-        description={pendingCount ? `${pendingCount} aguardando aprovação.` : "Nenhum pedido pendente."}
-      >
+      <Section title="Pedidos de organizador" count={pendingCount}>
         {owners.isLoading && <InlineLoading />}
         {owners.isError && <ErrorBanner message={owners.error.message} />}
         {owners.data && (
@@ -50,13 +47,13 @@ export function AdminDashboardPage() {
             }}
           />
         )}
-      </FormSection>
+      </Section>
 
-      <FormSection title="Parties" description="Ajuste o limite de participantes de cada uma.">
+      <Section title="Parties" count={parties.data?.parties.length}>
         {parties.isLoading && <InlineLoading />}
         {parties.isError && <ErrorBanner message={parties.error.message} />}
         {parties.data && <PartiesTable rows={parties.data.parties} onChanged={() => void parties.refetch()} />}
-      </FormSection>
+      </Section>
     </Page>
   );
 }
@@ -71,60 +68,72 @@ function OwnersTable(props: { rows: AuthorizedOwnerRow[]; onDecided: () => void 
   });
 
   if (props.rows.length === 0) {
-    return <p className="muted">Quando alguém pedir pra organizar, o pedido aparece aqui.</p>;
+    return (
+      <EmptyState icon="users" title="Nenhum pedido">
+        Quando alguém pedir pra organizar, o pedido aparece aqui.
+      </EmptyState>
+    );
   }
 
   const rows = [...props.rows].sort((a, b) => ORDER[a.status] - ORDER[b.status]);
 
   return (
     <>
-      <ul className="rows">
-        {rows.map((row) => {
-          const deciding = decide.isPending && decide.variables?.email === row.email;
-          return (
-            <li key={row.email} className="row-item">
-              <div className="row-item__main">
-                <div className="row-item__title">{row.requestedName || row.email}</div>
-                {row.requestedName && <div className="row-item__meta">{row.email}</div>}
-              </div>
-              <div className="row-item__aside">
-                {row.status === "pending" ? (
-                  <>
-                    <Button
-                      size="sm"
-                      loading={deciding && decide.variables?.decision === "approved"}
-                      disabled={decide.isPending}
-                      onClick={() => decide.mutate({ email: row.email, decision: "approved" })}
-                    >
-                      Aprovar
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="danger"
-                      loading={deciding && decide.variables?.decision === "rejected"}
-                      disabled={decide.isPending}
-                      onClick={() => decide.mutate({ email: row.email, decision: "rejected" })}
-                    >
-                      Rejeitar
-                    </Button>
-                  </>
-                ) : (
-                  <OwnerStatus status={row.status} />
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-      {decide.isError && <ErrorBanner message={decide.error.message} />}
+      <Card flush>
+        <ul className="list">
+          {rows.map((row) => {
+            const deciding = decide.isPending && decide.variables?.email === row.email;
+            return (
+              <li key={row.email} className="list-row">
+                <Avatar name={row.requestedName || row.email} />
+                <div className="list-row__main">
+                  <div className="list-row__title">{row.requestedName || row.email}</div>
+                  {row.requestedName && <div className="list-row__meta">{row.email}</div>}
+                </div>
+                <div className="list-row__actions">
+                  {row.status === "pending" ? (
+                    <>
+                      <Button
+                        size="sm"
+                        icon="check"
+                        loading={deciding && decide.variables?.decision === "approved"}
+                        disabled={decide.isPending}
+                        onClick={() => decide.mutate({ email: row.email, decision: "approved" })}
+                      >
+                        Aprovar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        loading={deciding && decide.variables?.decision === "rejected"}
+                        disabled={decide.isPending}
+                        onClick={() => decide.mutate({ email: row.email, decision: "rejected" })}
+                      >
+                        Rejeitar
+                      </Button>
+                    </>
+                  ) : (
+                    <StatusBadge status={row.status} />
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </Card>
+      {decide.isError && (
+        <div style={{ marginTop: 10 }}>
+          <ErrorBanner message={decide.error.message} />
+        </div>
+      )}
     </>
   );
 }
 
-function OwnerStatus(props: { status: string }) {
-  if (props.status === "approved") return <Status tone="success">aprovado</Status>;
-  if (props.status === "rejected") return <Status tone="danger">rejeitado</Status>;
-  return <Status tone="warning">pendente</Status>;
+function StatusBadge(props: { status: string }) {
+  if (props.status === "approved") return <Badge tone="success">aprovado</Badge>;
+  if (props.status === "rejected") return <Badge tone="danger">rejeitado</Badge>;
+  return <Badge tone="warning">pendente</Badge>;
 }
 
 function PartiesTable(props: { rows: PartyRow[]; onChanged: () => void }) {
@@ -143,23 +152,23 @@ function PartiesTable(props: { rows: PartyRow[]; onChanged: () => void }) {
   });
 
   if (props.rows.length === 0) {
-    return <p className="muted">Nenhuma party criada ainda.</p>;
+    return <EmptyState title="Nenhuma party criada ainda">As parties dos organizadores aparecem aqui.</EmptyState>;
   }
 
   return (
     <>
-      <ul className="rows">
-        {props.rows.map((row) => (
-          <li key={row.id} className="row-item">
-            <div className="row-item__main">
-              <div className="row-item__title">{row.name}</div>
-              <div className="row-item__meta">{row.ownerEmail}</div>
-            </div>
-            <div className="row-item__aside">
-              <Status tone={STATUS_TONE[row.status] ?? "neutral"}>{STATUS_LABEL[row.status] ?? row.status}</Status>
+      <Card flush>
+        <ul className="list">
+          {props.rows.map((row) => (
+            <li key={row.id} className="list-row">
+              <div className="list-row__main">
+                <div className="list-row__title">{row.name}</div>
+                <div className="list-row__meta">{row.ownerEmail}</div>
+              </div>
+              <Badge tone={STATUS_TONE[row.status] ?? "neutral"}>{STATUS_LABEL[row.status] ?? row.status}</Badge>
               {editing === row.id ? (
                 <form
-                  className="row"
+                  className="list-row__actions"
                   onSubmit={(e) => {
                     e.preventDefault();
                     setMax.mutate({ partyId: row.id, maxParticipants: Number(value) });
@@ -175,7 +184,7 @@ function PartiesTable(props: { rows: PartyRow[]; onChanged: () => void }) {
                     min={1}
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
-                    style={{ width: 80 }}
+                    style={{ width: 90 }}
                     autoFocus
                   />
                   <Button type="submit" size="sm" loading={setMax.isPending}>
@@ -189,20 +198,25 @@ function PartiesTable(props: { rows: PartyRow[]; onChanged: () => void }) {
                 <Button
                   size="sm"
                   variant="secondary"
-                  aria-label={`Limite de ${row.maxParticipants} participantes. Editar`}
+                  icon="users"
+                  aria-label={`Limite de ${row.maxParticipants} participantes — editar`}
                   onClick={() => {
                     setEditing(row.id);
                     setValue(String(row.maxParticipants));
                   }}
                 >
-                  Limite {row.maxParticipants}
+                  {row.maxParticipants}
                 </Button>
               )}
-            </div>
-          </li>
-        ))}
-      </ul>
-      {setMax.isError && <ErrorBanner message={setMax.error.message} />}
+            </li>
+          ))}
+        </ul>
+      </Card>
+      {setMax.isError && (
+        <div style={{ marginTop: 10 }}>
+          <ErrorBanner message={setMax.error.message} />
+        </div>
+      )}
     </>
   );
 }

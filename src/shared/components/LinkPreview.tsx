@@ -19,7 +19,7 @@ export function LinkPreview(props: {
   action?: ReactNode;
 }) {
   return (
-    <div className="link-card">
+    <div className="card link-card">
       {props.imageUrl ? (
         <img src={props.imageUrl} alt="" className="link-card__thumb" loading="lazy" />
       ) : (

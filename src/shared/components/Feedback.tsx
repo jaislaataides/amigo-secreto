@@ -42,12 +42,15 @@ export function ErrorBanner(props: { message: string }) {
   return <Alert tone="error">{props.message}</Alert>;
 }
 
-export function EmptyState(props: { children: ReactNode; title?: string; action?: ReactNode }) {
+export function EmptyState(props: { children: ReactNode; title?: string; icon?: IconName; action?: ReactNode }) {
   return (
     <div className="empty">
+      <span className="empty__icon">
+        <Icon name={props.icon ?? "gift"} size={28} strokeWidth={1.75} />
+      </span>
       {props.title && <p className="empty__title">{props.title}</p>}
       <p>{props.children}</p>
-      {props.action && <div style={{ marginTop: 12 }}>{props.action}</div>}
+      {props.action && <div style={{ marginTop: 8 }}>{props.action}</div>}
     </div>
   );
 }

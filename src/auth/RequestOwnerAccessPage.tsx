@@ -24,7 +24,7 @@ export function RequestOwnerAccessPage() {
         <div>
           <h1>Quero organizar</h1>
           <p className="muted" style={{ marginTop: 6 }}>
-            Organizadores criam parties e convidam o grupo. Um admin aprova o pedido antes.
+            Organizadores criam parties e convidam o grupo. Um admin aprova seu pedido antes.
           </p>
         </div>
 
@@ -50,7 +50,7 @@ export function RequestOwnerAccessPage() {
         {done && (
           <Alert tone="success">
             {done === "approved"
-              ? "Você já é um organizador aprovado. Recarregue a página."
+              ? "Você já é um organizador aprovado — recarregue a página."
               : "Pedido enviado! Avisaremos quando um admin aprovar."}
           </Alert>
         )}

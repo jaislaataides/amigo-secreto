@@ -17,13 +17,13 @@ export function AuthShell(props: { children: ReactNode }) {
         </p>
         <ul className="auth__promises">
           <li>
-            <strong>Sorteio sem spoiler.</strong> Cada um vê só quem tirou, num link pessoal.
+            <Icon name="lock" size={18} /> Sorteio sem spoiler: cada um vê só quem tirou.
           </li>
           <li>
-            <strong>Pistas de presente.</strong> Categorias e links do que a pessoa quer ganhar.
+            <Icon name="link" size={18} /> Ideias e referências de quem você tirou.
           </li>
           <li>
-            <strong>Lista de micos.</strong> O que ninguém quer ganhar fica combinado antes.
+            <Icon name="ban" size={18} /> Lista de micos: o que ninguém quer ganhar.
           </li>
         </ul>
       </section>

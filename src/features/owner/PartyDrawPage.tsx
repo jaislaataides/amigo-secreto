@@ -1,7 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiClientError } from "@/shared/api/client";
-import { Button, Stack } from "@/shared/components/ui";
+import { Button, Card, Stack } from "@/shared/components/ui";
+import { Icon } from "@/shared/components/Icon";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
 import { usePartyDetail } from "./usePartyDetail";
@@ -27,7 +28,7 @@ export function PartyDrawPage() {
 
   return (
     <PartyLayout partyId={partyId} name={data.name} status={data.status}>
-      <Stack gap={32}>
+      <Stack gap={20}>
         <div className="stats">
           <Stat value={going} label="confirmados" accent />
           <Stat value={pending} label="aguardando" />
@@ -35,50 +36,62 @@ export function PartyDrawPage() {
         </div>
 
         {alreadyDrawn || draw.isSuccess ? (
-          <div>
-            <h2 className="section-title">Sorteio realizado</h2>
-            <p className="muted">
+          <Card>
+            <div className="home-link" style={{ alignItems: "flex-start" }}>
+              <span className="home-link__icon">
+                <Icon name="check" size={24} strokeWidth={2.5} />
+              </span>
+              <div>
+                <h2 className="section-title" style={{ margin: 0 }}>
+                  Sorteio realizado
+                </h2>
+                <p className="muted" style={{ marginTop: 4 }}>
               {draw.isSuccess
                 ? `${draw.data.assignedCount} participantes receberam o link de revelação por e-mail.`
                 : "Cada participante recebeu por e-mail um link pessoal com quem tirou."}
-            </p>
-          </div>
-        ) : (
-          <Stack gap={16}>
-            <h2 className="section-title" style={{ margin: 0 }}>
-              Pronto pra sortear?
-            </h2>
-            {!enough ? (
-              <Alert tone="warning">É preciso ter pelo menos 3 participantes confirmados pra sortear.</Alert>
-            ) : pending === 0 ? (
-              <Alert tone="success">Todo mundo respondeu. Tudo pronto pro sorteio.</Alert>
-            ) : (
-              <Alert tone="info">
-                {pending} {pending === 1 ? "pessoa ainda não respondeu" : "pessoas ainda não responderam"}. Depois do
-                prazo de confirmação, dá pra sortear só com quem confirmou.
-              </Alert>
-            )}
-            <p className="muted">
-              Ao sortear, cada confirmado recebe por e-mail um link pessoal com quem tirou. Não dá pra desfazer.
-            </p>
-            {draw.isError && (
-              <ErrorBanner
-                message={draw.error instanceof ApiClientError ? draw.error.message : "Erro ao realizar o sorteio."}
-              />
-            )}
-            <div>
-              <Button
-                size="lg"
-                loading={draw.isPending}
-                disabled={!enough}
-                onClick={() => {
-                  if (window.confirm(`Sortear agora entre ${going} confirmados? Os e-mails saem na hora.`)) draw.mutate();
-                }}
-              >
-                {draw.isPending ? "Sorteando…" : "Realizar sorteio"}
-              </Button>
+                </p>
+              </div>
             </div>
-          </Stack>
+          </Card>
+        ) : (
+          <Card>
+            <Stack gap={16}>
+              <h2 className="section-title" style={{ margin: 0 }}>
+                Pronto pra sortear?
+              </h2>
+              {!enough ? (
+                <Alert tone="warning">É preciso de pelo menos 3 participantes confirmados pra sortear.</Alert>
+              ) : pending === 0 ? (
+                <Alert tone="success">Todo mundo respondeu — tudo pronto pro sorteio.</Alert>
+              ) : (
+                <Alert tone="info">
+                  {pending} {pending === 1 ? "pessoa ainda não respondeu" : "pessoas ainda não responderam"}. Depois do
+                  prazo de confirmação, dá pra sortear só com quem confirmou.
+                </Alert>
+              )}
+              <p className="hint">
+                Ao sortear, cada confirmado recebe por e-mail um link pessoal com quem tirou. Não dá pra desfazer.
+              </p>
+              {draw.isError && (
+                <ErrorBanner
+                  message={draw.error instanceof ApiClientError ? draw.error.message : "Erro ao realizar o sorteio."}
+                />
+              )}
+              <div className="form-actions">
+                <Button
+                  size="lg"
+                  icon="shuffle"
+                  loading={draw.isPending}
+                  disabled={!enough}
+                  onClick={() => {
+                    if (window.confirm(`Sortear agora entre ${going} confirmados? Os e-mails saem na hora.`)) draw.mutate();
+                  }}
+                >
+                  {draw.isPending ? "Sorteando…" : "Realizar sorteio"}
+                </Button>
+              </div>
+            </Stack>
+          </Card>
         )}
       </Stack>
     </PartyLayout>

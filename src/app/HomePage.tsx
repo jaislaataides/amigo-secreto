@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { EmptyState } from "@/shared/components/Feedback";
-import { Icon } from "@/shared/components/Icon";
+import { Icon, type IconName } from "@/shared/components/Icon";
 import { Page, PageHeader } from "@/shared/components/ui";
 
 export function HomePage() {
@@ -12,41 +12,53 @@ export function HomePage() {
 
   return (
     <Page>
-      <PageHeader title={firstName ? `Olá, ${firstName}` : "Olá"} />
+      <PageHeader title={firstName ? `Olá, ${firstName}!` : "Olá!"} subtitle="O que você quer fazer hoje?" />
 
       {canOrganize || role.admin ? (
-        <ul className="rows">
+        <div className="party-grid">
           {canOrganize && (
-            <HomeRow to="/owner" title="Minhas parties" description="Criar e acompanhar seus amigos secretos." />
+            <HomeCard
+              to="/owner"
+              icon="gift"
+              title="Minhas parties"
+              description="Criar e gerenciar seus amigos secretos."
+            />
           )}
           {role.admin && (
-            <HomeRow
+            <HomeCard
               to="/admin"
+              icon="shield"
               title="Painel do admin"
               description="Aprovar organizadores e ajustar limites de participantes."
             />
           )}
-        </ul>
+        </div>
       ) : (
-        <EmptyState title="Procurando sua party?">
-          Use o link que chegou no seu e-mail (convite ou resultado do sorteio). Quer organizar um amigo secreto?{" "}
-          <Link to="/solicitar-acesso">Peça acesso de organizador</Link>.
+        <EmptyState icon="mail" title="Procurando sua party?">
+          Use o link que chegou no seu e-mail (convite ou resultado do sorteio).
+          <br />
+          Quer organizar um amigo secreto? <Link to="/solicitar-acesso">Peça acesso de organizador</Link>.
         </EmptyState>
       )}
     </Page>
   );
 }
 
-function HomeRow(props: { to: string; title: string; description: string }) {
+function HomeCard(props: { to: string; icon: IconName; title: string; description: string }) {
   return (
-    <li>
-      <Link to={props.to} className="row-item">
-        <div className="row-item__main">
-          <div className="row-item__title">{props.title}</div>
-          <div className="row-item__meta">{props.description}</div>
-        </div>
-        <Icon name="arrowRight" size={18} />
-      </Link>
-    </li>
+    <Link to={props.to} className="card card--interactive home-link">
+      <span className="home-link__icon">
+        <Icon name={props.icon} size={24} />
+      </span>
+      <span>
+        <span className="party-card__name" style={{ display: "block" }}>
+          {props.title}
+        </span>
+        <span className="muted small">{props.description}</span>
+      </span>
+      <span className="home-link__arrow">
+        <Icon name="arrowRight" size={20} />
+      </span>
+    </Link>
   );
 }

@@ -28,7 +28,6 @@ export function PageHeader(props: {
   subtitle?: ReactNode;
   actions?: ReactNode;
   back?: { to: string; label: string };
-  meta?: ReactNode;
 }) {
   return (
     <header className="page-header">
@@ -40,7 +39,6 @@ export function PageHeader(props: {
           </Link>
         )}
         <h1 className="page-title">{props.title}</h1>
-        {props.meta && <div className="page-meta">{props.meta}</div>}
         {props.subtitle && <p className="page-subtitle">{props.subtitle}</p>}
       </div>
       {props.actions}
@@ -79,6 +77,20 @@ export function Card(props: { children: ReactNode; style?: CSSProperties; flush?
     <div className={cx("card", props.flush && "card--flush", props.className)} style={props.style}>
       {props.children}
     </div>
+  );
+}
+
+export function Avatar(props: { name: string }) {
+  const initials = props.name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+  return (
+    <span className="avatar" aria-hidden="true">
+      {initials || "?"}
+    </span>
   );
 }
 
@@ -220,24 +232,6 @@ export function ButtonLink(props: LinkProps & { variant?: ButtonVariant; size?: 
 /* ---------- Badge ---------- */
 
 export type BadgeTone = "neutral" | "success" | "warning" | "danger" | "brand";
-
-/** Status discreto: pontinho colorido + texto. */
-export function Status(props: { children: ReactNode; tone?: BadgeTone }) {
-  return <span className={cx("status", `status--${props.tone ?? "neutral"}`)}>{props.children}</span>;
-}
-
-/** Seção de formulário: título e explicação à esquerda, campos à direita. */
-export function FormSection(props: { title: string; description?: ReactNode; children: ReactNode }) {
-  return (
-    <section className="form-section">
-      <div className="form-section__intro">
-        <h2>{props.title}</h2>
-        {props.description && <p>{props.description}</p>}
-      </div>
-      <div className="form-section__fields">{props.children}</div>
-    </section>
-  );
-}
 
 export function Badge(props: { children: ReactNode; tone?: BadgeTone; icon?: IconName }) {
   return (
