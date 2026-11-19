@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
-import { Icon } from "@/shared/components/Icon";
+import { MonkeyMark } from "@/shared/components/MonkeyMark";
 import { IconButton } from "@/shared/components/ui";
 
 export function AppLayout(props: { children: ReactNode }) {
@@ -15,7 +15,7 @@ export function AppLayout(props: { children: ReactNode }) {
         <div className="app-header__inner">
           <Link to="/home" className="brand">
             <span className="brand__mark">
-              <Icon name="monkey" size={22} />
+              <MonkeyMark />
             </span>
             Amico Secreto
           </Link>
