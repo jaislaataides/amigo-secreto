@@ -1,7 +1,7 @@
 import type { DocumentReference, DocumentSnapshot, QueryDocumentSnapshot } from "firebase-admin/firestore";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { adminDb } from "./firebaseAdmin.js";
-import { ApiError, normalizeEmail } from "./auth.js";
+import { ApiError, requireVerifiedEmail } from "./auth.js";
 import type { Participant, Party } from "../../shared/types.js";
 
 export async function loadPartyOrThrow(
@@ -30,10 +30,7 @@ export async function findMyParticipantOrThrow(
   partyRef: DocumentReference,
   decoded: DecodedIdToken,
 ): Promise<{ doc: QueryDocumentSnapshot; participant: Participant }> {
-  if (!decoded.email) {
-    throw new ApiError(400, "no-email", "Sua conta Google não tem e-mail.");
-  }
-  const email = normalizeEmail(decoded.email);
+  const email = requireVerifiedEmail(decoded);
 
   const snapshot = await partyRef.collection("participants").where("email", "==", email).limit(1).get();
   if (snapshot.empty) {

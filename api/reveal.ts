@@ -48,7 +48,8 @@ export default withErrorHandling(async (req: VercelRequest, res: VercelResponse)
     partyRef.collection("possessionTokens").doc(participantId).get(),
   ]);
 
-  if (!participantSnap.exists || !tokenSnap.exists || !decoded.email) {
+  // E-mail só vale como prova se o provedor o verificou (ver requireVerifiedEmail).
+  if (!participantSnap.exists || !tokenSnap.exists || !decoded.email || decoded.email_verified !== true) {
     throw genericError();
   }
 

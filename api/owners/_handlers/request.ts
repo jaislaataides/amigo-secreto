@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "../../_lib/firebaseAdmin.js";
-import { normalizeEmail, requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { requireMethod, requireVerifiedEmail, verifyAuth } from "../../_lib/auth.js";
 import { withErrorHandling } from "../../_lib/http.js";
 import type { AuthorizedOwner } from "../../../shared/types.js";
 
@@ -9,11 +9,7 @@ export const requestOwnerAccess = withErrorHandling(async (req: VercelRequest, r
   if (!requireMethod(req, res, ["POST"])) return;
 
   const decoded = await verifyAuth(req);
-  if (!decoded.email) {
-    res.status(400).json({ error: { code: "no-email", message: "Sua conta Google não tem e-mail." } });
-    return;
-  }
-  const email = normalizeEmail(decoded.email);
+  const email = requireVerifiedEmail(decoded);
 
   const ref = adminDb.collection("authorizedOwners").doc(email);
   const existing = await ref.get();

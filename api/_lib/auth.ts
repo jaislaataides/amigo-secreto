@@ -31,6 +31,23 @@ export async function verifyAuth(req: VercelRequest): Promise<DecodedIdToken> {
   }
 }
 
+/**
+ * E-mail da conta logada, normalizado — mas só se o provedor o VERIFICOU.
+ * Toda identidade de participante/owner é resolvida por e-mail, então um
+ * e-mail não verificado (ex: se algum dia o login por e-mail e senha for
+ * ativado no Firebase) deixaria qualquer um se passar por outra pessoa e
+ * responder no lugar dela. O login Google sempre vem verificado.
+ */
+export function requireVerifiedEmail(decoded: DecodedIdToken): string {
+  if (!decoded.email) {
+    throw new ApiError(400, "no-email", "Sua conta não tem e-mail.");
+  }
+  if (decoded.email_verified !== true) {
+    throw new ApiError(403, "email-not-verified", "Seu e-mail ainda não foi verificado. Entre com a conta Google.");
+  }
+  return normalizeEmail(decoded.email);
+}
+
 export function requireAdmin(decoded: DecodedIdToken): void {
   if (decoded.admin !== true) {
     throw new ApiError(403, "forbidden", "Ação restrita a administradores.");

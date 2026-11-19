@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import type { DocumentReference } from "firebase-admin/firestore";
 import { adminDb } from "../../_lib/firebaseAdmin.js";
-import { ApiError, normalizeEmail, requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { requireMethod, requireVerifiedEmail, verifyAuth } from "../../_lib/auth.js";
 import { withErrorHandling } from "../../_lib/http.js";
 import type { Participant, Party } from "../../../shared/types.js";
 
@@ -18,10 +18,7 @@ export const listInvitedParties = withErrorHandling(async (req: VercelRequest, r
   if (!requireMethod(req, res, ["GET"])) return;
 
   const decoded = await verifyAuth(req);
-  if (!decoded.email) {
-    throw new ApiError(400, "no-email", "Sua conta Google não tem e-mail.");
-  }
-  const email = normalizeEmail(decoded.email);
+  const email = requireVerifiedEmail(decoded);
 
   const participations = await adminDb.collectionGroup("participants").where("email", "==", email).get();
 

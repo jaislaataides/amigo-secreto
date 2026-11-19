@@ -40,7 +40,7 @@ service cloud.firestore {
     }
 
     match /authorizedOwners/{email} {
-      allow read: if isAdmin() || (isSignedIn() && request.auth.token.email == email);
+      allow read: if isAdmin() || (isSignedIn() && request.auth.token.email_verified == true && request.auth.token.email == email);
       allow write: if false; // criação/aprovação só via /api/owners/*
     }
 

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { adminAuth, adminDb } from "../_lib/firebaseAdmin.js";
-import { ApiError, normalizeEmail, requireMethod, verifyAuth } from "../_lib/auth.js";
+import { requireMethod, requireVerifiedEmail, verifyAuth } from "../_lib/auth.js";
 import { withErrorHandling } from "../_lib/http.js";
 import type { AuthorizedOwner } from "../../shared/types.js";
 
@@ -22,10 +22,7 @@ export default withErrorHandling(async (req: VercelRequest, res: VercelResponse)
   if (!requireMethod(req, res, ["POST"])) return;
 
   const decoded = await verifyAuth(req);
-  if (!decoded.email) {
-    throw new ApiError(400, "no-email", "Sua conta Google não tem e-mail.");
-  }
-  const email = normalizeEmail(decoded.email);
+  const email = requireVerifiedEmail(decoded);
 
   const [adminSnapshot, ownerSnapshot, participantSnapshot] = await Promise.all([
     adminDb.collection("admins").doc(decoded.uid).get(),

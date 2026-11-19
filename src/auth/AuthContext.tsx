@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { onAuthStateChanged, signInWithPopup, signOut, type User } from "firebase/auth";
 import { auth, googleProvider } from "@/shared/firebase/client";
-import { api } from "@/shared/api/client";
+import { api, ApiClientError } from "@/shared/api/client";
 
 interface Role {
   admin: boolean;
@@ -71,7 +71,17 @@ export function AuthProvider(props: { children: ReactNode }) {
           owner: tokenResult.claims.owner === true,
         });
         setUnauthorized(false);
-      } catch {
+      } catch (err) {
+        // E-mail não verificado: o servidor não aceita essa conta como
+        // ninguém (ver requireVerifiedEmail na API). Desloga em vez de
+        // deixar uma sessão que não consegue fazer nada.
+        if (err instanceof ApiClientError && err.code === "email-not-verified") {
+          await signOut(auth);
+          setUser(null);
+          setRole(NO_ROLE);
+          setUnauthorized(true);
+          return;
+        }
         // sync-role falhou (erro de rede/servidor) — não sabemos se a conta
         // tem acesso ou não, então não deslogamos ninguém às cegas. Em vez
         // de simplesmente zerar o papel, lê os claims que já estão no token

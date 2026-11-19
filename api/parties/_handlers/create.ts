@@ -3,7 +3,7 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { wrapDek, generatePartyDek } from "../../_lib/crypto/envelope.js";
 import { validateImageDataUrl } from "../../_lib/image.js";
 import { adminDb } from "../../_lib/firebaseAdmin.js";
-import { ApiError, normalizeEmail, requireMethod, requireOwner, verifyAuth } from "../../_lib/auth.js";
+import { ApiError, requireMethod, requireOwner, requireVerifiedEmail, verifyAuth } from "../../_lib/auth.js";
 import { readJsonBody, requireString, withErrorHandling } from "../../_lib/http.js";
 import type { Party } from "../../../shared/types.js";
 
@@ -27,9 +27,8 @@ export const createParty = withErrorHandling(async (req: VercelRequest, res: Ver
 
   const decoded = await verifyAuth(req);
   requireOwner(decoded);
-  if (!decoded.email) {
-    throw new ApiError(400, "no-email", "Sua conta Google não tem e-mail.");
-  }
+  // O criador vira participante (isOwner) identificado pelo e-mail.
+  const ownerEmail = requireVerifiedEmail(decoded);
 
   const body = readJsonBody<CreatePartyBody>(req);
   const name = requireString(body.name, "name");
@@ -55,7 +54,7 @@ export const createParty = withErrorHandling(async (req: VercelRequest, res: Ver
     description: body.description?.trim() ?? "",
     imageUrl: body.imageDataUrl ? validateImageDataUrl(body.imageDataUrl) : null,
     ownerUid: decoded.uid,
-    ownerEmail: normalizeEmail(decoded.email),
+    ownerEmail,
     status: "draft",
     valueRange: { min: body.valueMin, max: body.valueMax, currency: "BRL" },
     forbiddenItemsText: body.forbiddenItemsText?.trim() ?? "",
@@ -108,10 +107,10 @@ export const createParty = withErrorHandling(async (req: VercelRequest, res: Ver
   // maxParticipants) — ele pode se remover depois via DELETE .../participants/:pid
   // se preferir só organizar. Como ele mesmo está logado agora, já sabemos o
   // uid na hora (diferente de um participante convidado comum).
-  const ownerDisplayName = decoded.name?.trim() || decoded.email!.split("@")[0]!;
+  const ownerDisplayName = decoded.name?.trim() || ownerEmail.split("@")[0]!;
   batch.set(partyRef.collection("participants").doc(), {
     name: ownerDisplayName,
-    email: normalizeEmail(decoded.email),
+    email: ownerEmail,
     uid: decoded.uid,
     inviteStatus: "sent",
     isOwner: true,
