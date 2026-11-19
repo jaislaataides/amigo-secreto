@@ -268,9 +268,23 @@ select {
 
 /* ---------- App header (faixa de marca) ---------- */
 
+/* Cabeçalho fixo no topo. É o único lugar com vidro: o conteúdo passa por
+   baixo ao rolar, então o desfoque tem o que mostrar. Sem suporte a
+   backdrop-filter, fica o roxo sólido. */
 .app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   background: var(--color-brand);
   color: var(--color-on-brand);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .app-header {
+    background: color-mix(in srgb, var(--color-brand) 86%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(1.5);
+    backdrop-filter: blur(14px) saturate(1.5);
+  }
 }
 
 .app-header__inner {
