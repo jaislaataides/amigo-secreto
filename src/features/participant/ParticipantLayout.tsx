@@ -33,9 +33,8 @@ export function ParticipantLoadState(props: { isLoading: boolean; error: Error |
     return (
       <Page maxWidth={560}>
         <EmptyState icon="mail" title="Abra pelo link do seu e-mail">
-          Por segurança, sua party só abre a partir do link do convite que chegou no seu e-mail, junto com o login na
-          sua conta. Depois da primeira vez, este aparelho lembra. Não achou o e-mail? Peça pra quem organiza reenviar o
-          convite.
+          Por segurança, a primeira vez precisa ser pelo link do convite que chegou no seu e-mail. Depois disso é só
+          entrar com a sua conta, em qualquer aparelho. Não achou o e-mail? Peça pra quem organiza reenviar o convite.
         </EmptyState>
       </Page>
     );

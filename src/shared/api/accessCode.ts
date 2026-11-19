@@ -1,24 +1,23 @@
 /**
  * Código de acesso do participante, que chega no link do convite
- * (`?t=...`). Fica guardado neste aparelho, por party, pra que as abas e os
- * cards de "Minhas parties" continuem abrindo sem precisar do e-mail de
- * novo. Sozinho ele não abre nada: o servidor também exige estar logado
- * com o e-mail do participante.
+ * (`?t=...`). Só é necessário na PRIMEIRA abertura: o servidor vincula a
+ * conta logada ao participante e, dali em diante, o login basta. Por isso
+ * fica só na sessão desta aba (não persiste no aparelho).
  */
 const key = (partyId: string) => `amico:access:${partyId}`;
 
 export function saveAccessCode(partyId: string, code: string) {
   try {
-    localStorage.setItem(key(partyId), code);
+    sessionStorage.setItem(key(partyId), code);
   } catch {
-    // Armazenamento bloqueado (aba anônima etc.): vale só pra esta visita.
+    // Armazenamento bloqueado: vale só enquanto a página estiver aberta.
     memory.set(partyId, code);
   }
 }
 
 export function getAccessCode(partyId: string): string | null {
   try {
-    return localStorage.getItem(key(partyId)) ?? memory.get(partyId) ?? null;
+    return sessionStorage.getItem(key(partyId)) ?? memory.get(partyId) ?? null;
   } catch {
     return memory.get(partyId) ?? null;
   }

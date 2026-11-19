@@ -174,7 +174,7 @@ function ParticipantHome() {
         <InlineLoading />
       ) : (
         <EmptyState icon="mail" title="Nenhum convite por enquanto">
-          Quando alguém te chamar pra um amigo secreto, ele aparece aqui (e no seu e-mail).
+          Recebeu um convite por e-mail? Abra pelo link dele uma vez e a party passa a aparecer aqui.
         </EmptyState>
       )}
 

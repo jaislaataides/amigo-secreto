@@ -57,7 +57,7 @@ export function OwnerDashboardPage() {
         {invited.isError && <ErrorBanner message={invited.error.message} />}
         {invited.data && invitedList.length === 0 && (
           <EmptyState icon="mail" title="Nenhum convite por enquanto">
-            Quando alguém te chamar pra um amigo secreto, ele aparece aqui (e no seu e-mail).
+            Recebeu um convite por e-mail? Abra pelo link dele uma vez e a party passa a aparecer aqui.
           </EmptyState>
         )}
         {invitedList.length > 0 && (

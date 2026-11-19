@@ -8,7 +8,9 @@ import type { Participant, Party } from "../../../shared/types.js";
 /**
  * GET /api/parties/invited — parties em que o e-mail logado é participante
  * (convites), com a resposta dele (rsvp). Ficam de fora as que ele mesmo
- * organiza (participante isOwner), que já aparecem em "criadas por você".
+ * organiza (participante isOwner), que já aparecem em "criadas por você",
+ * e as que ele ainda não abriu pelo link do convite com esta conta: a
+ * party só aparece no app depois da primeira abertura pelo e-mail.
  *
  * Só devolve dados públicos da party + o próprio rsvp; nada de outros
  * participantes. Usa o índice de collection group em participants.email
@@ -26,7 +28,7 @@ export const listInvitedParties = withErrorHandling(async (req: VercelRequest, r
     .map((doc) => ({ partyRef: doc.ref.parent.parent, participant: doc.data() as Participant }))
     .filter(
       (p): p is { partyRef: DocumentReference; participant: Participant } =>
-        p.partyRef !== null && p.participant.isOwner !== true,
+        p.partyRef !== null && p.participant.isOwner !== true && p.participant.claimedByUid === decoded.uid,
     );
 
   if (mine.length === 0) {

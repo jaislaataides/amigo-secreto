@@ -69,13 +69,22 @@ export async function issueAccessToken(partyRef: DocumentReference, participantI
 export const ACCESS_TOKEN_HEADER = "x-access-token";
 
 /**
- * Porta de entrada de toda rota "/me": exige as DUAS provas — sessão com o
- * e-mail (verificado) do participante E o código do link que chegou no
- * e-mail dele. Sessão roubada sozinha ou link encaminhado sozinho não
- * bastam pra ver ou mudar nada.
+ * Porta de entrada de toda rota "/me".
  *
- * Exceção: o organizador participando da própria party (participante
- * isOwner) não recebe convite por e-mail; ele entra só pela sessão de dono.
+ * Primeira vez: exige as DUAS provas — sessão com o e-mail (verificado) do
+ * participante E o código do link do convite. Passou, a conta fica
+ * vinculada ao participante (`claimedByUid`). Daí em diante basta entrar
+ * com essa mesma conta, em qualquer aparelho, sem o link.
+ *
+ * Isso impede que alguém com a sessão (ou o e-mail) de outra pessoa abra
+ * uma party que ela mesma nunca abriu pelo convite, e que um link
+ * encaminhado sirva pra outra conta.
+ *
+ * Exceção: o organizador participando da própria party (isOwner) não
+ * recebe convite por e-mail; ele entra só pela sessão de dono.
+ *
+ * (A revelação do sorteio é outra regra: SEMPRE link + login, ver
+ * api/reveal.ts.)
  */
 export async function requireParticipantAccess(
   req: VercelRequest,
@@ -85,6 +94,10 @@ export async function requireParticipantAccess(
 ): Promise<{ doc: QueryDocumentSnapshot; participant: Participant }> {
   const found = await findMyParticipantOrThrow(partyRef, decoded);
   if (found.participant.isOwner === true && party.ownerUid === decoded.uid) {
+    return found;
+  }
+  // Já abriu pelo convite com esta conta antes: o login basta.
+  if (found.participant.claimedByUid === decoded.uid) {
     return found;
   }
 
@@ -98,5 +111,11 @@ export async function requireParticipantAccess(
   const stored = tokenSnap.data() as { tokenHash?: string } | undefined;
   if (!stored?.tokenHash || !verifyLinkToken(token, stored.tokenHash)) throw linkRequired();
 
+  // Primeira abertura válida: vincula a conta ao participante.
+  await found.doc.ref.set(
+    { claimedByUid: decoded.uid, claimedAt: FieldValue.serverTimestamp() },
+    { merge: true },
+  );
+  found.participant.claimedByUid = decoded.uid;
   return found;
 }

@@ -66,6 +66,13 @@ export interface Participant {
    * remover da lista (DELETE .../participants/:pid) se quiser só organizar.
    */
   isOwner?: boolean;
+  /**
+   * Conta que já abriu a party pelo link do convite (link + login). A
+   * partir daí o login dessa conta basta, sem o link. Ver
+   * requireParticipantAccess em api/_lib/party.ts.
+   */
+  claimedByUid?: string | null;
+  claimedAt?: FirestoreTimestampLike | null;
 }
 
 export interface ReferenceLink {
