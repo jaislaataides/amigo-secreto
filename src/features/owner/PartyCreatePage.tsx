@@ -4,11 +4,24 @@ import { useMutation } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
 import { api } from "@/shared/api/client";
 import { usePlatformCategories } from "@/shared/hooks/usePlatformCategories";
-import { Button, Field, Input, Page, PageHeader, Textarea } from "@/shared/components/ui";
+import {
+  Button,
+  ButtonLink,
+  Card,
+  CheckOption,
+  Field,
+  Input,
+  MoneyInput,
+  Page,
+  PageHeader,
+  Stack,
+  Textarea,
+} from "@/shared/components/ui";
 import { TagInput } from "@/shared/components/TagInput";
 import { DateInputBR } from "@/shared/components/DateInputBR";
 import { ImagePickerBox } from "@/shared/components/ImagePickerBox";
-import { ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
+import { ErrorBanner, InlineLoading } from "@/shared/components/Feedback";
+import { PARTY_BACK } from "./partyStatus";
 
 function defaultDeadline(): string {
   const d = new Date();
@@ -82,7 +95,11 @@ export function PartyCreatePage() {
 
   return (
     <Page>
-      <PageHeader title="Criar party" subtitle="Defina as regras do seu amigo secreto." />
+      <PageHeader
+        back={PARTY_BACK}
+        title="Nova party"
+        subtitle="Defina as regras do seu amigo secreto. Dá pra ajustar quase tudo depois."
+      />
 
       <form
         onSubmit={(e) => {
@@ -90,86 +107,143 @@ export function PartyCreatePage() {
           createParty.mutate();
         }}
       >
-        <div style={{ marginBottom: 20 }}>
-          <ImagePickerBox imageUrl={imageDataUrl} onFileSelected={handleImageSelected} />
-          {compressingImage && <p style={{ fontSize: 13, color: "#71717a", marginTop: 8 }}>Processando imagem…</p>}
-          {imageError && <ErrorBanner message={imageError} />}
-        </div>
+        <Stack gap={20}>
+          <Card>
+            <Stack gap={20}>
+              <h2 className="section-title" style={{ margin: 0 }}>Sobre a party</h2>
+              <div>
+                <ImagePickerBox imageUrl={imageDataUrl} onFileSelected={handleImageSelected} busy={compressingImage} />
+                {imageError && (
+                  <div style={{ marginTop: 8 }}>
+                    <ErrorBanner message={imageError} />
+                  </div>
+                )}
+              </div>
 
-        <Field label="Nome da party">
-          <Input value={name} onChange={(e) => setName(e.target.value)} required />
-        </Field>
-
-        <Field label="Descrição">
-          <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
-        </Field>
-
-        <div style={{ display: "flex", gap: 12 }}>
-          <Field label="Valor mínimo (R$)">
-            <Input type="number" min={0} value={valueMin} onChange={(e) => setValueMin(e.target.value)} required />
-          </Field>
-          <Field label="Valor máximo (R$)">
-            <Input type="number" min={0} value={valueMax} onChange={(e) => setValueMax(e.target.value)} required />
-          </Field>
-        </div>
-
-        <Field label="Itens proibidos / não recomendados" hint="Digite e aperte Enter pra cada item.">
-          <TagInput value={forbiddenTags} onChange={setForbiddenTags} placeholder="ex: perfumes, roupas íntimas" />
-        </Field>
-
-        <Field label="Categorias" hint={isLivreSelected ? "Com \"Livre\" marcado, vale qualquer categoria." : undefined}>
-          {platformCategories.isLoading && <FullPageSpinner />}
-          {platformCategories.data?.map((c) => {
-            const isLivre = c.id === "livre";
-            const locked = isLivreSelected && !isLivre;
-            return (
-              <label
-                key={c.id}
-                style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", opacity: locked ? 0.6 : 1 }}
-              >
-                <input
-                  type="checkbox"
-                  checked={baseCategoryIds.includes(c.id)}
-                  disabled={locked}
-                  onChange={(e) => {
-                    if (isLivre) {
-                      // Marcar "livre" força todas as outras como selecionadas
-                      // também; desmarcar só tira o "livre" (as outras ficam
-                      // como estavam, livres pra ajustar de novo).
-                      setBaseCategoryIds(
-                        e.target.checked
-                          ? (platformCategories.data ?? []).map((cat) => cat.id)
-                          : baseCategoryIds.filter((id) => id !== "livre"),
-                      );
-                      return;
-                    }
-                    setBaseCategoryIds(
-                      e.target.checked ? [...baseCategoryIds, c.id] : baseCategoryIds.filter((id) => id !== c.id),
-                    );
-                  }}
+              <Field label="Nome da party" htmlFor="party-name">
+                <Input
+                  id="party-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="ex: Amigo secreto da firma 2026"
+                  autoComplete="off"
+                  required
                 />
-                {c.label}
-              </label>
-            );
-          })}
-        </Field>
+              </Field>
 
-        <Field label="Categorias extras (opcional)" hint="Digite e aperte Enter pra cada categoria.">
-          <TagInput value={customCategories} onChange={setCustomCategories} placeholder="ex: livros, jogos" />
-        </Field>
+              <Field label="Descrição" htmlFor="party-description" optional>
+                <Textarea
+                  id="party-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Data e local da troca, recados pro grupo…"
+                />
+              </Field>
+            </Stack>
+          </Card>
 
-        <Field
-          label="Prazo para confirmação (RSVP)"
-          hint="Depois dessa data, você pode forçar o sorteio com quem já confirmou (mínimo 3)."
-        >
-          <DateInputBR value={rsvpDeadline} onChange={setRsvpDeadline} />
-        </Field>
+          <Card>
+            <Stack gap={20}>
+              <h2 className="section-title" style={{ margin: 0 }}>Presentes</h2>
+              <div className="grid-2">
+                <Field label="Valor mínimo" htmlFor="value-min">
+                  <MoneyInput id="value-min" value={valueMin} onChange={(e) => setValueMin(e.target.value)} required />
+                </Field>
+                <Field label="Valor máximo" htmlFor="value-max">
+                  <MoneyInput id="value-max" value={valueMax} onChange={(e) => setValueMax(e.target.value)} required />
+                </Field>
+              </div>
 
-        {createParty.isError && <ErrorBanner message={createParty.error.message} />}
+              <Field
+                label="Itens proibidos ou não recomendados"
+                htmlFor="forbidden"
+                hint="Aperte Enter depois de cada item."
+                optional
+              >
+                <TagInput
+                  id="forbidden"
+                  aria-describedby="forbidden-hint"
+                  value={forbiddenTags}
+                  onChange={setForbiddenTags}
+                  placeholder="ex: perfumes, roupas íntimas"
+                />
+              </Field>
 
-        <Button type="submit" disabled={createParty.isPending || compressingImage}>
-          {createParty.isPending ? "Criando…" : "Criar party"}
-        </Button>
+              <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
+                <legend className="label" style={{ marginBottom: 6 }}>
+                  Categorias permitidas
+                </legend>
+                {platformCategories.isLoading && <InlineLoading />}
+                <div className="options">
+                  {platformCategories.data?.map((c) => {
+                    const isLivre = c.id === "livre";
+                    const locked = isLivreSelected && !isLivre;
+                    return (
+                      <CheckOption
+                        key={c.id}
+                        label={c.label}
+                        checked={baseCategoryIds.includes(c.id)}
+                        disabled={locked}
+                        onChange={(checked) => {
+                          if (isLivre) {
+                            // Marcar "livre" força todas as outras como selecionadas
+                            // também; desmarcar só tira o "livre" (as outras ficam
+                            // como estavam, livres pra ajustar de novo).
+                            setBaseCategoryIds(
+                              checked
+                                ? (platformCategories.data ?? []).map((cat) => cat.id)
+                                : baseCategoryIds.filter((id) => id !== "livre"),
+                            );
+                            return;
+                          }
+                          setBaseCategoryIds(
+                            checked ? [...baseCategoryIds, c.id] : baseCategoryIds.filter((id) => id !== c.id),
+                          );
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+                {isLivreSelected && (
+                  <p className="hint" style={{ marginTop: 6 }}>
+                    Com “Livre” marcado, vale qualquer categoria.
+                  </p>
+                )}
+              </fieldset>
+
+              <Field label="Categorias extras" htmlFor="custom-categories" hint="Aperte Enter depois de cada categoria." optional>
+                <TagInput
+                  id="custom-categories"
+                  aria-describedby="custom-categories-hint"
+                  value={customCategories}
+                  onChange={setCustomCategories}
+                  placeholder="ex: livros, jogos"
+                />
+              </Field>
+            </Stack>
+          </Card>
+
+          <Card>
+            <Field
+              label="Prazo para confirmação (RSVP)"
+              htmlFor="rsvp-deadline"
+              hint="Depois dessa data, você pode sortear só com quem já confirmou (mínimo 3)."
+            >
+              <DateInputBR id="rsvp-deadline" value={rsvpDeadline} onChange={setRsvpDeadline} />
+            </Field>
+          </Card>
+
+          {createParty.isError && <ErrorBanner message={createParty.error.message} />}
+
+          <div className="form-actions">
+            <Button type="submit" size="lg" loading={createParty.isPending} disabled={compressingImage}>
+              {createParty.isPending ? "Criando…" : "Criar party"}
+            </Button>
+            <ButtonLink to="/owner" variant="ghost">
+              Cancelar
+            </ButtonLink>
+          </div>
+        </Stack>
       </form>
     </Page>
   );

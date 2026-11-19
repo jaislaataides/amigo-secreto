@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Badge, Button, Card, Page, PageHeader } from "@/shared/components/ui";
+import { Badge, ButtonLink, Page, PageHeader } from "@/shared/components/ui";
 import { EmptyState, ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
+import { Icon } from "@/shared/components/Icon";
+import { STATUS_LABEL, STATUS_TONE } from "./partyStatus";
 
 interface PartyRow {
   id: string;
@@ -11,22 +13,6 @@ interface PartyRow {
   imageUrl: string | null;
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  draft: "rascunho",
-  collecting: "coletando confirmações",
-  ready_to_draw: "pronta pra sortear",
-  drawn: "sorteada",
-  canceled: "cancelada",
-};
-
-const STATUS_TONE: Record<string, "neutral" | "success" | "warning"> = {
-  draft: "neutral",
-  collecting: "warning",
-  ready_to_draw: "warning",
-  drawn: "success",
-  canceled: "neutral",
-};
-
 export function OwnerDashboardPage() {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["owner", "parties"],
@@ -34,13 +20,14 @@ export function OwnerDashboardPage() {
   });
 
   return (
-    <Page>
+    <Page maxWidth={960}>
       <PageHeader
         title="Minhas parties"
+        subtitle="Seus amigos secretos, do convite ao sorteio."
         actions={
-          <Link to="/owner/parties/new">
-            <Button>+ Nova party</Button>
-          </Link>
+          <ButtonLink to="/owner/parties/new" icon="plus">
+            Nova party
+          </ButtonLink>
         }
       />
 
@@ -48,19 +35,43 @@ export function OwnerDashboardPage() {
       {isError && <ErrorBanner message={error.message} />}
 
       {data && data.parties.length === 0 && (
-        <EmptyState>Você ainda não criou nenhuma party. Que tal começar agora?</EmptyState>
+        <EmptyState
+          title="Nenhuma party ainda"
+          action={
+            <ButtonLink to="/owner/parties/new" icon="plus">
+              Criar minha primeira party
+            </ButtonLink>
+          }
+        >
+          Crie uma party, convide o grupo por e-mail e deixe o sorteio com a gente.
+        </EmptyState>
       )}
 
-      {data?.parties.map((party) => (
-        <Link key={party.id} to={`/owner/parties/${party.id}/participants`} style={{ textDecoration: "none", color: "inherit" }}>
-          <Card style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <strong>{party.name}</strong>
-            <Badge tone={STATUS_TONE[party.status] ?? "neutral"}>
-              {STATUS_LABEL[party.status] ?? party.status}
-            </Badge>
-          </Card>
-        </Link>
-      ))}
+      {data && data.parties.length > 0 && (
+        <ul className="party-grid list">
+          {data.parties.map((party) => (
+            <li key={party.id}>
+              <Link to={`/owner/parties/${party.id}/participants`} className="card card--flush card--interactive">
+                {party.imageUrl ? (
+                  <img src={party.imageUrl} alt="" className="party-card__cover" loading="lazy" />
+                ) : (
+                  <div className="party-card__cover party-card__cover--placeholder">
+                    <Icon name="gift" size={40} strokeWidth={1.5} />
+                  </div>
+                )}
+                <div className="party-card__body">
+                  <span className="party-card__name">{party.name}</span>
+                  <span>
+                    <Badge tone={STATUS_TONE[party.status] ?? "neutral"}>
+                      {STATUS_LABEL[party.status] ?? party.status}
+                    </Badge>
+                  </span>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </Page>
   );
 }

@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Button, Card, Page, PageHeader } from "@/shared/components/ui";
-import { EmptyState, ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
-import { PartyTabs } from "./PartyTabs";
+import { Badge, Button, Card, CheckOption, IconButton, Stack } from "@/shared/components/ui";
+import { Alert, EmptyState, ErrorBanner } from "@/shared/components/Feedback";
+import { PartyLayout, PartyLoadState } from "./PartyLayout";
 import { usePartyDetail } from "./usePartyDetail";
 
 interface Group {
@@ -32,61 +32,99 @@ export function PartyExclusionsPage() {
   });
 
   if (!partyId) return null;
-  if (isLoading) return <FullPageSpinner />;
-  if (isError) return <ErrorBanner message={error.message} />;
+  if (isLoading || isError || !data) return <PartyLoadState isLoading={isLoading} error={error} />;
 
-  const nameById = new Map(data!.participants.map((p) => [p.id, p.name]));
+  const nameById = new Map(data.participants.map((p) => [p.id, p.name]));
+  const savedSignature = JSON.stringify(data.exclusions.map((e) => e.participantIds));
+  const dirty = JSON.stringify(groups.map((g) => g.participantIds)) !== savedSignature;
 
   return (
-    <Page>
-      <PageHeader
-        title={data!.name}
-        subtitle="Pessoas num mesmo grupo nunca se tiram entre si — útil pra evitar casais/famílias se tirando."
-      />
-      <PartyTabs partyId={partyId} />
+    <PartyLayout
+      partyId={partyId}
+      name={data.name}
+      status={data.status}
+      subtitle="Pessoas no mesmo grupo nunca se tiram entre si — ótimo pra casais e famílias."
+    >
+      <Stack gap={20}>
+        <section>
+          <h2 className="section-title">
+            Grupos de exclusão <span className="count">{groups.length}</span>
+          </h2>
+          {groups.length === 0 ? (
+            <EmptyState icon="ban" title="Nenhuma exclusão">
+              Todo mundo pode tirar todo mundo. Crie um grupo abaixo se precisar evitar algum par.
+            </EmptyState>
+          ) : (
+            <Card flush>
+              <ul className="list">
+                {groups.map((g, i) => (
+                  <li key={i} className="list-row">
+                    <div className="list-row__main row" style={{ gap: 6 }}>
+                      {g.participantIds.map((id) => (
+                        <Badge key={id} tone="brand">
+                          {nameById.get(id) ?? id}
+                        </Badge>
+                      ))}
+                    </div>
+                    <IconButton
+                      icon="trash"
+                      label={`Remover grupo ${i + 1}`}
+                      variant="danger"
+                      size="sm"
+                      onClick={() => setGroups(groups.filter((_, j) => j !== i))}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+        </section>
 
-      <h2 style={{ fontSize: 16 }}>Grupos de exclusão</h2>
-      {groups.length === 0 && <EmptyState>Nenhuma exclusão definida.</EmptyState>}
-      {groups.map((g, i) => (
-        <Card key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>{g.participantIds.map((id) => nameById.get(id) ?? id).join(" · ")}</span>
-          <Button variant="danger" onClick={() => setGroups(groups.filter((_, j) => j !== i))}>
-            Remover
-          </Button>
+        <Card>
+          <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
+            <legend className="section-title" style={{ padding: 0 }}>
+              Novo grupo
+            </legend>
+            <p className="hint" style={{ marginBottom: 12 }}>
+              Escolha 2 ou mais pessoas que não podem se tirar.
+            </p>
+            <div className="options">
+              {data.participants.map((p) => (
+                <CheckOption
+                  key={p.id}
+                  label={p.name}
+                  checked={selected.includes(p.id)}
+                  onChange={(checked) =>
+                    setSelected(checked ? [...selected, p.id] : selected.filter((id) => id !== p.id))
+                  }
+                />
+              ))}
+            </div>
+          </fieldset>
+          <div className="form-actions" style={{ marginTop: 16 }}>
+            <Button
+              variant="secondary"
+              icon="plus"
+              disabled={selected.length < 2}
+              onClick={() => {
+                setGroups([...groups, { participantIds: selected }]);
+                setSelected([]);
+              }}
+            >
+              {selected.length < 2 ? "Adicionar grupo" : `Adicionar grupo com ${selected.length}`}
+            </Button>
+          </div>
         </Card>
-      ))}
 
-      <h2 style={{ fontSize: 16, marginTop: 24 }}>Criar novo grupo</h2>
-      <Card>
-        {data!.participants.map((p) => (
-          <label key={p.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
-            <input
-              type="checkbox"
-              checked={selected.includes(p.id)}
-              onChange={(e) =>
-                setSelected(e.target.checked ? [...selected, p.id] : selected.filter((id) => id !== p.id))
-              }
-            />
-            {p.name}
-          </label>
-        ))}
-        <Button
-          variant="secondary"
-          disabled={selected.length < 2}
-          style={{ marginTop: 12 }}
-          onClick={() => {
-            setGroups([...groups, { participantIds: selected }]);
-            setSelected([]);
-          }}
-        >
-          + Adicionar grupo ({selected.length} selecionados)
-        </Button>
-      </Card>
-
-      {save.isError && <ErrorBanner message={save.error.message} />}
-      <Button disabled={save.isPending} onClick={() => save.mutate()}>
-        {save.isPending ? "Salvando…" : "Salvar exclusões"}
-      </Button>
-    </Page>
+        {save.isError && <ErrorBanner message={save.error.message} />}
+        {save.isSuccess && !dirty && <Alert tone="success">Exclusões salvas.</Alert>}
+        <div className="form-actions">
+          <Button loading={save.isPending} disabled={!dirty} onClick={() => save.mutate()}>
+            {save.isPending ? "Salvando…" : "Salvar exclusões"}
+          </Button>
+          {dirty && <span className="hint">Você tem alterações não salvas.</span>}
+        </div>
+      </Stack>
+    </PartyLayout>
   );
 }

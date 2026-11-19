@@ -3,11 +3,12 @@ import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
 import { api } from "@/shared/api/client";
-import { Button, Field, Input, Page, PageHeader, Textarea } from "@/shared/components/ui";
+import { Badge, Button, Card, Field, Input, MoneyInput, Stack, Textarea } from "@/shared/components/ui";
+import { Icon } from "@/shared/components/Icon";
 import { DateInputBR } from "@/shared/components/DateInputBR";
 import { ImagePickerBox } from "@/shared/components/ImagePickerBox";
-import { ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
-import { PartyTabs } from "./PartyTabs";
+import { Alert, ErrorBanner } from "@/shared/components/Feedback";
+import { PartyLayout, PartyLoadState } from "./PartyLayout";
 import { usePartyDetail } from "./usePartyDetail";
 
 function toDateInputValue(deadline: PartyDetailDeadline): string {
@@ -92,95 +93,142 @@ export function PartyEditPage() {
   }
 
   if (!partyId) return null;
-  if (isLoading || !form) return <FullPageSpinner />;
-  if (isError) return <ErrorBanner message={error.message} />;
+  if (isLoading || isError || !form || !data) return <PartyLoadState isLoading={isLoading || (!form && !isError)} error={error} />;
 
   return (
-    <Page>
-      <PageHeader title={data!.name} />
-      <PartyTabs partyId={partyId} />
-
-      <div style={{ marginBottom: 20 }}>
-        <ImagePickerBox imageUrl={data!.imageUrl} onFileSelected={handleCoverSelected} />
-        {(compressingCover || setCover.isPending) && (
-          <p style={{ fontSize: 13, color: "#71717a", marginTop: 8 }}>Salvando…</p>
-        )}
-        {coverError && <ErrorBanner message={coverError} />}
-        {setCover.isError && <ErrorBanner message={setCover.error.message} />}
-      </div>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          save.mutate(undefined);
-        }}
-      >
-        <Field label="Nome da party">
-          <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        </Field>
-        <Field label="Descrição">
-          <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-        </Field>
-        <div style={{ display: "flex", gap: 12 }}>
-          <Field label="Valor mínimo (R$)">
-            <Input type="number" value={form.valueMin} onChange={(e) => setForm({ ...form, valueMin: e.target.value })} />
-          </Field>
-          <Field label="Valor máximo (R$)">
-            <Input type="number" value={form.valueMax} onChange={(e) => setForm({ ...form, valueMax: e.target.value })} />
-          </Field>
-        </div>
-        <Field label="Itens proibidos / não recomendados">
-          <Textarea
-            value={form.forbiddenItemsText}
-            onChange={(e) => setForm({ ...form, forbiddenItemsText: e.target.value })}
+    <PartyLayout partyId={partyId} name={data.name} status={data.status}>
+      <Stack gap={20}>
+        <div>
+          <ImagePickerBox
+            imageUrl={data.imageUrl}
+            onFileSelected={handleCoverSelected}
+            busy={compressingCover || setCover.isPending}
           />
-        </Field>
-        <Field label="Prazo de confirmação (RSVP)">
-          <DateInputBR value={form.rsvpDeadline} onChange={(v) => setForm({ ...form, rsvpDeadline: v })} />
-        </Field>
+          {coverError && (
+            <div style={{ marginTop: 8 }}>
+              <ErrorBanner message={coverError} />
+            </div>
+          )}
+          {setCover.isError && (
+            <div style={{ marginTop: 8 }}>
+              <ErrorBanner message={setCover.error.message} />
+            </div>
+          )}
+        </div>
 
-        {save.isError && <ErrorBanner message={save.error.message} />}
-        <Button type="submit" disabled={save.isPending}>
-          {save.isPending ? "Salvando…" : "Salvar alterações"}
-        </Button>
-      </form>
-
-      <h2 style={{ fontSize: 16, marginTop: 32 }}>Categorias</h2>
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {data!.categories.map((c) => (
-          <li key={c.id} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0" }}>
-            <span>
-              {c.label} {c.isCustom && <em style={{ color: "#71717a", fontSize: 12 }}>(customizada)</em>}
-            </span>
-            {c.isCustom && (
-              <button
-                onClick={() => removeCategory.mutate(c.id)}
-                style={{ background: "none", border: "none", color: "#991b1b", cursor: "pointer", fontSize: 13 }}
-              >
-                remover
-              </button>
-            )}
-          </li>
-        ))}
-      </ul>
-      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-        <Input
-          placeholder="Nova categoria"
-          value={newCategory}
-          onChange={(e) => setNewCategory(e.target.value)}
-          style={{ maxWidth: 220 }}
-        />
-        <Button
-          variant="secondary"
-          disabled={!newCategory.trim()}
-          onClick={() => {
-            save.mutate([newCategory]);
-            setNewCategory("");
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            save.mutate(undefined);
           }}
         >
-          Adicionar
-        </Button>
-      </div>
-    </Page>
+          <Card>
+            <Stack gap={20}>
+              <h2 className="section-title" style={{ margin: 0 }}>Regras</h2>
+              <Field label="Nome da party" htmlFor="party-name">
+                <Input id="party-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+              </Field>
+              <Field label="Descrição" htmlFor="party-description" optional>
+                <Textarea
+                  id="party-description"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
+              </Field>
+              <div className="grid-2">
+                <Field label="Valor mínimo" htmlFor="value-min">
+                  <MoneyInput
+                    id="value-min"
+                    value={form.valueMin}
+                    onChange={(e) => setForm({ ...form, valueMin: e.target.value })}
+                  />
+                </Field>
+                <Field label="Valor máximo" htmlFor="value-max">
+                  <MoneyInput
+                    id="value-max"
+                    value={form.valueMax}
+                    onChange={(e) => setForm({ ...form, valueMax: e.target.value })}
+                  />
+                </Field>
+              </div>
+              <Field label="Itens proibidos ou não recomendados" htmlFor="forbidden" optional>
+                <Textarea
+                  id="forbidden"
+                  value={form.forbiddenItemsText}
+                  onChange={(e) => setForm({ ...form, forbiddenItemsText: e.target.value })}
+                />
+              </Field>
+              <Field label="Prazo de confirmação (RSVP)" htmlFor="rsvp-deadline">
+                <DateInputBR
+                  id="rsvp-deadline"
+                  value={form.rsvpDeadline}
+                  onChange={(v) => setForm({ ...form, rsvpDeadline: v })}
+                />
+              </Field>
+
+              {save.isError && <ErrorBanner message={save.error.message} />}
+              {save.isSuccess && !save.isPending && <Alert tone="success">Alterações salvas.</Alert>}
+              <div className="form-actions">
+                <Button type="submit" loading={save.isPending}>
+                  {save.isPending ? "Salvando…" : "Salvar alterações"}
+                </Button>
+              </div>
+            </Stack>
+          </Card>
+        </form>
+
+        <Card>
+          <Stack gap={16}>
+            <h2 className="section-title" style={{ margin: 0 }}>
+              Categorias <span className="count">{data.categories.length}</span>
+            </h2>
+            <div className="row">
+              {data.categories.map((c) =>
+                c.isCustom ? (
+                  <span key={c.id} className="tag">
+                    {c.label}
+                    <button
+                      type="button"
+                      onClick={() => removeCategory.mutate(c.id)}
+                      disabled={removeCategory.isPending}
+                      aria-label={`Remover categoria ${c.label}`}
+                    >
+                      <Icon name="x" size={14} strokeWidth={2.5} />
+                    </button>
+                  </span>
+                ) : (
+                  <Badge key={c.id}>{c.label}</Badge>
+                ),
+              )}
+            </div>
+            <p className="hint">As categorias extras que você criou podem ser removidas; as da plataforma ficam fixas.</p>
+            <form
+              className="row"
+              style={{ flexWrap: "nowrap" }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!newCategory.trim()) return;
+                save.mutate([newCategory.trim()]);
+                setNewCategory("");
+              }}
+            >
+              <label htmlFor="new-category" className="sr-only">
+                Nova categoria
+              </label>
+              <Input
+                id="new-category"
+                placeholder="Nova categoria"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                style={{ maxWidth: 280 }}
+              />
+              <Button type="submit" variant="secondary" icon="plus" disabled={!newCategory.trim()}>
+                Adicionar
+              </Button>
+            </form>
+          </Stack>
+        </Card>
+      </Stack>
+    </PartyLayout>
   );
 }
