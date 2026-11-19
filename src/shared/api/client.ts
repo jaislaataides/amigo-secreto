@@ -1,4 +1,5 @@
 import { auth } from "@/shared/firebase/client";
+import { accessCodeHeaderFor } from "./accessCode";
 
 export class ApiClientError extends Error {
   readonly status: number;
@@ -34,6 +35,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = {
     "Content-Type": "application/json",
     ...(await authHeader()),
+    // Rotas do participante também precisam do código do link do e-mail.
+    ...accessCodeHeaderFor(path),
     ...(init?.headers ?? {}),
   };
 

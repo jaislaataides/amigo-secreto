@@ -1,4 +1,7 @@
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { saveAccessCode } from "@/shared/api/accessCode";
 import { api } from "@/shared/api/client";
 
 export interface MyPartyCategory {
@@ -39,9 +42,29 @@ export interface MyPartyView {
 }
 
 export function useMyPartyView(partyId: string | undefined) {
+  useCaptureAccessCode(partyId);
   return useQuery({
     queryKey: ["participant", "me", partyId],
     queryFn: () => api.get<MyPartyView>(`/api/parties/${partyId}/me`),
     enabled: Boolean(partyId),
   });
+}
+
+/**
+ * Chegou pelo link do e-mail (`?t=...`): guarda o código antes da primeira
+ * chamada à API e tira ele da barra de endereço (não fica no histórico nem
+ * vaza em print/compartilhamento de URL).
+ */
+function useCaptureAccessCode(partyId: string | undefined) {
+  const [params, setParams] = useSearchParams();
+  const code = params.get("t");
+  // Síncrono, de propósito: a query lê o código já no primeiro render.
+  if (partyId && code) saveAccessCode(partyId, code);
+
+  useEffect(() => {
+    if (!code) return;
+    const next = new URLSearchParams(params);
+    next.delete("t");
+    setParams(next, { replace: true });
+  }, [code, params, setParams]);
 }

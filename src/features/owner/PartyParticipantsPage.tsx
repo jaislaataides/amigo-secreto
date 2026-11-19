@@ -49,6 +49,12 @@ export function PartyParticipantsPage() {
     },
   });
 
+  // Novo código + novo e-mail de convite; o link anterior deixa de valer.
+  const resendInvite = useMutation({
+    mutationFn: (pid: string) => api.post(`/api/parties/${partyId}/participants/${pid}/resend`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
+  });
+
   const removeParticipant = useMutation({
     mutationFn: (pid: string) => api.delete(`/api/parties/${partyId}/participants/${pid}`),
     // Retorna a promessa: a mutação só termina quando a lista nova chega,
@@ -110,10 +116,7 @@ export function PartyParticipantsPage() {
                   <Avatar name={p.name} />
                   <div className="list-row__main">
                     <div className="list-row__title">
-                      {p.name}{" "}
-                      {p.isOwner && (
-                        <Badge tone="brand">organizador</Badge>
-                      )}
+                      {p.name} {p.isOwner && <Badge tone="brand">organizador</Badge>}
                     </div>
                     <div className="list-row__meta">{p.email}</div>
                   </div>
@@ -124,6 +127,23 @@ export function PartyParticipantsPage() {
                       </Badge>
                     )}
                     <Badge tone={RSVP_TONE[p.rsvp]}>{RSVP_LABEL[p.rsvp]}</Badge>
+                    {!p.isOwner && data.status !== "canceled" && (
+                      <IconButton
+                        icon="mail"
+                        label={
+                          resendInvite.isPending && resendInvite.variables === p.id
+                            ? `Reenviando convite para ${p.name}…`
+                            : `Reenviar convite para ${p.name}`
+                        }
+                        size="sm"
+                        loading={resendInvite.isPending && resendInvite.variables === p.id}
+                        disabled={resendInvite.isPending}
+                        onClick={() => {
+                          if (window.confirm(`Reenviar o convite para ${p.email}? O link anterior deixa de funcionar.`))
+                            resendInvite.mutate(p.id);
+                        }}
+                      />
+                    )}
                     {editable && (
                       <IconButton
                         icon="trash"
@@ -148,6 +168,13 @@ export function PartyParticipantsPage() {
           </Card>
         )}
         {removeParticipant.isError && <ErrorBanner message={removeParticipant.error.message} />}
+        {resendInvite.isError && <ErrorBanner message={resendInvite.error.message} />}
+        {resendInvite.isSuccess && !resendInvite.isPending && (
+          <Alert tone="success">
+            Convite reenviado para{" "}
+            {data.participants.find((p) => p.id === resendInvite.variables)?.email ?? "o participante"}.
+          </Alert>
+        )}
 
         {editable && count < max && (
           <Card>
@@ -222,7 +249,9 @@ export function PartyParticipantsPage() {
         )}
 
         {editable && count >= max && (
-          <Alert tone="info">A party atingiu o limite de {max} participantes. Fale com um admin se precisar de mais vagas.</Alert>
+          <Alert tone="info">
+            A party atingiu o limite de {max} participantes. Fale com um admin se precisar de mais vagas.
+          </Alert>
         )}
       </Stack>
     </PartyLayout>
