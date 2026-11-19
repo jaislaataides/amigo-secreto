@@ -1,11 +1,18 @@
-import { Link } from "react-router-dom";
+import { EmptyState } from "@/shared/components/Feedback";
+import { ButtonLink } from "@/shared/components/ui";
 
 export function NotFoundPage() {
   return (
-    <main style={{ textAlign: "center", marginTop: "20vh" }}>
-      <h1>404</h1>
-      <p>Página não encontrada.</p>
-      <Link to="/">Voltar ao início</Link>
+    <main className="center-screen">
+      <div style={{ width: "100%", maxWidth: 440 }}>
+        <EmptyState
+          icon="gift"
+          title="Página não encontrada"
+          action={<ButtonLink to="/">Voltar ao início</ButtonLink>}
+        >
+          Esse endereço não existe — talvez o link tenha sido copiado pela metade.
+        </EmptyState>
+      </div>
     </main>
   );
 }

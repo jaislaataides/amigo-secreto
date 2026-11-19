@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { FullPageSpinner } from "@/shared/components/Feedback";
+import { Alert, FullPageSpinner } from "@/shared/components/Feedback";
+import { Icon } from "@/shared/components/Icon";
+import { Button, Card } from "@/shared/components/ui";
 import { useAuth } from "./AuthContext";
 
 export function RequestOwnerAccessPage() {
@@ -16,37 +19,53 @@ export function RequestOwnerAccessPage() {
   if (loading) return <FullPageSpinner />;
 
   return (
-    <main style={{ maxWidth: 480, margin: "15vh auto", padding: "0 24px", textAlign: "center" }}>
-      <h1 style={{ fontSize: 24, marginBottom: 8 }}>Solicitar acesso de organizador</h1>
-      <p style={{ color: "#71717a", fontSize: 14, marginBottom: 24 }}>
-        Organizadores podem criar parties de amigo secreto. Um admin precisa aprovar seu pedido antes.
-      </p>
-
-      {!user && (
-        <button onClick={() => void signInWithGoogle()} style={{ padding: "10px 20px", borderRadius: 8 }}>
-          Entrar com o Google pra continuar
-        </button>
-      )}
-
-      {user && !done && (
-        <button
-          onClick={() => mutation.mutate()}
-          disabled={mutation.isPending}
-          style={{ padding: "10px 20px", borderRadius: 8 }}
-        >
-          {mutation.isPending ? "Enviando…" : `Solicitar como ${user.email}`}
-        </button>
-      )}
-
-      {mutation.isError && <p style={{ color: "#991b1b", marginTop: 12 }}>{mutation.error.message}</p>}
-
-      {done && (
-        <p style={{ color: "#166534", marginTop: 12 }}>
-          {done === "approved"
-            ? "Você já é um organizador aprovado — recarregue a página."
-            : "Pedido enviado! Avisaremos quando um admin aprovar."}
+    <main className="center-screen">
+      <Card className="auth-card fade-up">
+        <div className="auth-card__mark">
+          <Icon name="sparkles" size={30} />
+        </div>
+        <h1 style={{ fontSize: 26 }}>Quero organizar</h1>
+        <p className="muted" style={{ margin: "8px 0 28px" }}>
+          Organizadores criam parties de amigo secreto e convidam o grupo. Um admin aprova seu pedido antes.
         </p>
-      )}
+
+        {!user && (
+          <Button size="lg" block onClick={() => void signInWithGoogle()}>
+            Entrar com o Google pra continuar
+          </Button>
+        )}
+
+        {user && !done && (
+          <Button size="lg" block loading={mutation.isPending} onClick={() => mutation.mutate()}>
+            {mutation.isPending ? "Enviando…" : "Solicitar acesso"}
+          </Button>
+        )}
+        {user && !done && (
+          <p className="hint" style={{ marginTop: 8 }}>
+            Como <strong>{user.email}</strong>
+          </p>
+        )}
+
+        {mutation.isError && (
+          <div style={{ marginTop: 16, textAlign: "left" }}>
+            <Alert tone="error">{mutation.error.message}</Alert>
+          </div>
+        )}
+
+        {done && (
+          <div style={{ textAlign: "left" }}>
+            <Alert tone="success">
+              {done === "approved"
+                ? "Você já é um organizador aprovado — recarregue a página."
+                : "Pedido enviado! Avisaremos quando um admin aprovar."}
+            </Alert>
+          </div>
+        )}
+
+        <p className="hint" style={{ marginTop: 24 }}>
+          <Link to={user ? "/home" : "/"}>Voltar ao início</Link>
+        </p>
+      </Card>
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { FullPageSpinner } from "@/shared/components/Feedback";
+import { Link, Navigate, useLocation } from "react-router-dom";
+import { EmptyState, FullPageSpinner } from "@/shared/components/Feedback";
+import { ButtonLink, Page } from "@/shared/components/ui";
 import { useAuth } from "./AuthContext";
 
 export function AuthGuard(props: { children: ReactNode; requireRole?: "admin" | "owner" }) {
@@ -18,15 +19,21 @@ export function AuthGuard(props: { children: ReactNode; requireRole?: "admin" | 
 
   if (!satisfiesRequiredRole) {
     return (
-      <div style={{ padding: 32, textAlign: "center", color: "#71717a" }}>
-        <p>Você não tem permissão para acessar esta página.</p>
-        {props.requireRole === "owner" && (
-          <p>
-            Se você deveria ser organizador, peça acesso em{" "}
-            <a href="/solicitar-acesso">/solicitar-acesso</a>.
-          </p>
-        )}
-      </div>
+      <Page maxWidth={520}>
+        <EmptyState
+          icon="lock"
+          title="Sem permissão"
+          action={<ButtonLink to="/home" variant="secondary">Voltar ao início</ButtonLink>}
+        >
+          Você não tem acesso a esta página.
+          {props.requireRole === "owner" && (
+            <>
+              {" "}
+              Se deveria ser organizador, <Link to="/solicitar-acesso">peça acesso aqui</Link>.
+            </>
+          )}
+        </EmptyState>
+      </Page>
     );
   }
 
