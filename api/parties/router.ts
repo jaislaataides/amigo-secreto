@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { listParties } from "./_handlers/list.js";
+import { listInvitedParties } from "./_handlers/listInvited.js";
 import { createParty } from "./_handlers/create.js";
 import { getPartyDetail } from "./_handlers/detail.js";
 import { runDraw } from "./_handlers/draw.js";
@@ -40,6 +41,11 @@ export default async function router(req: VercelRequest, res: VercelResponse) {
 
   if (segments.length === 1 && segments[0] === "create") {
     return createParty(req, res);
+  }
+
+  // Antes do "/:partyId": ids do Firestore nunca são "invited".
+  if (segments.length === 1 && segments[0] === "invited") {
+    return listInvitedParties(req, res);
   }
 
   const [partyId, section, third] = segments;
