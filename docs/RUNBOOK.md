@@ -1,4 +1,4 @@
-# Runbook — Amigo Secreto
+# Runbook — Amico Secreto
 
 Guia operacional: setup inicial, segredos, deploy e manutenção.
 

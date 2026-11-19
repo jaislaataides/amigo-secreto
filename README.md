@@ -1,4 +1,6 @@
-# 🎁 Amigo Secreto
+# Amico Secreto
+
+> Amigo secreto sem pagar mico.
 
 App de amigo secreto: organizadores aprovados criam parties (regras, categorias,
 faixa de valor, itens proibidos), convidam participantes, que confirmam presença,
