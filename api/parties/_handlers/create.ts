@@ -17,6 +17,8 @@ interface CreatePartyBody {
   forbiddenItemsText?: string;
   rsvpDeadline: string; // ISO date string
   customCategories?: string[];
+  /** IDs de platformCategories a manter nesta party. Omitido = todas as ativas. */
+  baseCategoryIds?: string[];
   imageDataUrl?: string;
 }
 
@@ -73,7 +75,9 @@ export const createParty = withErrorHandling(async (req: VercelRequest, res: Ver
     .collection("platformCategories")
     .where("active", "==", true)
     .get();
+  const keepIds = body.baseCategoryIds ? new Set(body.baseCategoryIds) : null;
   for (const doc of platformCategories.docs) {
+    if (keepIds && !keepIds.has(doc.id)) continue;
     const data = doc.data();
     batch.set(partyRef.collection("categories").doc(doc.id), {
       label: data.label,

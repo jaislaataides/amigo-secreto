@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
 import { api } from "@/shared/api/client";
+import { usePlatformCategories } from "@/shared/hooks/usePlatformCategories";
 import { Button, Field, Input, Page, PageHeader, Textarea } from "@/shared/components/ui";
-import { ErrorBanner } from "@/shared/components/Feedback";
+import { TagInput } from "@/shared/components/TagInput";
+import { DateInputBR } from "@/shared/components/DateInputBR";
+import { ImagePickerBox } from "@/shared/components/ImagePickerBox";
+import { ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
 
 function defaultDeadline(): string {
   const d = new Date();
@@ -14,16 +18,26 @@ function defaultDeadline(): string {
 
 export function PartyCreatePage() {
   const navigate = useNavigate();
+  const platformCategories = usePlatformCategories();
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [valueMin, setValueMin] = useState("30");
   const [valueMax, setValueMax] = useState("80");
-  const [forbiddenItemsText, setForbiddenItemsText] = useState("");
+  const [forbiddenTags, setForbiddenTags] = useState<string[]>([]);
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
+  const [baseCategoryIds, setBaseCategoryIds] = useState<string[]>([]);
   const [rsvpDeadline, setRsvpDeadline] = useState(defaultDeadline());
-  const [customCategories, setCustomCategories] = useState("");
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
   const [compressingImage, setCompressingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
+
+  // Assim que as categorias base carregam, vêm todas marcadas por padrão.
+  useEffect(() => {
+    if (platformCategories.data) {
+      setBaseCategoryIds(platformCategories.data.map((c) => c.id));
+    }
+  }, [platformCategories.data]);
 
   const createParty = useMutation({
     mutationFn: () =>
@@ -32,12 +46,10 @@ export function PartyCreatePage() {
         description,
         valueMin: Number(valueMin),
         valueMax: Number(valueMax),
-        forbiddenItemsText,
+        forbiddenItemsText: forbiddenTags.join(", "),
+        baseCategoryIds,
+        customCategories,
         rsvpDeadline: new Date(rsvpDeadline).toISOString(),
-        customCategories: customCategories
-          .split(",")
-          .map((c) => c.trim())
-          .filter(Boolean),
         imageDataUrl: imageDataUrl ?? undefined,
       }),
     onSuccess: (data) => navigate(`/owner/parties/${data.partyId}/participants`),
@@ -45,10 +57,7 @@ export function PartyCreatePage() {
 
   async function handleImageSelected(file: File | undefined) {
     setImageError(null);
-    if (!file) {
-      setImageDataUrl(null);
-      return;
-    }
+    if (!file) return;
     setCompressingImage(true);
     try {
       // Sem Firebase Storage (passou a exigir plano pago) — a capa vira um
@@ -62,7 +71,6 @@ export function PartyCreatePage() {
       setImageDataUrl(dataUrl);
     } catch {
       setImageError("Não foi possível processar essa imagem. Tente outra.");
-      setImageDataUrl(null);
     } finally {
       setCompressingImage(false);
     }
@@ -78,25 +86,18 @@ export function PartyCreatePage() {
           createParty.mutate();
         }}
       >
+        <div style={{ marginBottom: 20 }}>
+          <ImagePickerBox imageUrl={imageDataUrl} onFileSelected={handleImageSelected} />
+          {compressingImage && <p style={{ fontSize: 13, color: "#71717a", marginTop: 8 }}>Processando imagem…</p>}
+          {imageError && <ErrorBanner message={imageError} />}
+        </div>
+
         <Field label="Nome da party">
           <Input value={name} onChange={(e) => setName(e.target.value)} required />
         </Field>
 
         <Field label="Descrição">
           <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
-        </Field>
-
-        <Field label="Capa (opcional)" hint="A imagem é comprimida e guardada como um thumbnail pequeno.">
-          <input type="file" accept="image/*" onChange={(e) => void handleImageSelected(e.target.files?.[0])} />
-          {compressingImage && <p style={{ fontSize: 13, color: "#71717a" }}>Processando imagem…</p>}
-          {imageError && <ErrorBanner message={imageError} />}
-          {imageDataUrl && (
-            <img
-              src={imageDataUrl}
-              alt="Pré-visualização da capa"
-              style={{ marginTop: 8, maxWidth: 160, borderRadius: 8 }}
-            />
-          )}
         </Field>
 
         <div style={{ display: "flex", gap: 12 }}>
@@ -108,30 +109,37 @@ export function PartyCreatePage() {
           </Field>
         </div>
 
-        <Field label="Itens proibidos / não recomendados">
-          <Textarea
-            value={forbiddenItemsText}
-            onChange={(e) => setForbiddenItemsText(e.target.value)}
-            placeholder="ex: nada de perfumes, nada de roupas íntimas..."
-          />
+        <Field label="Itens proibidos / não recomendados" hint="Digite e aperte Enter pra cada item.">
+          <TagInput value={forbiddenTags} onChange={setForbiddenTags} placeholder="ex: perfumes, roupas íntimas" />
         </Field>
 
-        <Field
-          label="Categorias extras (opcional)"
-          hint="Separadas por vírgula. Já vêm prontas: livre, acessórios, vestimentas, objetos, decorações."
-        >
-          <Input
-            value={customCategories}
-            onChange={(e) => setCustomCategories(e.target.value)}
-            placeholder="ex: livros, jogos"
-          />
+        <Field label="Categorias">
+          {platformCategories.isLoading && <FullPageSpinner />}
+          {platformCategories.data?.map((c) => (
+            <label key={c.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
+              <input
+                type="checkbox"
+                checked={baseCategoryIds.includes(c.id)}
+                onChange={(e) =>
+                  setBaseCategoryIds(
+                    e.target.checked ? [...baseCategoryIds, c.id] : baseCategoryIds.filter((id) => id !== c.id),
+                  )
+                }
+              />
+              {c.label}
+            </label>
+          ))}
+        </Field>
+
+        <Field label="Categorias extras (opcional)" hint="Digite e aperte Enter pra cada categoria.">
+          <TagInput value={customCategories} onChange={setCustomCategories} placeholder="ex: livros, jogos" />
         </Field>
 
         <Field
           label="Prazo para confirmação (RSVP)"
           hint="Depois dessa data, você pode forçar o sorteio com quem já confirmou (mínimo 3)."
         >
-          <Input type="date" value={rsvpDeadline} onChange={(e) => setRsvpDeadline(e.target.value)} required />
+          <DateInputBR value={rsvpDeadline} onChange={setRsvpDeadline} />
         </Field>
 
         {createParty.isError && <ErrorBanner message={createParty.error.message} />}
