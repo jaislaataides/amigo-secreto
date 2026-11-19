@@ -4,6 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
 import { api } from "@/shared/api/client";
 import { Button, Field, Input, Page, PageHeader, Textarea } from "@/shared/components/ui";
+import { DateInputBR } from "@/shared/components/DateInputBR";
+import { ImagePickerBox } from "@/shared/components/ImagePickerBox";
 import { ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
 import { PartyTabs } from "./PartyTabs";
 import { usePartyDetail } from "./usePartyDetail";
@@ -98,6 +100,15 @@ export function PartyEditPage() {
       <PageHeader title={data!.name} />
       <PartyTabs partyId={partyId} />
 
+      <div style={{ marginBottom: 20 }}>
+        <ImagePickerBox imageUrl={data!.imageUrl} onFileSelected={handleCoverSelected} />
+        {(compressingCover || setCover.isPending) && (
+          <p style={{ fontSize: 13, color: "#71717a", marginTop: 8 }}>Salvando…</p>
+        )}
+        {coverError && <ErrorBanner message={coverError} />}
+        {setCover.isError && <ErrorBanner message={setCover.error.message} />}
+      </div>
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -125,7 +136,7 @@ export function PartyEditPage() {
           />
         </Field>
         <Field label="Prazo de confirmação (RSVP)">
-          <Input type="date" value={form.rsvpDeadline} onChange={(e) => setForm({ ...form, rsvpDeadline: e.target.value })} />
+          <DateInputBR value={form.rsvpDeadline} onChange={(v) => setForm({ ...form, rsvpDeadline: v })} />
         </Field>
 
         {save.isError && <ErrorBanner message={save.error.message} />}
@@ -169,19 +180,6 @@ export function PartyEditPage() {
         >
           Adicionar
         </Button>
-      </div>
-
-      <h2 style={{ fontSize: 16, marginTop: 32 }}>Capa</h2>
-      {data!.imageUrl && (
-        <img src={data!.imageUrl} alt="Capa atual" style={{ maxWidth: 160, borderRadius: 8, marginBottom: 8 }} />
-      )}
-      <div>
-        <input type="file" accept="image/*" onChange={(e) => void handleCoverSelected(e.target.files?.[0])} />
-        {(compressingCover || setCover.isPending) && (
-          <p style={{ fontSize: 13, color: "#71717a" }}>Salvando…</p>
-        )}
-        {coverError && <ErrorBanner message={coverError} />}
-        {setCover.isError && <ErrorBanner message={setCover.error.message} />}
       </div>
     </Page>
   );
