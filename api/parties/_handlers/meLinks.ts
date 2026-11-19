@@ -31,7 +31,9 @@ export const handleMyLinks = withErrorHandling(async (req: VercelRequest, res: V
     let preview;
     try {
       preview = await fetchOpenGraphPreview(url);
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`[link-preview] falha ao buscar preview de ${url}: ${message}`);
       preview = { title: null, imageUrl: null, description: null, domain: null };
     }
 
