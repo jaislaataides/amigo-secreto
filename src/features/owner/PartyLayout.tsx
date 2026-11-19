@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Page, PageHeader, Status } from "@/shared/components/ui";
+import { Badge, Page, PageHeader } from "@/shared/components/ui";
 import { ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
 import { PartyTabs } from "./PartyTabs";
 import { PARTY_BACK, STATUS_LABEL, STATUS_TONE } from "./partyStatus";
@@ -10,7 +10,6 @@ export function PartyLayout(props: {
   name: string;
   status: string;
   subtitle?: ReactNode;
-  meta?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -19,11 +18,8 @@ export function PartyLayout(props: {
         back={PARTY_BACK}
         title={props.name}
         subtitle={props.subtitle}
-        meta={
-          <>
-            <Status tone={STATUS_TONE[props.status] ?? "neutral"}>{STATUS_LABEL[props.status] ?? props.status}</Status>
-            {props.meta}
-          </>
+        actions={
+          <Badge tone={STATUS_TONE[props.status] ?? "neutral"}>{STATUS_LABEL[props.status] ?? props.status}</Badge>
         }
       />
       <PartyTabs partyId={props.partyId} />

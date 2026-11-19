@@ -1,8 +1,8 @@
 import { Link, Navigate, useLocation, type Location } from "react-router-dom";
 import { useState } from "react";
 import { Alert, FullPageSpinner } from "@/shared/components/Feedback";
-import { Stack } from "@/shared/components/ui";
-import { AuthShell } from "./AuthShell";
+import { Icon } from "@/shared/components/Icon";
+import { Card } from "@/shared/components/ui";
 import { useAuth } from "./AuthContext";
 
 export function LoginPage() {
@@ -22,22 +22,30 @@ export function LoginPage() {
   }
 
   return (
-    <AuthShell>
-      <Stack gap={20}>
-        <div>
-          <h1 className="sr-only">Amico Secreto</h1>
-          <h2>Entrar</h2>
-          <p className="muted" style={{ marginTop: 6 }}>
-            Use a conta Google do e-mail em que você recebeu o convite.
-          </p>
+    <main className="center-screen">
+      <Card className="auth-card fade-up">
+        <div className="auth-card__mark">
+          <Icon name="gift" size={32} />
         </div>
+        <h1>Amigo Secreto</h1>
+        <p className="muted" style={{ margin: "8px 0 28px" }}>
+          Organize o amigo secreto do seu grupo, sem complicação.
+        </p>
+
+        {from && !unauthorized && (
+          <div style={{ marginBottom: 16, textAlign: "left" }}>
+            <Alert tone="info">Entre com a conta do e-mail em que você recebeu o convite.</Alert>
+          </div>
+        )}
 
         {unauthorized && (
-          <Alert tone="warning">
-            Esse e-mail não tem acesso a nada por aqui (não é organizador, admin, nem participante de nenhuma
-            party). Peça pra quem organiza te cadastrar, ou{" "}
-            <Link to="/solicitar-acesso">solicite virar organizador</Link>.
-          </Alert>
+          <div style={{ marginBottom: 16, textAlign: "left" }}>
+            <Alert tone="warning">
+              Esse e-mail não tem acesso a nada por aqui (não é organizador, admin, nem participante de nenhuma
+              party). Peça pra quem organiza te cadastrar, ou{" "}
+              <Link to="/solicitar-acesso">solicite virar organizador</Link>.
+            </Alert>
+          </div>
         )}
 
         <button
@@ -61,13 +69,17 @@ export function LoginPage() {
           Entrar com o Google
         </button>
 
-        {error && <Alert tone="error">{error}</Alert>}
+        {error && (
+          <div style={{ marginTop: 12, textAlign: "left" }}>
+            <Alert tone="error">{error}</Alert>
+          </div>
+        )}
 
-        <p className="hint">
+        <p className="hint" style={{ marginTop: 24 }}>
           Quer organizar um amigo secreto? <Link to="/solicitar-acesso">Peça acesso de organizador</Link>
         </p>
-      </Stack>
-    </AuthShell>
+      </Card>
+    </main>
   );
 }
 

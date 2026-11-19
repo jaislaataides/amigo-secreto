@@ -3,12 +3,11 @@ import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
 import { api } from "@/shared/api/client";
-import { Badge, Button, Field, FormSection, Input, MoneyInput, Textarea } from "@/shared/components/ui";
+import { Badge, Button, Card, Field, Input, MoneyInput, Stack, Textarea } from "@/shared/components/ui";
 import { Icon } from "@/shared/components/Icon";
 import { DateInputBR } from "@/shared/components/DateInputBR";
 import { ImagePickerBox } from "@/shared/components/ImagePickerBox";
-import { ErrorBanner } from "@/shared/components/Feedback";
-import { useOverlay } from "@/shared/components/Overlay";
+import { Alert, ErrorBanner } from "@/shared/components/Feedback";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
 import { usePartyDetail } from "./usePartyDetail";
 
@@ -23,7 +22,6 @@ export function PartyEditPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const { data, isLoading, isError, error } = usePartyDetail(partyId);
   const queryClient = useQueryClient();
-  const { toast } = useOverlay();
 
   const [form, setForm] = useState<{
     name: string;
@@ -58,10 +56,7 @@ export function PartyEditPage() {
         rsvpDeadline: form?.rsvpDeadline ? new Date(form.rsvpDeadline).toISOString() : undefined,
         addCustomCategories,
       }),
-    onSuccess: (_data, addCustomCategories) => {
-      toast(addCustomCategories ? "Categoria adicionada" : "Regras salvas");
-      void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] });
-    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
   });
 
   const removeCategory = useMutation({
@@ -75,10 +70,7 @@ export function PartyEditPage() {
   const setCover = useMutation({
     mutationFn: (imageDataUrl: string | null) =>
       api.post(`/api/parties/${partyId}/set-cover`, { imageDataUrl }),
-    onSuccess: () => {
-      toast("Capa atualizada");
-      void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] });
-    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
   });
 
   async function handleCoverSelected(file: File | undefined) {
@@ -100,133 +92,143 @@ export function PartyEditPage() {
     }
   }
 
-  const rangeError =
-    form && Number(form.valueMax) < Number(form.valueMin) ? "O máximo precisa ser maior que o mínimo." : null;
-
   if (!partyId) return null;
   if (isLoading || isError || !form || !data) return <PartyLoadState isLoading={isLoading || (!form && !isError)} error={error} />;
 
   return (
     <PartyLayout partyId={partyId} name={data.name} status={data.status}>
-      <div className="card-stack">
-      <form
-        className="card-stack"
-        onSubmit={(e) => {
-          e.preventDefault();
-          save.mutate(undefined);
-        }}
-      >
-        <FormSection title="Sobre a party">
-          <Field label="Nome" htmlFor="party-name">
-            <Input id="party-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-          </Field>
-          <Field label="Descrição" htmlFor="party-description" optional>
-            <Textarea
-              id="party-description"
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-            />
-          </Field>
-        </FormSection>
-
-        <FormSection title="Presentes">
-          <div className="grid-2">
-            <Field label="Valor mínimo" htmlFor="value-min">
-              <MoneyInput id="value-min" value={form.valueMin} onChange={(e) => setForm({ ...form, valueMin: e.target.value })} />
-            </Field>
-            <Field label="Valor máximo" htmlFor="value-max" error={rangeError}>
-              <MoneyInput
-                id="value-max"
-                value={form.valueMax}
-                aria-invalid={rangeError ? true : undefined}
-                aria-describedby={rangeError ? "value-max-error" : undefined}
-                onChange={(e) => setForm({ ...form, valueMax: e.target.value })}
-              />
-            </Field>
-          </div>
-          <Field label="Lista de micos" htmlFor="forbidden" hint="Presentes que ninguém quer ganhar." optional>
-            <Textarea
-              id="forbidden"
-              aria-describedby="forbidden-hint"
-              value={form.forbiddenItemsText}
-              onChange={(e) => setForm({ ...form, forbiddenItemsText: e.target.value })}
-            />
-          </Field>
-        </FormSection>
-
-        <FormSection title="Prazo">
-          <Field label="Confirmação (RSVP) até" htmlFor="rsvp-deadline">
-            <DateInputBR id="rsvp-deadline" value={form.rsvpDeadline} onChange={(v) => setForm({ ...form, rsvpDeadline: v })} />
-          </Field>
-        </FormSection>
-
-        <div className="form-footer">
-          <Button type="submit" loading={save.isPending} disabled={Boolean(rangeError)}>
-            {save.isPending ? "Salvando…" : "Salvar alterações"}
-          </Button>
-        </div>
-        {save.isError && <ErrorBanner message={save.error.message} />}
-      </form>
-
-      <FormSection title="Capa" description="Aparece no topo da página de cada participante.">
-        <ImagePickerBox
-          imageUrl={data.imageUrl}
-          onFileSelected={handleCoverSelected}
-          busy={compressingCover || setCover.isPending}
-        />
-        {coverError && <ErrorBanner message={coverError} />}
-        {setCover.isError && <ErrorBanner message={setCover.error.message} />}
-      </FormSection>
-
-      <FormSection
-        title="Categorias"
-        description="As da plataforma ficam fixas. As extras que você criou podem ser removidas."
-      >
-        <div className="row">
-          {data.categories.map((c) =>
-            c.isCustom ? (
-              <span key={c.id} className="tag">
-                {c.label}
-                <button
-                  type="button"
-                  onClick={() => removeCategory.mutate(c.id)}
-                  disabled={removeCategory.isPending}
-                  aria-label={`Remover categoria ${c.label}`}
-                >
-                  <Icon name="x" size={14} strokeWidth={2.5} />
-                </button>
-              </span>
-            ) : (
-              <Badge key={c.id}>{c.label}</Badge>
-            ),
+      <Stack gap={20}>
+        <div>
+          <ImagePickerBox
+            imageUrl={data.imageUrl}
+            onFileSelected={handleCoverSelected}
+            busy={compressingCover || setCover.isPending}
+          />
+          {coverError && (
+            <div style={{ marginTop: 8 }}>
+              <ErrorBanner message={coverError} />
+            </div>
+          )}
+          {setCover.isError && (
+            <div style={{ marginTop: 8 }}>
+              <ErrorBanner message={setCover.error.message} />
+            </div>
           )}
         </div>
+
         <form
-          className="row"
-          style={{ flexWrap: "nowrap" }}
           onSubmit={(e) => {
             e.preventDefault();
-            if (!newCategory.trim()) return;
-            save.mutate([newCategory.trim()]);
-            setNewCategory("");
+            save.mutate(undefined);
           }}
         >
-          <label htmlFor="new-category" className="sr-only">
-            Nova categoria
-          </label>
-          <Input
-            id="new-category"
-            placeholder="Nova categoria"
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-            style={{ maxWidth: 280 }}
-          />
-          <Button type="submit" variant="secondary" disabled={!newCategory.trim()}>
-            Adicionar
-          </Button>
+          <Card>
+            <Stack gap={20}>
+              <h2 className="section-title" style={{ margin: 0 }}>Regras</h2>
+              <Field label="Nome da party" htmlFor="party-name">
+                <Input id="party-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+              </Field>
+              <Field label="Descrição" htmlFor="party-description" optional>
+                <Textarea
+                  id="party-description"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
+              </Field>
+              <div className="grid-2">
+                <Field label="Valor mínimo" htmlFor="value-min">
+                  <MoneyInput
+                    id="value-min"
+                    value={form.valueMin}
+                    onChange={(e) => setForm({ ...form, valueMin: e.target.value })}
+                  />
+                </Field>
+                <Field label="Valor máximo" htmlFor="value-max">
+                  <MoneyInput
+                    id="value-max"
+                    value={form.valueMax}
+                    onChange={(e) => setForm({ ...form, valueMax: e.target.value })}
+                  />
+                </Field>
+              </div>
+              <Field label="Itens proibidos ou não recomendados" htmlFor="forbidden" optional>
+                <Textarea
+                  id="forbidden"
+                  value={form.forbiddenItemsText}
+                  onChange={(e) => setForm({ ...form, forbiddenItemsText: e.target.value })}
+                />
+              </Field>
+              <Field label="Prazo de confirmação (RSVP)" htmlFor="rsvp-deadline">
+                <DateInputBR
+                  id="rsvp-deadline"
+                  value={form.rsvpDeadline}
+                  onChange={(v) => setForm({ ...form, rsvpDeadline: v })}
+                />
+              </Field>
+
+              {save.isError && <ErrorBanner message={save.error.message} />}
+              {save.isSuccess && !save.isPending && <Alert tone="success">Alterações salvas.</Alert>}
+              <div className="form-actions">
+                <Button type="submit" loading={save.isPending}>
+                  {save.isPending ? "Salvando…" : "Salvar alterações"}
+                </Button>
+              </div>
+            </Stack>
+          </Card>
         </form>
-      </FormSection>
-      </div>
+
+        <Card>
+          <Stack gap={16}>
+            <h2 className="section-title" style={{ margin: 0 }}>
+              Categorias <span className="count">{data.categories.length}</span>
+            </h2>
+            <div className="row">
+              {data.categories.map((c) =>
+                c.isCustom ? (
+                  <span key={c.id} className="tag">
+                    {c.label}
+                    <button
+                      type="button"
+                      onClick={() => removeCategory.mutate(c.id)}
+                      disabled={removeCategory.isPending}
+                      aria-label={`Remover categoria ${c.label}`}
+                    >
+                      <Icon name="x" size={14} strokeWidth={2.5} />
+                    </button>
+                  </span>
+                ) : (
+                  <Badge key={c.id}>{c.label}</Badge>
+                ),
+              )}
+            </div>
+            <p className="hint">As categorias extras que você criou podem ser removidas; as da plataforma ficam fixas.</p>
+            <form
+              className="row"
+              style={{ flexWrap: "nowrap" }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!newCategory.trim()) return;
+                save.mutate([newCategory.trim()]);
+                setNewCategory("");
+              }}
+            >
+              <label htmlFor="new-category" className="sr-only">
+                Nova categoria
+              </label>
+              <Input
+                id="new-category"
+                placeholder="Nova categoria"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                style={{ maxWidth: 280 }}
+              />
+              <Button type="submit" variant="secondary" icon="plus" disabled={!newCategory.trim()}>
+                Adicionar
+              </Button>
+            </form>
+          </Stack>
+        </Card>
+      </Stack>
     </PartyLayout>
   );
 }

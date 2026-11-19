@@ -2,10 +2,8 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Button, FormSection, IconButton, Input, Status, type BadgeTone } from "@/shared/components/ui";
+import { Avatar, Badge, Button, Card, IconButton, Input, Stack, type BadgeTone } from "@/shared/components/ui";
 import { Alert, EmptyState, ErrorBanner } from "@/shared/components/Feedback";
-import { useOverlay } from "@/shared/components/Overlay";
-import { Icon } from "@/shared/components/Icon";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
 import { usePartyDetail } from "./usePartyDetail";
 
@@ -32,28 +30,11 @@ const INVITE_TONE: Record<string, BadgeTone> = {
   failed: "danger",
 };
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-/** Erro de uma linha do convite, ou null se ela está ok (ou vazia). */
-function rowError(row: Row): string | null {
-  const name = row.name.trim();
-  const email = row.email.trim();
-  if (!name && !email) return null;
-  if (!name) return "Falta o nome.";
-  if (!email) return "Falta o e-mail.";
-  if (!EMAIL_RE.test(email)) return "Esse e-mail não parece válido.";
-  return null;
-}
-
 export function PartyParticipantsPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const { data, isLoading, isError, error } = usePartyDetail(partyId);
   const queryClient = useQueryClient();
   const [rows, setRows] = useState<Row[]>([{ name: "", email: "" }]);
-  // Erros só aparecem depois que a pessoa sai do campo ou tenta enviar.
-  const [touched, setTouched] = useState<Set<number>>(new Set());
-  const [attempted, setAttempted] = useState(false);
-  const { toast, confirm } = useOverlay();
 
   const invalidate = () => void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] });
 
@@ -63,21 +44,14 @@ export function PartyParticipantsPage() {
         participants: rows.filter((r) => r.name.trim() && r.email.trim()),
       }),
     onSuccess: () => {
-      const sent = rows.filter((r) => r.name.trim() && r.email.trim()).length;
-      toast(sent === 1 ? "Convite enviado" : `${sent} convites enviados`);
       setRows([{ name: "", email: "" }]);
-      setTouched(new Set());
-      setAttempted(false);
       invalidate();
     },
   });
 
   const removeParticipant = useMutation({
-    mutationFn: (p: { id: string; name: string }) => api.delete(`/api/parties/${partyId}/participants/${p.id}`),
-    onSuccess: (_data, p) => {
-      toast(`${p.name} removido(a)`);
-      invalidate();
-    },
+    mutationFn: (pid: string) => api.delete(`/api/parties/${partyId}/participants/${pid}`),
+    onSuccess: invalidate,
   });
 
   if (!partyId) return null;
@@ -93,155 +67,152 @@ export function PartyParticipantsPage() {
     setRows(rows.map((r, j) => (j === index ? { ...r, ...patch } : r)));
   }
 
-  const errors = rows.map(rowError);
-  const visibleError = (i: number) => (attempted || touched.has(i) ? errors[i] : null);
-
   return (
-    <PartyLayout
-      partyId={partyId}
-      name={data.name}
-      status={data.status}
-      meta={
-        <span>
-          {count} de {max} participantes · {going} confirmados
-        </span>
-      }
-    >
-      {count === 0 ? (
-        <EmptyState title="Ninguém por aqui ainda">
-          Adicione nome e e-mail de cada pessoa. Elas recebem o convite na hora.
-        </EmptyState>
-      ) : (
-        <ul className="rows card card--flush">
-          {data.participants.map((p) => (
-            <li key={p.id} className="row-item">
-              <div className="row-item__main">
-                <div className="row-item__title">
-                  {p.name}
-                  {p.isOwner && <span className="muted" style={{ fontWeight: 400 }}> · organizador</span>}
-                </div>
-                <div className="row-item__meta">{p.email}</div>
-              </div>
-              <div className="row-item__aside">
-                {p.inviteStatus === "failed" && (
-                  <Status tone={INVITE_TONE[p.inviteStatus]}>{INVITE_LABEL[p.inviteStatus]}</Status>
-                )}
-                <Status tone={RSVP_TONE[p.rsvp]}>{RSVP_LABEL[p.rsvp]}</Status>
-                {editable && (
-                  <IconButton
-                    icon="trash"
-                    label={`Remover ${p.name}`}
-                    variant="danger"
-                    size="sm"
-                    disabled={removeParticipant.isPending}
-                    onClick={async () => {
-                      const ok = await confirm({
-                        title: `Remover ${p.name}?`,
-                        body: "A pessoa sai da party e não participa do sorteio. Dá pra convidar de novo depois.",
-                        confirmLabel: "Remover",
-                        danger: true,
-                      });
-                      if (ok) removeParticipant.mutate({ id: p.id, name: p.name });
-                    }}
-                  />
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-      {removeParticipant.isError && (
-        <div style={{ marginTop: 12 }}>
-          <ErrorBanner message={removeParticipant.error.message} />
-        </div>
-      )}
+    <PartyLayout partyId={partyId} name={data.name} status={data.status}>
+      <Stack gap={20}>
+        <Card>
+          <div className="row row--between" style={{ marginBottom: 10 }}>
+            <span className="label">
+              {count} de {max} participantes
+            </span>
+            <span className="hint">{going} confirmados</span>
+          </div>
+          <div
+            className="progress"
+            role="progressbar"
+            aria-label="Vagas preenchidas"
+            aria-valuemin={0}
+            aria-valuemax={max}
+            aria-valuenow={count}
+          >
+            <span style={{ width: `${Math.min(100, (count / Math.max(max, 1)) * 100)}%` }} />
+          </div>
+        </Card>
 
-      {editable && count < max && (
-        <form
-          style={{ marginTop: 24 }}
-          noValidate
-          onSubmit={(e) => {
-            e.preventDefault();
-            const firstBad = errors.findIndex(Boolean);
-            if (firstBad >= 0) {
-              setAttempted(true);
-              document.getElementById(`row-name-${firstBad}`)?.focus();
-              return;
-            }
-            addParticipants.mutate();
-          }}
-        >
-          <FormSection title="Convidar" description="Cada pessoa recebe um e-mail pra confirmar presença.">
-            {rows.map((row, i) => (
-              <div key={i}>
-              <div className="row" style={{ alignItems: "flex-start", flexWrap: "nowrap" }}>
-                <div className="grid-2" style={{ flex: 1 }}>
-                  <div>
-                    <label htmlFor={`row-name-${i}`} className="sr-only">
-                      Nome da pessoa {i + 1}
-                    </label>
-                    <Input
-                      id={`row-name-${i}`}
-                      placeholder="Nome"
-                      autoComplete="off"
-                      value={row.name}
-                      aria-invalid={Boolean(visibleError(i)) && !row.name.trim() ? true : undefined}
-                      aria-describedby={visibleError(i) ? `row-error-${i}` : undefined}
-                      onChange={(e) => updateRow(i, { name: e.target.value })}
-                    />
+        {count === 0 ? (
+          <EmptyState icon="users" title="Ninguém por aqui ainda">
+            Adicione nome e e-mail de cada pessoa — elas recebem o convite na hora.
+          </EmptyState>
+        ) : (
+          <Card flush>
+            <ul className="list">
+              {data.participants.map((p) => (
+                <li key={p.id} className="list-row">
+                  <Avatar name={p.name} />
+                  <div className="list-row__main">
+                    <div className="list-row__title">
+                      {p.name}{" "}
+                      {p.isOwner && (
+                        <Badge tone="brand" icon="sparkles">
+                          organizador
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="list-row__meta">{p.email}</div>
                   </div>
-                  <div>
-                    <label htmlFor={`row-email-${i}`} className="sr-only">
-                      E-mail da pessoa {i + 1}
-                    </label>
-                    <Input
-                      id={`row-email-${i}`}
-                      placeholder="email@exemplo.com"
-                      type="email"
-                      inputMode="email"
-                      autoComplete="off"
-                      value={row.email}
-                      aria-invalid={Boolean(visibleError(i)) && Boolean(row.name.trim()) ? true : undefined}
-                      aria-describedby={visibleError(i) ? `row-error-${i}` : undefined}
-                      onChange={(e) => updateRow(i, { email: e.target.value })}
-                      onBlur={() => setTouched(new Set(touched).add(i))}
-                    />
+                  <div className="list-row__actions">
+                    {p.inviteStatus === "failed" && (
+                      <Badge tone={INVITE_TONE[p.inviteStatus]} icon="alert">
+                        {INVITE_LABEL[p.inviteStatus]}
+                      </Badge>
+                    )}
+                    <Badge tone={RSVP_TONE[p.rsvp]}>{RSVP_LABEL[p.rsvp]}</Badge>
+                    {editable && (
+                      <IconButton
+                        icon="trash"
+                        label={`Remover ${p.name}`}
+                        variant="danger"
+                        size="sm"
+                        disabled={removeParticipant.isPending}
+                        onClick={() => {
+                          if (window.confirm(`Remover ${p.name} da party?`)) removeParticipant.mutate(p.id);
+                        }}
+                      />
+                    )}
                   </div>
-                </div>
-                {rows.length > 1 && (
-                  <IconButton icon="x" label={`Remover linha ${i + 1}`} onClick={() => setRows(rows.filter((_, j) => j !== i))} />
-                )}
-              </div>
-              {visibleError(i) && (
-                <p className="field__error" id={`row-error-${i}`} style={{ marginTop: 6 }}>
-                  <Icon name="alert" size={16} />
-                  {visibleError(i)}
-                </p>
-              )}
-              </div>
-            ))}
-            {addParticipants.isError && <ErrorBanner message={addParticipants.error.message} />}
-            <div className="form-actions" style={{ marginTop: 0 }}>
-              <Button type="submit" loading={addParticipants.isPending} disabled={filledRows === 0}>
-                {addParticipants.isPending
-                  ? "Enviando convites…"
-                  : filledRows > 1
-                    ? `Convidar ${filledRows} pessoas`
-                    : "Convidar"}
-              </Button>
-              <Button variant="ghost" onClick={() => setRows([...rows, { name: "", email: "" }])}>
-                Mais uma pessoa
-              </Button>
-            </div>
-          </FormSection>
-        </form>
-      )}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+        {removeParticipant.isError && <ErrorBanner message={removeParticipant.error.message} />}
 
-      {editable && count >= max && (
-        <div style={{ marginTop: 24 }}>
+        {editable && count < max && (
+          <Card>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                addParticipants.mutate();
+              }}
+            >
+              <Stack gap={16}>
+                <div>
+                  <h2 className="section-title" style={{ margin: 0 }}>
+                    Convidar pessoas
+                  </h2>
+                  <p className="hint">Cada pessoa recebe um convite por e-mail pra confirmar presença.</p>
+                </div>
+                {rows.map((row, i) => (
+                  <div key={i} className="row" style={{ alignItems: "flex-start", flexWrap: "nowrap" }}>
+                    <div className="grid-2" style={{ flex: 1 }}>
+                      <div>
+                        <label htmlFor={`row-name-${i}`} className="sr-only">
+                          Nome da pessoa {i + 1}
+                        </label>
+                        <Input
+                          id={`row-name-${i}`}
+                          placeholder="Nome"
+                          autoComplete="off"
+                          value={row.name}
+                          onChange={(e) => updateRow(i, { name: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`row-email-${i}`} className="sr-only">
+                          E-mail da pessoa {i + 1}
+                        </label>
+                        <Input
+                          id={`row-email-${i}`}
+                          placeholder="email@exemplo.com"
+                          type="email"
+                          inputMode="email"
+                          autoComplete="off"
+                          value={row.email}
+                          onChange={(e) => updateRow(i, { email: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    {rows.length > 1 && (
+                      <IconButton
+                        icon="x"
+                        label={`Remover linha ${i + 1}`}
+                        onClick={() => setRows(rows.filter((_, j) => j !== i))}
+                      />
+                    )}
+                  </div>
+                ))}
+                {addParticipants.isError && <ErrorBanner message={addParticipants.error.message} />}
+                <div className="form-actions">
+                  <Button type="submit" icon="mail" loading={addParticipants.isPending} disabled={filledRows === 0}>
+                    {addParticipants.isPending
+                      ? "Enviando convites…"
+                      : filledRows > 1
+                        ? `Convidar ${filledRows} pessoas`
+                        : "Convidar"}
+                  </Button>
+                  <Button variant="ghost" icon="plus" onClick={() => setRows([...rows, { name: "", email: "" }])}>
+                    Mais uma pessoa
+                  </Button>
+                </div>
+              </Stack>
+            </form>
+          </Card>
+        )}
+
+        {editable && count >= max && (
           <Alert tone="info">A party atingiu o limite de {max} participantes. Fale com um admin se precisar de mais vagas.</Alert>
-        </div>
-      )}
+        )}
+      </Stack>
     </PartyLayout>
   );
 }

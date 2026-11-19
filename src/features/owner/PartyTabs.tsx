@@ -6,10 +6,10 @@ export function PartyTabs(props: { partyId: string }) {
     <Tabs
       label="Seções da party"
       items={[
-        { to: `${base}/participants`, label: "Participantes" },
-        { to: `${base}/edit`, label: "Regras" },
-        { to: `${base}/exclusions`, label: "Exclusões" },
-        { to: `${base}/draw`, label: "Sorteio" },
+        { to: `${base}/participants`, label: "Participantes", icon: "users" },
+        { to: `${base}/edit`, label: "Regras", icon: "sliders" },
+        { to: `${base}/exclusions`, label: "Exclusões", icon: "ban" },
+        { to: `${base}/draw`, label: "Sorteio", icon: "shuffle" },
       ]}
     />
   );

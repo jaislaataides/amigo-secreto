@@ -28,7 +28,6 @@ export function PageHeader(props: {
   subtitle?: ReactNode;
   actions?: ReactNode;
   back?: { to: string; label: string };
-  meta?: ReactNode;
 }) {
   return (
     <header className="page-header">
@@ -40,7 +39,6 @@ export function PageHeader(props: {
           </Link>
         )}
         <h1 className="page-title">{props.title}</h1>
-        {props.meta && <div className="page-meta">{props.meta}</div>}
         {props.subtitle && <p className="page-subtitle">{props.subtitle}</p>}
       </div>
       {props.actions}
@@ -82,6 +80,20 @@ export function Card(props: { children: ReactNode; style?: CSSProperties; flush?
   );
 }
 
+export function Avatar(props: { name: string }) {
+  const initials = props.name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+  return (
+    <span className="avatar" aria-hidden="true">
+      {initials || "?"}
+    </span>
+  );
+}
+
 /* ---------- Form ---------- */
 
 export function Field(props: {
@@ -90,8 +102,6 @@ export function Field(props: {
   children: ReactNode;
   hint?: ReactNode;
   optional?: boolean;
-  /** Erro de validação, mostrado colado no campo. */
-  error?: string | null;
 }) {
   const hintId = props.hint && props.htmlFor ? `${props.htmlFor}-hint` : undefined;
   return (
@@ -101,17 +111,10 @@ export function Field(props: {
         {props.optional && <span className="label__optional"> (opcional)</span>}
       </Label>
       {props.children}
-      {props.error ? (
-        <p className="field__error" id={props.htmlFor ? `${props.htmlFor}-error` : undefined}>
-          <Icon name="alert" size={16} />
-          {props.error}
+      {props.hint && (
+        <p className="hint" id={hintId}>
+          {props.hint}
         </p>
-      ) : (
-        props.hint && (
-          <p className="hint" id={hintId}>
-            {props.hint}
-          </p>
-        )
       )}
     </div>
   );
@@ -229,36 +232,6 @@ export function ButtonLink(props: LinkProps & { variant?: ButtonVariant; size?: 
 /* ---------- Badge ---------- */
 
 export type BadgeTone = "neutral" | "success" | "warning" | "danger" | "brand";
-
-/** Status discreto: pontinho colorido + texto. */
-export function Status(props: { children: ReactNode; tone?: BadgeTone }) {
-  return <span className={cx("status", `status--${props.tone ?? "neutral"}`)}>{props.children}</span>;
-}
-
-/**
- * Card com cabeçalho separado por picote (a assinatura visual do app).
- * `flush` tira o respiro do corpo, pra listas de linhas encostarem na borda.
- */
-export function FormSection(props: {
-  title: string;
-  description?: ReactNode;
-  children: ReactNode;
-  flush?: boolean;
-  actions?: ReactNode;
-}) {
-  return (
-    <section className="card" style={{ padding: 0 }}>
-      <header className="card__header row row--between" style={{ flexWrap: "nowrap", alignItems: "flex-start" }}>
-        <div>
-          <h2>{props.title}</h2>
-          {props.description && <p>{props.description}</p>}
-        </div>
-        {props.actions}
-      </header>
-      <div className={cx("card__body", props.flush && "card__body--flush")}>{props.children}</div>
-    </section>
-  );
-}
 
 export function Badge(props: { children: ReactNode; tone?: BadgeTone; icon?: IconName }) {
   return (

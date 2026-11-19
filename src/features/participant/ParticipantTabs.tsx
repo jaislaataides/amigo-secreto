@@ -6,9 +6,9 @@ export function ParticipantTabs(props: { partyId: string }) {
     <Tabs
       label="Seções da party"
       items={[
-        { to: `${base}/rsvp`, label: "Confirmação" },
-        { to: `${base}/preferences`, label: "Categorias" },
-        { to: `${base}/references`, label: "Referências" },
+        { to: `${base}/rsvp`, label: "Confirmação", icon: "check" },
+        { to: `${base}/preferences`, label: "Categorias", icon: "heart" },
+        { to: `${base}/references`, label: "Referências", icon: "link" },
       ]}
     />
   );
