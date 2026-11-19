@@ -1,8 +1,8 @@
 import { FieldValue, type DocumentReference } from "firebase-admin/firestore";
-import { adminDb } from "../firebaseAdmin";
-import { getMailFrom, getResendClient } from "./resendClient";
-import { renderMailTemplate } from "./templates";
-import type { MailTemplate } from "../../../shared/types";
+import { adminDb } from "../firebaseAdmin.js";
+import { getMailFrom, getResendClient } from "./resendClient.js";
+import { renderMailTemplate } from "./templates.js";
+import type { MailTemplate } from "../../../shared/types.js";
 
 export interface MailInput {
   template: MailTemplate;

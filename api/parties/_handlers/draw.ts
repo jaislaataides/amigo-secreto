@@ -1,14 +1,14 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Timestamp } from "firebase-admin/firestore";
-import { encryptAssignment, generatePossessionToken, hashPossessionToken, unwrapDek } from "../../_lib/crypto/envelope";
-import { runDerangementDraw, type ExclusionInput } from "../../_lib/draw/derangement";
-import { getAppBaseUrl } from "../../_lib/env";
-import { enqueueAndSend } from "../../_lib/mail/send";
-import { adminDb } from "../../_lib/firebaseAdmin";
-import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth";
-import { requireQueryParam, withErrorHandling } from "../../_lib/http";
-import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party";
-import type { DekMeta, Participant } from "../../../shared/types";
+import { encryptAssignment, generatePossessionToken, hashPossessionToken, unwrapDek } from "../../_lib/crypto/envelope.js";
+import { runDerangementDraw, type ExclusionInput } from "../../_lib/draw/derangement.js";
+import { getAppBaseUrl } from "../../_lib/env.js";
+import { enqueueAndSend } from "../../_lib/mail/send.js";
+import { adminDb } from "../../_lib/firebaseAdmin.js";
+import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { requireQueryParam, withErrorHandling } from "../../_lib/http.js";
+import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
+import type { DekMeta, Participant } from "../../../shared/types.js";
 
 const MIN_GOING_PARTICIPANTS = 3;
 const PURGE_AFTER_DAYS = 15;

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import type { DecodedIdToken } from "firebase-admin/auth";
-import { adminAuth } from "./firebaseAdmin";
+import { adminAuth } from "./firebaseAdmin.js";
 
 export class ApiError extends Error {
   readonly statusCode: number;

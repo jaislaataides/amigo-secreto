@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { requestOwnerAccess } from "./_handlers/request";
-import { approveOwner } from "./_handlers/approve";
+import { requestOwnerAccess } from "./_handlers/request.js";
+import { approveOwner } from "./_handlers/approve.js";
 
-/** Roteador único pra /api/owners/request e /api/owners/approve (ver api/parties/[[...slug]].ts). */
+/** Roteador único pra /api/owners/request e /api/owners/approve (ver api/parties/[...slug].ts). */
 export default async function router(req: VercelRequest, res: VercelResponse) {
   const raw = req.query.slug;
   const slug = Array.isArray(raw) ? raw : raw ? [raw] : [];

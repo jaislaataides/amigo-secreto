@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { adminAuth, adminDb } from "../_lib/firebaseAdmin";
-import { ApiError, normalizeEmail, requireMethod, verifyAuth } from "../_lib/auth";
-import { withErrorHandling } from "../_lib/http";
-import type { AuthorizedOwner } from "../../shared/types";
+import { adminAuth, adminDb } from "../_lib/firebaseAdmin.js";
+import { ApiError, normalizeEmail, requireMethod, verifyAuth } from "../_lib/auth.js";
+import { withErrorHandling } from "../_lib/http.js";
+import type { AuthorizedOwner } from "../../shared/types.js";
 
 /**
  * Chamada pelo front logo após cada login. Confere `admins/{uid}` e

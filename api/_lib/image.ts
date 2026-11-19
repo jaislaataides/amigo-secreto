@@ -1,4 +1,4 @@
-import { ApiError } from "./auth";
+import { ApiError } from "./auth.js";
 
 // Firestore limita cada documento a 1MiB. Guardamos a imagem como data URI
 // no próprio doc da party (sem Storage, que passou a exigir plano Blaze) —

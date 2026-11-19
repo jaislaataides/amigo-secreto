@@ -5,11 +5,11 @@ import {
   unwrapDek,
   verifyPossessionToken,
   type EncryptedAssignmentPayload,
-} from "./_lib/crypto/envelope";
-import { ApiError, normalizeEmail, requireMethod, verifyAuth } from "./_lib/auth";
-import { readJsonBody, requireString, withErrorHandling } from "./_lib/http";
-import { loadPartyOrThrow } from "./_lib/party";
-import type { DekMeta, Participant, PossessionToken } from "../shared/types";
+} from "./_lib/crypto/envelope.js";
+import { ApiError, normalizeEmail, requireMethod, verifyAuth } from "./_lib/auth.js";
+import { readJsonBody, requireString, withErrorHandling } from "./_lib/http.js";
+import { loadPartyOrThrow } from "./_lib/party.js";
+import type { DekMeta, Participant, PossessionToken } from "../shared/types.js";
 
 interface RevealBody {
   partyId: string;

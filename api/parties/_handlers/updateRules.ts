@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { adminDb } from "../../_lib/firebaseAdmin";
-import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth";
-import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http";
-import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party";
+import { adminDb } from "../../_lib/firebaseAdmin.js";
+import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http.js";
+import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
 
 interface UpdateRulesBody {
   name?: string;

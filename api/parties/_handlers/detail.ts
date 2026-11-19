@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { requireMethod, verifyAuth } from "../../_lib/auth";
-import { requireQueryParam, withErrorHandling } from "../../_lib/http";
-import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party";
+import { requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { requireQueryParam, withErrorHandling } from "../../_lib/http.js";
+import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
 
 /**
  * GET /api/parties/:id — detalhe completo pra tela do owner/admin: dados da

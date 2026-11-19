@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Timestamp } from "firebase-admin/firestore";
-import { adminDb } from "../../_lib/firebaseAdmin";
-import { requireMethod, verifyCronSecret } from "../../_lib/auth";
-import { withErrorHandling } from "../../_lib/http";
+import { adminDb } from "../../_lib/firebaseAdmin.js";
+import { requireMethod, verifyCronSecret } from "../../_lib/auth.js";
+import { withErrorHandling } from "../../_lib/http.js";
 
 /**
  * Exclui permanentemente parties sorteadas há mais de 15 dias (doc +

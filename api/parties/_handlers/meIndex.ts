@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { requireMethod, verifyAuth } from "../../_lib/auth";
-import { requireQueryParam, withErrorHandling } from "../../_lib/http";
-import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party";
+import { requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { requireQueryParam, withErrorHandling } from "../../_lib/http.js";
+import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party.js";
 
 /**
  * GET /api/parties/:id/me — visão do participante: dados públicos da party

@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
-import { ApiError, requireAdmin, requireMethod, verifyAuth } from "../../_lib/auth";
-import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http";
-import { loadPartyOrThrow } from "../../_lib/party";
+import { ApiError, requireAdmin, requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http.js";
+import { loadPartyOrThrow } from "../../_lib/party.js";
 
 interface SetMaxParticipantsBody {
   maxParticipants: number;

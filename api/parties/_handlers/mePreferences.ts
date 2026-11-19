@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
-import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth";
-import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http";
-import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party";
+import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http.js";
+import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party.js";
 
 interface PreferencesBody {
   categoryIds: string[];

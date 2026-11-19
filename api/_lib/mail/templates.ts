@@ -1,5 +1,5 @@
 import { render } from "@react-email/render";
-import type { MailTemplate } from "../../../shared/types";
+import type { MailTemplate } from "../../../shared/types.js";
 import {
   DrawDoneOwnerEmail,
   DrawInfeasibleOwnerEmail,
@@ -7,7 +7,7 @@ import {
   ReminderEmail,
   RevealLinkEmail,
   RsvpAckEmail,
-} from "./components";
+} from "./components.js";
 
 export interface RenderedMail {
   subject: string;

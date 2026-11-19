@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
-import type { ExclusionType } from "../../../shared/types";
-import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth";
-import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http";
-import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party";
+import type { ExclusionType } from "../../../shared/types.js";
+import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http.js";
+import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
 
 interface ExclusionInputBody {
   type: ExclusionType;

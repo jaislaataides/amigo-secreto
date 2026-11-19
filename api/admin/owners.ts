@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { adminDb } from "../_lib/firebaseAdmin";
-import { requireAdmin, requireMethod, verifyAuth } from "../_lib/auth";
-import { withErrorHandling } from "../_lib/http";
+import { adminDb } from "../_lib/firebaseAdmin.js";
+import { requireAdmin, requireMethod, verifyAuth } from "../_lib/auth.js";
+import { withErrorHandling } from "../_lib/http.js";
 
 /** GET /api/admin/owners — lista todos os pedidos/autorizações de owner. */
 export default withErrorHandling(async (req: VercelRequest, res: VercelResponse) => {

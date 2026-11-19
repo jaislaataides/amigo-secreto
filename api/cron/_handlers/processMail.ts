@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { redeliver, type MailInput } from "../../_lib/mail/send";
-import { adminDb } from "../../_lib/firebaseAdmin";
-import { requireMethod, verifyCronSecret } from "../../_lib/auth";
-import { withErrorHandling } from "../../_lib/http";
+import { redeliver, type MailInput } from "../../_lib/mail/send.js";
+import { adminDb } from "../../_lib/firebaseAdmin.js";
+import { requireMethod, verifyCronSecret } from "../../_lib/auth.js";
+import { withErrorHandling } from "../../_lib/http.js";
 
 const MAX_ATTEMPTS = 3;
 

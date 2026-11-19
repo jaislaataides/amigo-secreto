@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
-import { validateImageDataUrl } from "../../_lib/image";
-import { requireMethod, verifyAuth } from "../../_lib/auth";
-import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http";
-import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party";
+import { validateImageDataUrl } from "../../_lib/image.js";
+import { requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http.js";
+import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
 
 interface SetCoverBody {
   imageDataUrl: string | null;

@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
-import { enqueueAndSend } from "../../_lib/mail/send";
-import { getAppBaseUrl } from "../../_lib/env";
-import { ApiError, normalizeEmail, requireMethod, verifyAuth } from "../../_lib/auth";
-import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http";
-import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party";
+import { enqueueAndSend } from "../../_lib/mail/send.js";
+import { getAppBaseUrl } from "../../_lib/env.js";
+import { ApiError, normalizeEmail, requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http.js";
+import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
 
 interface AddParticipantsBody {
   participants: { name: string; email: string }[];

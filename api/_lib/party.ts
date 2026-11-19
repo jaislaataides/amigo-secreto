@@ -1,8 +1,8 @@
 import type { DocumentReference, DocumentSnapshot, QueryDocumentSnapshot } from "firebase-admin/firestore";
 import type { DecodedIdToken } from "firebase-admin/auth";
-import { adminDb } from "./firebaseAdmin";
-import { ApiError, normalizeEmail } from "./auth";
-import type { Participant, Party } from "../../shared/types";
+import { adminDb } from "./firebaseAdmin.js";
+import { ApiError, normalizeEmail } from "./auth.js";
+import type { Participant, Party } from "../../shared/types.js";
 
 export async function loadPartyOrThrow(
   partyId: string,

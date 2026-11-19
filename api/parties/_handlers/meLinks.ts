@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
-import { fetchOpenGraphPreview } from "../../_lib/linkPreview/fetchOg";
-import { ApiError, verifyAuth } from "../../_lib/auth";
-import { readJsonBody, requireString, withErrorHandling } from "../../_lib/http";
-import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party";
+import { fetchOpenGraphPreview } from "../../_lib/linkPreview/fetchOg.js";
+import { ApiError, verifyAuth } from "../../_lib/auth.js";
+import { readJsonBody, requireString, withErrorHandling } from "../../_lib/http.js";
+import { findMyParticipantOrThrow, loadPartyOrThrow } from "../../_lib/party.js";
 
 const MAX_LINKS = 10;
 

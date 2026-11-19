@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
-import { adminAuth, adminDb } from "../../_lib/firebaseAdmin";
-import { ApiError, normalizeEmail, requireAdmin, requireMethod, verifyAuth } from "../../_lib/auth";
-import { readJsonBody, requireString, withErrorHandling } from "../../_lib/http";
-import type { AuthorizedOwner } from "../../../shared/types";
+import { adminAuth, adminDb } from "../../_lib/firebaseAdmin.js";
+import { ApiError, normalizeEmail, requireAdmin, requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { readJsonBody, requireString, withErrorHandling } from "../../_lib/http.js";
+import type { AuthorizedOwner } from "../../../shared/types.js";
 
 interface ApproveBody {
   email: string;

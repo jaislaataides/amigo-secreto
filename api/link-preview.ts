@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { fetchOpenGraphPreview } from "./_lib/linkPreview/fetchOg";
-import { ApiError, requireMethod, verifyAuth } from "./_lib/auth";
-import { readJsonBody, requireString, withErrorHandling } from "./_lib/http";
+import { fetchOpenGraphPreview } from "./_lib/linkPreview/fetchOg.js";
+import { ApiError, requireMethod, verifyAuth } from "./_lib/auth.js";
+import { readJsonBody, requireString, withErrorHandling } from "./_lib/http.js";
 
 interface LinkPreviewBody {
   url: string;

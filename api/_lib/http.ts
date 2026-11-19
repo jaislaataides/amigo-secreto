@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { ApiError, sendApiError } from "./auth";
+import { ApiError, sendApiError } from "./auth.js";
 
 /**
  * Envolve o handler de uma rota com tratamento de erro consistente: um
