@@ -6,6 +6,7 @@ import { api } from "@/shared/api/client";
 import { Badge, Button, Card, Field, Input, MoneyInput, Stack, Textarea } from "@/shared/components/ui";
 import { Icon } from "@/shared/components/Icon";
 import { DateInputBR } from "@/shared/components/DateInputBR";
+import { joinMicos, parseMicos } from "@/shared/micos";
 import { ImagePickerBox } from "@/shared/components/ImagePickerBox";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
@@ -28,10 +29,10 @@ export function PartyEditPage() {
     description: string;
     valueMin: string;
     valueMax: string;
-    forbiddenItemsText: string;
     rsvpDeadline: string;
   } | null>(null);
   const [newCategory, setNewCategory] = useState("");
+  const [newMico, setNewMico] = useState("");
 
   useEffect(() => {
     if (!data) return;
@@ -40,7 +41,6 @@ export function PartyEditPage() {
       description: data.description,
       valueMin: String(data.valueRange.min),
       valueMax: String(data.valueRange.max),
-      forbiddenItemsText: data.forbiddenItemsText,
       rsvpDeadline: toDateInputValue(data.rsvpDeadline),
     });
   }, [data]);
@@ -52,10 +52,16 @@ export function PartyEditPage() {
         description: form?.description,
         valueMin: Number(form?.valueMin),
         valueMax: Number(form?.valueMax),
-        forbiddenItemsText: form?.forbiddenItemsText,
         rsvpDeadline: form?.rsvpDeadline ? new Date(form.rsvpDeadline).toISOString() : undefined,
         addCustomCategories,
       }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
+  });
+
+  // A lista de micos salva na hora, item por item, igual às categorias.
+  const saveMicos = useMutation({
+    mutationFn: (items: string[]) =>
+      api.post(`/api/parties/${partyId}/update-rules`, { forbiddenItemsText: joinMicos(items) }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
   });
 
@@ -94,6 +100,8 @@ export function PartyEditPage() {
 
   if (!partyId) return null;
   if (isLoading || isError || !form || !data) return <PartyLoadState isLoading={isLoading || (!form && !isError)} error={error} />;
+
+  const micos = parseMicos(data.forbiddenItemsText);
 
   return (
     <PartyLayout partyId={partyId} name={data.name} status={data.status}>
@@ -151,14 +159,6 @@ export function PartyEditPage() {
                   />
                 </Field>
               </div>
-              <Field label="Lista de micos" htmlFor="forbidden" hint="Presentes que ninguém quer ganhar." optional>
-                <Textarea
-                  id="forbidden"
-                  aria-describedby="forbidden-hint"
-                  value={form.forbiddenItemsText}
-                  onChange={(e) => setForm({ ...form, forbiddenItemsText: e.target.value })}
-                />
-              </Field>
               <Field label="Prazo de confirmação (RSVP)" htmlFor="rsvp-deadline">
                 <DateInputBR
                   id="rsvp-deadline"
@@ -227,6 +227,64 @@ export function PartyEditPage() {
                 Adicionar
               </Button>
             </form>
+          </Stack>
+        </Card>
+
+        <Card>
+          <Stack gap={16}>
+            <h2 className="section-title" style={{ margin: 0 }}>
+              Lista de micos <span className="count">{micos.length}</span>
+            </h2>
+            {micos.length > 0 && (
+              <div className="row">
+                {micos.map((item) => (
+                  <span key={item} className="tag">
+                    {item}
+                    <button
+                      type="button"
+                      onClick={() => saveMicos.mutate(micos.filter((m) => m !== item))}
+                      disabled={saveMicos.isPending}
+                      aria-label={`Remover mico ${item}`}
+                    >
+                      <Icon name="x" size={14} strokeWidth={2.5} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="hint">Presentes que ninguém quer ganhar. Todo mundo da party vê essa lista.</p>
+            <form
+              className="row"
+              style={{ flexWrap: "nowrap" }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                const added = parseMicos(newMico);
+                if (added.length === 0) return;
+                saveMicos.mutate(parseMicos(joinMicos([...micos, ...added])));
+                setNewMico("");
+              }}
+            >
+              <label htmlFor="new-mico" className="sr-only">
+                Novo mico
+              </label>
+              <Input
+                id="new-mico"
+                placeholder="Novo mico"
+                value={newMico}
+                onChange={(e) => setNewMico(e.target.value)}
+                style={{ maxWidth: 280 }}
+              />
+              <Button
+                type="submit"
+                variant="secondary"
+                icon="plus"
+                loading={saveMicos.isPending}
+                disabled={!newMico.trim()}
+              >
+                Adicionar
+              </Button>
+            </form>
+            {saveMicos.isError && <ErrorBanner message={saveMicos.error.message} />}
           </Stack>
         </Card>
       </Stack>

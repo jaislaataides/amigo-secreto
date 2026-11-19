@@ -18,6 +18,7 @@ import {
   Textarea,
 } from "@/shared/components/ui";
 import { TagInput } from "@/shared/components/TagInput";
+import { joinMicos } from "@/shared/micos";
 import { DateInputBR } from "@/shared/components/DateInputBR";
 import { ImagePickerBox } from "@/shared/components/ImagePickerBox";
 import { ErrorBanner, InlineLoading } from "@/shared/components/Feedback";
@@ -63,7 +64,7 @@ export function PartyCreatePage() {
         description,
         valueMin: Number(valueMin),
         valueMax: Number(valueMax),
-        forbiddenItemsText: forbiddenTags.join(", "),
+        forbiddenItemsText: joinMicos(forbiddenTags),
         baseCategoryIds,
         customCategories,
         rsvpDeadline: new Date(rsvpDeadline).toISOString(),
@@ -154,21 +155,6 @@ export function PartyCreatePage() {
                 </Field>
               </div>
 
-              <Field
-                label="Lista de micos"
-                htmlFor="forbidden"
-                hint="Presentes que ninguém quer ganhar. Aperte Enter depois de cada item."
-                optional
-              >
-                <TagInput
-                  id="forbidden"
-                  aria-describedby="forbidden-hint"
-                  value={forbiddenTags}
-                  onChange={setForbiddenTags}
-                  placeholder="ex: perfume, meia, caneca de piada"
-                />
-              </Field>
-
               <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
                 <legend className="label" style={{ marginBottom: 6 }}>
                   Categorias permitidas
@@ -218,6 +204,21 @@ export function PartyCreatePage() {
                   value={customCategories}
                   onChange={setCustomCategories}
                   placeholder="ex: livros, jogos"
+                />
+              </Field>
+
+              <Field
+                label="Lista de micos"
+                htmlFor="forbidden"
+                hint="Presentes que ninguém quer ganhar. Aperte Enter depois de cada item."
+                optional
+              >
+                <TagInput
+                  id="forbidden"
+                  aria-describedby="forbidden-hint"
+                  value={forbiddenTags}
+                  onChange={setForbiddenTags}
+                  placeholder="ex: perfume, meia, caneca de piada"
                 />
               </Field>
             </Stack>
