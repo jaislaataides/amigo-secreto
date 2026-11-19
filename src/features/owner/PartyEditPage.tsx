@@ -3,11 +3,11 @@ import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import imageCompression from "browser-image-compression";
 import { api } from "@/shared/api/client";
-import { Badge, Button, Card, Field, Input, MoneyInput, Stack, Textarea } from "@/shared/components/ui";
+import { Badge, Button, Field, FormSection, Input, MoneyInput, Textarea } from "@/shared/components/ui";
 import { Icon } from "@/shared/components/Icon";
 import { DateInputBR } from "@/shared/components/DateInputBR";
 import { ImagePickerBox } from "@/shared/components/ImagePickerBox";
-import { Alert, ErrorBanner } from "@/shared/components/Feedback";
+import { ErrorBanner } from "@/shared/components/Feedback";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
 import { usePartyDetail } from "./usePartyDetail";
 
@@ -97,139 +97,117 @@ export function PartyEditPage() {
 
   return (
     <PartyLayout partyId={partyId} name={data.name} status={data.status}>
-      <Stack gap={20}>
-        <div>
-          <ImagePickerBox
-            imageUrl={data.imageUrl}
-            onFileSelected={handleCoverSelected}
-            busy={compressingCover || setCover.isPending}
-          />
-          {coverError && (
-            <div style={{ marginTop: 8 }}>
-              <ErrorBanner message={coverError} />
-            </div>
-          )}
-          {setCover.isError && (
-            <div style={{ marginTop: 8 }}>
-              <ErrorBanner message={setCover.error.message} />
-            </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          save.mutate(undefined);
+        }}
+      >
+        <FormSection title="Sobre a party">
+          <Field label="Nome" htmlFor="party-name">
+            <Input id="party-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+          </Field>
+          <Field label="Descrição" htmlFor="party-description" optional>
+            <Textarea
+              id="party-description"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+          </Field>
+        </FormSection>
+
+        <FormSection title="Presentes">
+          <div className="grid-2">
+            <Field label="Valor mínimo" htmlFor="value-min">
+              <MoneyInput id="value-min" value={form.valueMin} onChange={(e) => setForm({ ...form, valueMin: e.target.value })} />
+            </Field>
+            <Field label="Valor máximo" htmlFor="value-max">
+              <MoneyInput id="value-max" value={form.valueMax} onChange={(e) => setForm({ ...form, valueMax: e.target.value })} />
+            </Field>
+          </div>
+          <Field label="Lista de micos" htmlFor="forbidden" hint="Presentes que ninguém quer ganhar." optional>
+            <Textarea
+              id="forbidden"
+              aria-describedby="forbidden-hint"
+              value={form.forbiddenItemsText}
+              onChange={(e) => setForm({ ...form, forbiddenItemsText: e.target.value })}
+            />
+          </Field>
+        </FormSection>
+
+        <FormSection title="Prazo">
+          <Field label="Confirmação (RSVP) até" htmlFor="rsvp-deadline">
+            <DateInputBR id="rsvp-deadline" value={form.rsvpDeadline} onChange={(v) => setForm({ ...form, rsvpDeadline: v })} />
+          </Field>
+        </FormSection>
+
+        <div className="form-footer" style={{ marginBottom: 8 }}>
+          <Button type="submit" loading={save.isPending}>
+            {save.isPending ? "Salvando…" : "Salvar alterações"}
+          </Button>
+          {save.isSuccess && !save.isPending && <span className="status status--success">Salvo</span>}
+        </div>
+        {save.isError && <ErrorBanner message={save.error.message} />}
+      </form>
+
+      <FormSection title="Capa" description="Aparece no topo da página de cada participante.">
+        <ImagePickerBox
+          imageUrl={data.imageUrl}
+          onFileSelected={handleCoverSelected}
+          busy={compressingCover || setCover.isPending}
+        />
+        {coverError && <ErrorBanner message={coverError} />}
+        {setCover.isError && <ErrorBanner message={setCover.error.message} />}
+      </FormSection>
+
+      <FormSection
+        title="Categorias"
+        description="As da plataforma ficam fixas. As extras que você criou podem ser removidas."
+      >
+        <div className="row">
+          {data.categories.map((c) =>
+            c.isCustom ? (
+              <span key={c.id} className="tag">
+                {c.label}
+                <button
+                  type="button"
+                  onClick={() => removeCategory.mutate(c.id)}
+                  disabled={removeCategory.isPending}
+                  aria-label={`Remover categoria ${c.label}`}
+                >
+                  <Icon name="x" size={14} strokeWidth={2.5} />
+                </button>
+              </span>
+            ) : (
+              <Badge key={c.id}>{c.label}</Badge>
+            ),
           )}
         </div>
-
         <form
+          className="row"
+          style={{ flexWrap: "nowrap" }}
           onSubmit={(e) => {
             e.preventDefault();
-            save.mutate(undefined);
+            if (!newCategory.trim()) return;
+            save.mutate([newCategory.trim()]);
+            setNewCategory("");
           }}
         >
-          <Card>
-            <Stack gap={20}>
-              <h2 className="section-title" style={{ margin: 0 }}>Regras</h2>
-              <Field label="Nome da party" htmlFor="party-name">
-                <Input id="party-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-              </Field>
-              <Field label="Descrição" htmlFor="party-description" optional>
-                <Textarea
-                  id="party-description"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                />
-              </Field>
-              <div className="grid-2">
-                <Field label="Valor mínimo" htmlFor="value-min">
-                  <MoneyInput
-                    id="value-min"
-                    value={form.valueMin}
-                    onChange={(e) => setForm({ ...form, valueMin: e.target.value })}
-                  />
-                </Field>
-                <Field label="Valor máximo" htmlFor="value-max">
-                  <MoneyInput
-                    id="value-max"
-                    value={form.valueMax}
-                    onChange={(e) => setForm({ ...form, valueMax: e.target.value })}
-                  />
-                </Field>
-              </div>
-              <Field label="Lista de micos" htmlFor="forbidden" hint="Presentes que ninguém quer ganhar." optional>
-                <Textarea
-                  id="forbidden"
-                  aria-describedby="forbidden-hint"
-                  value={form.forbiddenItemsText}
-                  onChange={(e) => setForm({ ...form, forbiddenItemsText: e.target.value })}
-                />
-              </Field>
-              <Field label="Prazo de confirmação (RSVP)" htmlFor="rsvp-deadline">
-                <DateInputBR
-                  id="rsvp-deadline"
-                  value={form.rsvpDeadline}
-                  onChange={(v) => setForm({ ...form, rsvpDeadline: v })}
-                />
-              </Field>
-
-              {save.isError && <ErrorBanner message={save.error.message} />}
-              {save.isSuccess && !save.isPending && <Alert tone="success">Alterações salvas.</Alert>}
-              <div className="form-actions">
-                <Button type="submit" loading={save.isPending}>
-                  {save.isPending ? "Salvando…" : "Salvar alterações"}
-                </Button>
-              </div>
-            </Stack>
-          </Card>
+          <label htmlFor="new-category" className="sr-only">
+            Nova categoria
+          </label>
+          <Input
+            id="new-category"
+            placeholder="Nova categoria"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            style={{ maxWidth: 280 }}
+          />
+          <Button type="submit" variant="secondary" disabled={!newCategory.trim()}>
+            Adicionar
+          </Button>
         </form>
-
-        <Card>
-          <Stack gap={16}>
-            <h2 className="section-title" style={{ margin: 0 }}>
-              Categorias <span className="count">{data.categories.length}</span>
-            </h2>
-            <div className="row">
-              {data.categories.map((c) =>
-                c.isCustom ? (
-                  <span key={c.id} className="tag">
-                    {c.label}
-                    <button
-                      type="button"
-                      onClick={() => removeCategory.mutate(c.id)}
-                      disabled={removeCategory.isPending}
-                      aria-label={`Remover categoria ${c.label}`}
-                    >
-                      <Icon name="x" size={14} strokeWidth={2.5} />
-                    </button>
-                  </span>
-                ) : (
-                  <Badge key={c.id}>{c.label}</Badge>
-                ),
-              )}
-            </div>
-            <p className="hint">As categorias extras que você criou podem ser removidas; as da plataforma ficam fixas.</p>
-            <form
-              className="row"
-              style={{ flexWrap: "nowrap" }}
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!newCategory.trim()) return;
-                save.mutate([newCategory.trim()]);
-                setNewCategory("");
-              }}
-            >
-              <label htmlFor="new-category" className="sr-only">
-                Nova categoria
-              </label>
-              <Input
-                id="new-category"
-                placeholder="Nova categoria"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                style={{ maxWidth: 280 }}
-              />
-              <Button type="submit" variant="secondary" icon="plus" disabled={!newCategory.trim()}>
-                Adicionar
-              </Button>
-            </form>
-          </Stack>
-        </Card>
-      </Stack>
+      </FormSection>
     </PartyLayout>
   );
 }

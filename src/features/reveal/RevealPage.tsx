@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api, ApiClientError } from "@/shared/api/client";
-import { Badge, Button, Stack } from "@/shared/components/ui";
+import { Badge, Button } from "@/shared/components/ui";
 import { EmptyState, FullPageSpinner } from "@/shared/components/Feedback";
 import { Icon } from "@/shared/components/Icon";
 import { LinkPreview } from "@/shared/components/LinkPreview";
@@ -36,7 +36,7 @@ export function RevealPage() {
 
   if (!token) {
     return (
-      <RevealError message="Esse link está incompleto — falta o código de acesso. Abra o link exatamente como veio no e-mail." />
+      <RevealError message="Esse link está incompleto: falta o código de acesso. Abra o link exatamente como veio no e-mail." />
     );
   }
 
@@ -57,7 +57,7 @@ export function RevealPage() {
           <p className="reveal__eyebrow">O sorteio saiu</p>
           <h1 className="reveal__title">Seu amigo secreto está aqui dentro</h1>
           <p className="reveal__hint">Pra não pagar mico: confira se ninguém está espiando sua tela.</p>
-          <Button size="lg" icon="gift" onClick={() => setOpened(true)}>
+          <Button size="lg" onClick={() => setOpened(true)}>
             Abrir presente
           </Button>
         </div>
@@ -90,20 +90,21 @@ export function RevealPage() {
         <div className="reveal__body-inner">
           <h2 className="section-title">Ideias de presente</h2>
           {data.referenceLinks.length === 0 ? (
-            <EmptyState icon="link">
-              {data.receiverName} ainda não adicionou nenhuma referência. Vale usar as categorias como pista!
+            <EmptyState>
+              {data.receiverName} ainda não adicionou nenhuma referência. Use as categorias como pista.
             </EmptyState>
           ) : (
-            <Stack gap={10}>
+            <ul className="rows">
               {data.referenceLinks.map((link) => (
-                <LinkPreview key={link.id} {...link} />
+                <li key={link.id}>
+                  <LinkPreview {...link} />
+                </li>
               ))}
-            </Stack>
+            </ul>
           )}
 
-          <p className="hint" style={{ marginTop: 32, display: "flex", gap: 6, alignItems: "flex-start" }}>
-            <Icon name="lock" size={16} />
-            Só você vê isso. Disponível por 15 dias após o sorteio.
+          <p className="hint" style={{ marginTop: 32 }}>
+            Só você vê isso. O link fica disponível por 15 dias após o sorteio.
           </p>
         </div>
       </div>
@@ -115,7 +116,7 @@ function RevealError(props: { message: string }) {
   return (
     <main className="center-screen">
       <div style={{ width: "100%", maxWidth: 460 }}>
-        <EmptyState icon="alert" title="Não deu pra abrir">
+        <EmptyState title="Não deu pra abrir">
           {props.message}
         </EmptyState>
       </div>

@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Stack } from "@/shared/components/ui";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
-import { Icon, type IconName } from "@/shared/components/Icon";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
 import { useMyPartyView } from "./useMyPartyView";
 
@@ -47,7 +46,6 @@ export function ParticipantRsvpPage() {
           <div className="choices" role="group" aria-label="Confirmação de presença">
             <Choice
               kind="yes"
-              icon="thumbsUp"
               label="Vou participar"
               pressed={current === "going"}
               disabled={confirm.isPending}
@@ -55,23 +53,21 @@ export function ParticipantRsvpPage() {
             />
             <Choice
               kind="no"
-              icon="x"
               label="Não vou dessa vez"
               pressed={current === "not_going"}
               disabled={confirm.isPending}
               onClick={() => confirm.mutate("not_going")}
             />
           </div>
-          <p className="hint" style={{ marginTop: 12, display: "flex", gap: 6, alignItems: "flex-start" }}>
-            <Icon name="lock" size={16} />
-            O resultado do sorteio chega no seu e-mail, num link pessoal — ninguém mais consegue abrir.
+          <p className="hint" style={{ marginTop: 12 }}>
+            O resultado do sorteio chega no seu e-mail, num link pessoal que só você consegue abrir.
           </p>
         </section>
 
         {confirm.isError && <ErrorBanner message={confirm.error.message} />}
         {confirm.isSuccess && me.rsvp === "going" && (
           <Alert tone="success">
-            Presença confirmada! Aproveite pra marcar suas categorias favoritas e deixar referências de presente.
+            Presença confirmada. Aproveite pra marcar suas categorias e deixar referências de presente.
           </Alert>
         )}
       </Stack>
@@ -81,7 +77,6 @@ export function ParticipantRsvpPage() {
 
 function Choice(props: {
   kind: "yes" | "no";
-  icon: IconName;
   label: string;
   pressed: boolean;
   disabled: boolean;
@@ -95,9 +90,7 @@ function Choice(props: {
       disabled={props.disabled}
       onClick={props.onClick}
     >
-      <span className="choice__icon">
-        <Icon name={props.pressed ? "check" : props.icon} />
-      </span>
+      <span className="choice__radio" aria-hidden="true" />
       {props.label}
     </button>
   );

@@ -103,7 +103,7 @@ export function InviteEmail(props: { participantName: string; partyName: string;
     Heading20(`Olá, ${props.participantName}!`),
     Paragraph(h("span", null, "Você foi convidado(a) pro amigo secreto ", h("strong", null, props.partyName), ".")),
     Paragraph(
-      "Lá você confirma presença, marca o que curte ganhar e deixa referências — pra ninguém pagar mico no presente.",
+      "Lá você confirma presença, marca o que curte ganhar e deixa referências, pra ninguém pagar mico no presente.",
     ),
     h(Section, { style: { margin: "24px 0" } }, h(CtaButton, { href: props.joinUrl }, "Participar agora")),
     MutedParagraph("Entre com a conta Google do e-mail que recebeu este convite."),
@@ -156,7 +156,7 @@ export function RevealLinkEmail(props: { participantName: string; partyName: str
     Paragraph(h("span", null, "O sorteio de ", h("strong", null, props.partyName), " foi realizado!")),
     h(Section, { style: { margin: "24px 0" } }, h(CtaButton, { href: props.revealUrl }, "Ver quem eu tirei")),
     MutedParagraph(
-      "Esse link é pessoal e intransferível — só funciona pra você, logado com este e-mail. Abra longe de olhares curiosos pra não pagar mico. Fica disponível por 15 dias após o sorteio.",
+      "Esse link é pessoal e intransferível: só funciona pra você, logado com este e-mail. Abra longe de olhares curiosos pra não pagar mico. Fica disponível por 15 dias após o sorteio.",
     ),
   );
 }
