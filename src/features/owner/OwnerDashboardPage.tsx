@@ -1,9 +1,12 @@
 import { ButtonLink, Page, PageHeader } from "@/shared/components/ui";
 import { PartyCard, useOwnerParties } from "./PartyCard";
-import { EmptyState, ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
+import { ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
+import { FirstPartyOnboarding } from "./FirstPartyOnboarding";
 
 export function OwnerDashboardPage() {
   const { data, isLoading, isError, error } = useOwnerParties();
+  // Sem nenhuma party, o único botão de criar é o do onboarding.
+  const hasParties = (data?.parties.length ?? 0) > 0;
 
   return (
     <Page maxWidth={960}>
@@ -12,27 +15,18 @@ export function OwnerDashboardPage() {
         highlight="parties"
         subtitle="Seus amigos secretos, do convite ao sorteio — sem mico."
         actions={
-          <ButtonLink to="/owner/parties/new" icon="plus">
-            Nova party
-          </ButtonLink>
+          hasParties ? (
+            <ButtonLink to="/owner/parties/new" icon="plus">
+              Nova party
+            </ButtonLink>
+          ) : undefined
         }
       />
 
       {isLoading && <FullPageSpinner />}
       {isError && <ErrorBanner message={error.message} />}
 
-      {data && data.parties.length === 0 && (
-        <EmptyState
-          title="Nenhuma party ainda"
-          action={
-            <ButtonLink to="/owner/parties/new" icon="plus">
-              Criar minha primeira party
-            </ButtonLink>
-          }
-        >
-          Crie uma party, convide o grupo por e-mail e deixe o sorteio com a gente.
-        </EmptyState>
-      )}
+      {data && !hasParties && <FirstPartyOnboarding />}
 
       {data && data.parties.length > 0 && (
         <ul className="party-grid list">

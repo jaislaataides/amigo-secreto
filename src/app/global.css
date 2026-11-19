@@ -1282,36 +1282,11 @@ select {
   color: var(--color-primary);
 }
 
-/* Home: card "Nova party" do mesmo tamanho dos cards de party. */
-.new-party-card {
-  height: 100%;
-  min-height: 220px;
+/* Estado vazio de organizador: título, passos e um único botão. */
+.onboarding {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  gap: var(--space-2);
-  border-style: dashed;
-  border-color: var(--color-border-strong);
-  background: transparent;
-}
-
-.new-party-card__icon {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  margin-bottom: var(--space-2);
-  border-radius: var(--radius-control);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  transition: transform var(--dur-med) var(--ease-out);
-}
-
-@media (hover: hover) {
-  .new-party-card:hover .new-party-card__icon {
-    transform: rotate(90deg);
-  }
+  gap: var(--space-4);
 }
 
 .party-grid > li {

@@ -3,9 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/auth/AuthContext";
 import { api } from "@/shared/api/client";
 import { EmptyState, ErrorBanner, InlineLoading } from "@/shared/components/Feedback";
-import { Icon, type IconName } from "@/shared/components/Icon";
+import { Icon } from "@/shared/components/Icon";
 import { ButtonLink, Page, PageHeader, Section } from "@/shared/components/ui";
-import { NewPartyCard, PartyCard, useOwnerParties } from "@/features/owner/PartyCard";
+import { PartyCard, useOwnerParties } from "@/features/owner/PartyCard";
+import { FirstPartyOnboarding } from "@/features/owner/FirstPartyOnboarding";
+import { Steps, type Step } from "@/shared/components/Steps";
 
 const HOME_PARTY_LIMIT = 5;
 
@@ -50,40 +52,43 @@ function OrganizerHome(props: { title: string; highlight?: string; isAdmin: bool
             : "O que você quer fazer hoje?"
         }
         actions={
-          <ButtonLink to="/owner/parties/new" icon="plus">
-            Nova party
-          </ButtonLink>
+          count > 0 ? (
+            <ButtonLink to="/owner/parties/new" icon="plus">
+              Nova party
+            </ButtonLink>
+          ) : undefined
         }
       />
 
       {props.isAdmin && <PendingRequestsNotice />}
 
-      <Section
-        title="Suas parties"
-        count={parties.data ? count : undefined}
-        actions={
-          count > HOME_PARTY_LIMIT ? (
-            <Link to="/owner" className="small">
-              Ver todas
-            </Link>
-          ) : undefined
-        }
-      >
-        {parties.isLoading && <InlineLoading />}
-        {parties.isError && <ErrorBanner message={parties.error.message} />}
-        {parties.data && (
-          <ul className="party-grid list">
-            {list.slice(0, HOME_PARTY_LIMIT).map((party) => (
-              <li key={party.id}>
-                <PartyCard party={party} />
-              </li>
-            ))}
-            <li>
-              <NewPartyCard />
-            </li>
-          </ul>
-        )}
-      </Section>
+      {parties.data && count === 0 ? (
+        <FirstPartyOnboarding />
+      ) : (
+        <Section
+          title="Suas parties"
+          count={parties.data ? count : undefined}
+          actions={
+            count > HOME_PARTY_LIMIT ? (
+              <Link to="/owner" className="small">
+                Ver todas
+              </Link>
+            ) : undefined
+          }
+        >
+          {parties.isLoading && <InlineLoading />}
+          {parties.isError && <ErrorBanner message={parties.error.message} />}
+          {parties.data && (
+            <ul className="party-grid list">
+              {list.slice(0, HOME_PARTY_LIMIT).map((party) => (
+                <li key={party.id}>
+                  <PartyCard party={party} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </Section>
+      )}
     </>
   );
 }
@@ -115,7 +120,7 @@ function PendingRequestsNotice() {
   );
 }
 
-const STEPS: { icon: IconName; title: string; text: string }[] = [
+const STEPS: Step[] = [
   { icon: "check", title: "Confirme presença", text: "Pelo link do convite que chegou no seu e-mail." },
   { icon: "heart", title: "Deixe pistas", text: "Marque o que você curte e cole links de presentes." },
   { icon: "gift", title: "Abra seu papelzinho", text: "Depois do sorteio, um link só seu revela quem você tirou." },
@@ -130,18 +135,7 @@ function ParticipantHome() {
       </EmptyState>
 
       <Section title="Como funciona">
-        <ol className="steps">
-          {STEPS.map((step, i) => (
-            <li key={step.title} className="card steps__item">
-              <span className="steps__number">{i + 1}</span>
-              <span className="home-link__icon">
-                <Icon name={step.icon} size={22} />
-              </span>
-              <strong>{step.title}</strong>
-              <span className="muted small">{step.text}</span>
-            </li>
-          ))}
-        </ol>
+        <Steps steps={STEPS} />
       </Section>
 
       <p className="muted small" style={{ marginTop: 24 }}>
