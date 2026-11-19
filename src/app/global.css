@@ -1860,3 +1860,56 @@ select {
     transform: rotate(4deg);
   }
 }
+
+/* ---------- Transição entre páginas (View Transitions) ----------
+   Ver src/app/useViewTransitionLocation.ts. A página antiga sai rápido
+   (saída mais curta que a entrada) e a nova sobe 6px aparecendo. O
+   cabeçalho tem nome próprio, então fica parado em vez de piscar junto. */
+
+.app-header {
+  view-transition-name: app-header;
+}
+
+::view-transition-old(root) {
+  animation: vt-out 120ms ease-in both;
+}
+
+::view-transition-new(root) {
+  animation: vt-in 260ms var(--ease-out) both;
+}
+
+/* Durante a transição quem anima é o navegador; a entrada do .page
+   ficaria dobrada. Ela continua valendo quando o conteúdo chega depois
+   (fim do carregamento) ou em navegador sem suporte. */
+html.vt-running .page,
+html.vt-running .center-screen > *,
+html.vt-running .auth__panel,
+html.vt-running .auth__promises li {
+  animation: none;
+}
+
+/* Carregamento rápido não pisca spinner: ele só aparece após 200ms. */
+.loading--full {
+  animation: fade-in var(--dur-med) ease-out 200ms both;
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
