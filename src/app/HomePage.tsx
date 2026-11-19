@@ -12,42 +12,41 @@ export function HomePage() {
 
   return (
     <Page>
-      <PageHeader title={firstName ? `Olá, ${firstName}` : "Olá"} subtitle="O que você quer fazer hoje?" />
+      <PageHeader title={firstName ? `Olá, ${firstName}` : "Olá"} />
 
       {canOrganize || role.admin ? (
-        <div className="party-grid">
+        <ul className="rows">
           {canOrganize && (
-            <HomeCard to="/owner" title="Minhas parties" description="Criar e gerenciar seus amigos secretos." />
+            <HomeRow to="/owner" title="Minhas parties" description="Criar e acompanhar seus amigos secretos." />
           )}
           {role.admin && (
-            <HomeCard
+            <HomeRow
               to="/admin"
               title="Painel do admin"
               description="Aprovar organizadores e ajustar limites de participantes."
             />
           )}
-        </div>
+        </ul>
       ) : (
-        <EmptyState icon="mail" title="Procurando sua party?">
-          Use o link que chegou no seu e-mail (convite ou resultado do sorteio).
-          <br />
-          Quer organizar um amigo secreto? <Link to="/solicitar-acesso">Peça acesso de organizador</Link>.
+        <EmptyState title="Procurando sua party?">
+          Use o link que chegou no seu e-mail (convite ou resultado do sorteio). Quer organizar um amigo secreto?{" "}
+          <Link to="/solicitar-acesso">Peça acesso de organizador</Link>.
         </EmptyState>
       )}
     </Page>
   );
 }
 
-function HomeCard(props: { to: string; title: string; description: string }) {
+function HomeRow(props: { to: string; title: string; description: string }) {
   return (
-    <Link to={props.to} className="card card--interactive">
-      <div className="row row--between" style={{ flexWrap: "nowrap" }}>
-        <h2 style={{ fontSize: 18 }}>{props.title}</h2>
+    <li>
+      <Link to={props.to} className="row-item">
+        <div className="row-item__main">
+          <div className="row-item__title">{props.title}</div>
+          <div className="row-item__meta">{props.description}</div>
+        </div>
         <Icon name="arrowRight" size={18} />
-      </div>
-      <p className="muted small" style={{ marginTop: 4 }}>
-        {props.description}
-      </p>
-    </Link>
+      </Link>
+    </li>
   );
 }

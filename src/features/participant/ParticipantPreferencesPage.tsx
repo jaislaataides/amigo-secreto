@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Button, CheckOption, Stack } from "@/shared/components/ui";
-import { Alert, ErrorBanner } from "@/shared/components/Feedback";
+import { ErrorBanner } from "@/shared/components/Feedback";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
 import { useMyPartyView } from "./useMyPartyView";
 
@@ -28,14 +28,14 @@ export function ParticipantPreferencesPage() {
   const dirty = [...selected].sort().join("|") !== [...data.me.preferredCategories].sort().join("|");
 
   return (
-    <ParticipantLayout partyId={partyId} view={data}>
+    <ParticipantLayout partyId={partyId} name={data.party.name} imageUrl={data.party.imageUrl}>
       <Stack gap={20}>
         <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
           <legend className="section-title" style={{ padding: 0 }}>
             Que tipo de presente você curte?
           </legend>
           <p className="hint" style={{ marginBottom: 12 }}>
-            Marque quantas quiser — quem te tirar usa isso pra não pagar mico.
+            Marque quantas quiser. Quem te tirar usa isso pra não pagar mico.
           </p>
           <div className="options">
             {data.party.categories.map((c) => (
@@ -52,12 +52,12 @@ export function ParticipantPreferencesPage() {
         </fieldset>
 
         {save.isError && <ErrorBanner message={save.error.message} />}
-        {save.isSuccess && !dirty && <Alert tone="success">Preferências salvas!</Alert>}
-        <div className="form-actions">
+        <div className="form-footer">
           <Button loading={save.isPending} disabled={!dirty} onClick={() => save.mutate()}>
             {save.isPending ? "Salvando…" : "Salvar preferências"}
           </Button>
-          {dirty && <span className="hint">Alterações não salvas</span>}
+          {dirty && <span className="status status--warning">Alterações não salvas</span>}
+          {save.isSuccess && !dirty && <span className="status status--success">Salvo</span>}
         </div>
       </Stack>
     </ParticipantLayout>

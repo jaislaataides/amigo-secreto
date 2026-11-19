@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Stack } from "@/shared/components/ui";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
-import { Icon } from "@/shared/components/Icon";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
 import { useMyPartyView } from "./useMyPartyView";
 
@@ -25,29 +24,43 @@ export function ParticipantRsvpPage() {
   const current = confirm.isPending ? confirm.variables : me.rsvp;
 
   return (
-    <ParticipantLayout partyId={partyId} view={data} subtitle={party.description}>
+    <ParticipantLayout partyId={partyId} name={party.name} imageUrl={party.imageUrl} subtitle={party.description}>
       <Stack gap={24}>
+        <div className="rules">
+          <div className="rules__item">
+            <div className="rules__label">Valor do presente</div>
+            <div className="rules__value">
+              R$ {party.valueRange.min}–{party.valueRange.max}
+            </div>
+          </div>
+          {party.forbiddenItemsText && (
+            <div className="rules__item">
+              <div className="rules__label">Lista de micos</div>
+              <p style={{ marginTop: 4 }}>{party.forbiddenItemsText}</p>
+            </div>
+          )}
+        </div>
+
         <section>
           <h2 className="section-title">Você vai participar?</h2>
           <div className="choices" role="group" aria-label="Confirmação de presença">
             <Choice
+              kind="yes"
               label="Vou participar"
-              detail="Entro no sorteio"
               pressed={current === "going"}
               disabled={confirm.isPending}
               onClick={() => confirm.mutate("going")}
             />
             <Choice
+              kind="no"
               label="Não vou dessa vez"
-              detail="Fico de fora do sorteio"
               pressed={current === "not_going"}
               disabled={confirm.isPending}
               onClick={() => confirm.mutate("not_going")}
             />
           </div>
-          <p className="hint" style={{ marginTop: 12, display: "flex", gap: 6, alignItems: "flex-start" }}>
-            <Icon name="lock" size={16} />
-            O resultado do sorteio chega no seu e-mail, num link pessoal — ninguém mais consegue abrir.
+          <p className="hint" style={{ marginTop: 12 }}>
+            O resultado do sorteio chega no seu e-mail, num link pessoal que só você consegue abrir.
           </p>
         </section>
 
@@ -62,20 +75,23 @@ export function ParticipantRsvpPage() {
   );
 }
 
-function Choice(props: { label: string; detail: string; pressed: boolean; disabled: boolean; onClick: () => void }) {
+function Choice(props: {
+  kind: "yes" | "no";
+  label: string;
+  pressed: boolean;
+  disabled: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
-      className="choice"
+      className={`choice choice--${props.kind}`}
       aria-pressed={props.pressed}
       disabled={props.disabled}
       onClick={props.onClick}
     >
       <span className="choice__radio" aria-hidden="true" />
-      <span className="choice__text">
-        {props.label}
-        <small>{props.detail}</small>
-      </span>
+      {props.label}
     </button>
   );
 }

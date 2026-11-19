@@ -5,7 +5,7 @@ import { Page } from "./ui";
 export function UnderConstruction(props: { title: string }) {
   return (
     <Page maxWidth={640}>
-      <EmptyState icon="info" title={props.title}>
+      <EmptyState title={props.title}>
         Em construção.
       </EmptyState>
     </Page>

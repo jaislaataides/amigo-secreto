@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
-import { IconButton, Wordmark } from "@/shared/components/ui";
+import { Icon } from "@/shared/components/Icon";
+import { IconButton } from "@/shared/components/ui";
 
 export function AppLayout(props: { children: ReactNode }) {
   const { user, role, signOutUser } = useAuth();
@@ -12,8 +13,11 @@ export function AppLayout(props: { children: ReactNode }) {
     <>
       <header className="app-header">
         <div className="app-header__inner">
-          <Link to="/home" className="brand" aria-label="Amico Secreto — início">
-            <Wordmark />
+          <Link to="/home" className="brand">
+            <span className="brand__mark">
+              <Icon name="monkey" size={22} />
+            </span>
+            Amico Secreto
           </Link>
 
           <nav className="app-nav" aria-label="Principal">

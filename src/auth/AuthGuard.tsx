@@ -21,7 +21,6 @@ export function AuthGuard(props: { children: ReactNode; requireRole?: "admin" | 
     return (
       <Page maxWidth={520}>
         <EmptyState
-          icon="lock"
           title="Sem permissão"
           action={<ButtonLink to="/home" variant="secondary">Voltar ao início</ButtonLink>}
         >
