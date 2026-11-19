@@ -84,8 +84,8 @@
     --color-bg: #130b1a;
     --color-surface: #1b1224;
     --color-surface-2: #261b31;
-    --color-border: #32263e;
-    --color-border-strong: #463852;
+    --color-border: #2a2034;
+    --color-border-strong: #3a2e46;
     --color-fg: #f3eef7;
     --color-fg-muted: #b8adc3;
     --color-fg-subtle: #91869c;
@@ -699,6 +699,19 @@ select {
   color: var(--color-fg-muted);
   font-weight: 600;
   pointer-events: none;
+}
+
+/* Sem as setinhas nativas do campo numérico: no escuro elas viram
+   caixinhas claras destoando, e o valor se digita mais rápido. */
+.input-prefix > .input {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.input-prefix > .input::-webkit-outer-spin-button,
+.input-prefix > .input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .input-prefix > .input {
