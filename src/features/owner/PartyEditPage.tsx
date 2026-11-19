@@ -8,6 +8,7 @@ import { Icon } from "@/shared/components/Icon";
 import { DateInputBR } from "@/shared/components/DateInputBR";
 import { ImagePickerBox } from "@/shared/components/ImagePickerBox";
 import { ErrorBanner } from "@/shared/components/Feedback";
+import { useOverlay } from "@/shared/components/Overlay";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
 import { usePartyDetail } from "./usePartyDetail";
 
@@ -22,6 +23,7 @@ export function PartyEditPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const { data, isLoading, isError, error } = usePartyDetail(partyId);
   const queryClient = useQueryClient();
+  const { toast } = useOverlay();
 
   const [form, setForm] = useState<{
     name: string;
@@ -56,7 +58,10 @@ export function PartyEditPage() {
         rsvpDeadline: form?.rsvpDeadline ? new Date(form.rsvpDeadline).toISOString() : undefined,
         addCustomCategories,
       }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
+    onSuccess: (_data, addCustomCategories) => {
+      toast(addCustomCategories ? "Categoria adicionada" : "Regras salvas");
+      void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] });
+    },
   });
 
   const removeCategory = useMutation({
@@ -70,7 +75,10 @@ export function PartyEditPage() {
   const setCover = useMutation({
     mutationFn: (imageDataUrl: string | null) =>
       api.post(`/api/parties/${partyId}/set-cover`, { imageDataUrl }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
+    onSuccess: () => {
+      toast("Capa atualizada");
+      void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] });
+    },
   });
 
   async function handleCoverSelected(file: File | undefined) {
@@ -92,12 +100,17 @@ export function PartyEditPage() {
     }
   }
 
+  const rangeError =
+    form && Number(form.valueMax) < Number(form.valueMin) ? "O máximo precisa ser maior que o mínimo." : null;
+
   if (!partyId) return null;
   if (isLoading || isError || !form || !data) return <PartyLoadState isLoading={isLoading || (!form && !isError)} error={error} />;
 
   return (
     <PartyLayout partyId={partyId} name={data.name} status={data.status}>
+      <div className="card-stack">
       <form
+        className="card-stack"
         onSubmit={(e) => {
           e.preventDefault();
           save.mutate(undefined);
@@ -121,8 +134,14 @@ export function PartyEditPage() {
             <Field label="Valor mínimo" htmlFor="value-min">
               <MoneyInput id="value-min" value={form.valueMin} onChange={(e) => setForm({ ...form, valueMin: e.target.value })} />
             </Field>
-            <Field label="Valor máximo" htmlFor="value-max">
-              <MoneyInput id="value-max" value={form.valueMax} onChange={(e) => setForm({ ...form, valueMax: e.target.value })} />
+            <Field label="Valor máximo" htmlFor="value-max" error={rangeError}>
+              <MoneyInput
+                id="value-max"
+                value={form.valueMax}
+                aria-invalid={rangeError ? true : undefined}
+                aria-describedby={rangeError ? "value-max-error" : undefined}
+                onChange={(e) => setForm({ ...form, valueMax: e.target.value })}
+              />
             </Field>
           </div>
           <Field label="Lista de micos" htmlFor="forbidden" hint="Presentes que ninguém quer ganhar." optional>
@@ -141,11 +160,10 @@ export function PartyEditPage() {
           </Field>
         </FormSection>
 
-        <div className="form-footer" style={{ marginBottom: 8 }}>
-          <Button type="submit" loading={save.isPending}>
+        <div className="form-footer">
+          <Button type="submit" loading={save.isPending} disabled={Boolean(rangeError)}>
             {save.isPending ? "Salvando…" : "Salvar alterações"}
           </Button>
-          {save.isSuccess && !save.isPending && <span className="status status--success">Salvo</span>}
         </div>
         {save.isError && <ErrorBanner message={save.error.message} />}
       </form>
@@ -208,6 +226,7 @@ export function PartyEditPage() {
           </Button>
         </form>
       </FormSection>
+      </div>
     </PartyLayout>
   );
 }

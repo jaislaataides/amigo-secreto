@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Button, CheckOption, Stack } from "@/shared/components/ui";
+import { Button, CheckOption, FormSection, Stack } from "@/shared/components/ui";
 import { ErrorBanner } from "@/shared/components/Feedback";
+import { useOverlay } from "@/shared/components/Overlay";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
 import { useMyPartyView } from "./useMyPartyView";
 
@@ -11,6 +12,7 @@ export function ParticipantPreferencesPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const { data, isLoading, isError, error } = useMyPartyView(partyId);
   const queryClient = useQueryClient();
+  const { toast } = useOverlay();
   const [selected, setSelected] = useState<string[]>([]);
 
   useEffect(() => {
@@ -19,7 +21,10 @@ export function ParticipantPreferencesPage() {
 
   const save = useMutation({
     mutationFn: () => api.post(`/api/parties/${partyId}/me/preferences`, { categoryIds: selected }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["participant", "me", partyId] }),
+    onSuccess: () => {
+      toast("Preferências salvas");
+      void queryClient.invalidateQueries({ queryKey: ["participant", "me", partyId] });
+    },
   });
 
   if (!partyId) return null;
@@ -29,14 +34,13 @@ export function ParticipantPreferencesPage() {
 
   return (
     <ParticipantLayout partyId={partyId} name={data.party.name} imageUrl={data.party.imageUrl}>
-      <Stack gap={20}>
+      <Stack gap={16}>
+        <FormSection
+          title="Que tipo de presente você curte?"
+          description="Marque quantas quiser. Quem te tirar usa isso pra não pagar mico."
+        >
         <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
-          <legend className="section-title" style={{ padding: 0 }}>
-            Que tipo de presente você curte?
-          </legend>
-          <p className="hint" style={{ marginBottom: 12 }}>
-            Marque quantas quiser. Quem te tirar usa isso pra não pagar mico.
-          </p>
+          <legend className="sr-only">Categorias</legend>
           <div className="options">
             {data.party.categories.map((c) => (
               <CheckOption
@@ -50,6 +54,7 @@ export function ParticipantPreferencesPage() {
             ))}
           </div>
         </fieldset>
+        </FormSection>
 
         {save.isError && <ErrorBanner message={save.error.message} />}
         <div className="form-footer">
@@ -57,7 +62,6 @@ export function ParticipantPreferencesPage() {
             {save.isPending ? "Salvando…" : "Salvar preferências"}
           </Button>
           {dirty && <span className="status status--warning">Alterações não salvas</span>}
-          {save.isSuccess && !dirty && <span className="status status--success">Salvo</span>}
         </div>
       </Stack>
     </ParticipantLayout>

@@ -4,6 +4,7 @@ import { api } from "@/shared/api/client";
 import { Button, FormSection, Input, Page, PageHeader, Status } from "@/shared/components/ui";
 import { STATUS_LABEL, STATUS_TONE } from "@/features/owner/partyStatus";
 import { ErrorBanner, InlineLoading } from "@/shared/components/Feedback";
+import { useOverlay } from "@/shared/components/Overlay";
 
 interface AuthorizedOwnerRow {
   email: string;
@@ -36,9 +37,11 @@ export function AdminDashboardPage() {
     <Page maxWidth={860}>
       <PageHeader title="Painel do admin" />
 
+      <div className="card-stack">
       <FormSection
         title="Pedidos de organizador"
         description={pendingCount ? `${pendingCount} aguardando aprovação.` : "Nenhum pedido pendente."}
+        flush
       >
         {owners.isLoading && <InlineLoading />}
         {owners.isError && <ErrorBanner message={owners.error.message} />}
@@ -52,11 +55,12 @@ export function AdminDashboardPage() {
         )}
       </FormSection>
 
-      <FormSection title="Parties" description="Ajuste o limite de participantes de cada uma.">
+      <FormSection title="Parties" description="Ajuste o limite de participantes de cada uma." flush>
         {parties.isLoading && <InlineLoading />}
         {parties.isError && <ErrorBanner message={parties.error.message} />}
         {parties.data && <PartiesTable rows={parties.data.parties} onChanged={() => void parties.refetch()} />}
       </FormSection>
+      </div>
     </Page>
   );
 }
@@ -64,10 +68,14 @@ export function AdminDashboardPage() {
 const ORDER: Record<AuthorizedOwnerRow["status"], number> = { pending: 0, approved: 1, rejected: 2 };
 
 function OwnersTable(props: { rows: AuthorizedOwnerRow[]; onDecided: () => void }) {
+  const { toast } = useOverlay();
   const decide = useMutation({
     mutationFn: (input: { email: string; decision: "approved" | "rejected" }) =>
       api.post("/api/owners/approve", input),
-    onSuccess: props.onDecided,
+    onSuccess: (_data, input) => {
+      toast(input.decision === "approved" ? `${input.email} aprovado(a)` : `${input.email} rejeitado(a)`);
+      props.onDecided();
+    },
   });
 
   if (props.rows.length === 0) {
@@ -129,6 +137,7 @@ function OwnerStatus(props: { status: string }) {
 
 function PartiesTable(props: { rows: PartyRow[]; onChanged: () => void }) {
   const queryClient = useQueryClient();
+  const { toast } = useOverlay();
   const [editing, setEditing] = useState<string | null>(null);
   const [value, setValue] = useState("");
 
@@ -136,6 +145,7 @@ function PartiesTable(props: { rows: PartyRow[]; onChanged: () => void }) {
     mutationFn: (input: { partyId: string; maxParticipants: number }) =>
       api.post(`/api/parties/${input.partyId}/set-max-participants`, { maxParticipants: input.maxParticipants }),
     onSuccess: () => {
+      toast("Limite atualizado");
       setEditing(null);
       props.onChanged();
       void queryClient.invalidateQueries({ queryKey: ["admin", "parties"] });

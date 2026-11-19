@@ -1,8 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiClientError } from "@/shared/api/client";
-import { Button, Stack } from "@/shared/components/ui";
+import { Button, FormSection, Stack } from "@/shared/components/ui";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
+import { useOverlay } from "@/shared/components/Overlay";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
 import { usePartyDetail } from "./usePartyDetail";
 
@@ -10,6 +11,7 @@ export function PartyDrawPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const { data, isLoading, isError, error } = usePartyDetail(partyId);
   const queryClient = useQueryClient();
+  const { confirm } = useOverlay();
 
   const draw = useMutation({
     mutationFn: () => api.post<{ assignedCount: number }>(`/api/parties/${partyId}/draw`),
@@ -27,27 +29,23 @@ export function PartyDrawPage() {
 
   return (
     <PartyLayout partyId={partyId} name={data.name} status={data.status}>
-      <Stack gap={32}>
-        <div className="stats">
+      <Stack gap={16}>
+        <div className="card stats">
           <Stat value={going} label="confirmados" accent />
           <Stat value={pending} label="aguardando" />
           <Stat value={declined} label="não vão" />
         </div>
 
         {alreadyDrawn || draw.isSuccess ? (
-          <div>
-            <h2 className="section-title">Sorteio realizado</h2>
+          <FormSection title="Sorteio realizado">
             <p className="muted">
               {draw.isSuccess
                 ? `${draw.data.assignedCount} participantes receberam o link de revelação por e-mail.`
                 : "Cada participante recebeu por e-mail um link pessoal com quem tirou."}
             </p>
-          </div>
+          </FormSection>
         ) : (
-          <Stack gap={16}>
-            <h2 className="section-title" style={{ margin: 0 }}>
-              Pronto pra sortear?
-            </h2>
+          <FormSection title="Pronto pra sortear?">
             {!enough ? (
               <Alert tone="warning">É preciso ter pelo menos 3 participantes confirmados pra sortear.</Alert>
             ) : pending === 0 ? (
@@ -71,14 +69,19 @@ export function PartyDrawPage() {
                 size="lg"
                 loading={draw.isPending}
                 disabled={!enough}
-                onClick={() => {
-                  if (window.confirm(`Sortear agora entre ${going} confirmados? Os e-mails saem na hora.`)) draw.mutate();
+                onClick={async () => {
+                  const ok = await confirm({
+                    title: `Sortear entre ${going} confirmados?`,
+                    body: "Cada um recebe na hora, por e-mail, o link com quem tirou. O sorteio não pode ser desfeito.",
+                    confirmLabel: "Sortear agora",
+                  });
+                  if (ok) draw.mutate();
                 }}
               >
                 {draw.isPending ? "Sorteando…" : "Realizar sorteio"}
               </Button>
             </div>
-          </Stack>
+          </FormSection>
         )}
       </Stack>
     </PartyLayout>

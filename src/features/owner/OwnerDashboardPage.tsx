@@ -20,7 +20,7 @@ export function OwnerDashboardPage() {
   });
 
   return (
-    <Page>
+    <Page maxWidth={960}>
       <PageHeader title="Minhas parties" actions={<ButtonLink to="/owner/parties/new">Nova party</ButtonLink>} />
 
       {isLoading && <FullPageSpinner />}
@@ -36,18 +36,21 @@ export function OwnerDashboardPage() {
       )}
 
       {data && data.parties.length > 0 && (
-        <ul className="rows">
+        <ul className="party-grid">
           {data.parties.map((party) => (
             <li key={party.id}>
-              <Link to={`/owner/parties/${party.id}/participants`} className="row-item">
-                {party.imageUrl && <img src={party.imageUrl} alt="" className="row-item__thumb" loading="lazy" />}
-                <div className="row-item__main">
-                  <div className="row-item__title">{party.name}</div>
+              <Link to={`/owner/parties/${party.id}/participants`} className="card party-card">
+                {party.imageUrl && <img src={party.imageUrl} alt="" className="party-card__cover" loading="lazy" />}
+                <div className="party-card__body">
+                  <span className="party-card__name">{party.name}</span>
                   <Status tone={STATUS_TONE[party.status] ?? "neutral"}>
                     {STATUS_LABEL[party.status] ?? party.status}
                   </Status>
                 </div>
-                <Icon name="arrowRight" size={18} />
+                <span className="party-card__foot">
+                  Abrir
+                  <Icon name="arrowRight" size={16} />
+                </span>
               </Link>
             </li>
           ))}

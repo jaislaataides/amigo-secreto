@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Button, IconButton, Input, Stack } from "@/shared/components/ui";
 import { Alert, EmptyState, ErrorBanner } from "@/shared/components/Feedback";
+import { useOverlay } from "@/shared/components/Overlay";
 import { LinkPreview } from "@/shared/components/LinkPreview";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
 import { useMyPartyView } from "./useMyPartyView";
@@ -14,6 +15,7 @@ export function ParticipantReferencesPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const { data, isLoading, isError, error } = useMyPartyView(partyId);
   const queryClient = useQueryClient();
+  const { toast } = useOverlay();
   const [url, setUrl] = useState("");
 
   const invalidate = () => void queryClient.invalidateQueries({ queryKey: ["participant", "me", partyId] });
@@ -21,6 +23,7 @@ export function ParticipantReferencesPage() {
   const addLink = useMutation({
     mutationFn: () => api.post(`/api/parties/${partyId}/me/links`, { url: url.trim() }),
     onSuccess: () => {
+      toast("Link adicionado");
       setUrl("");
       invalidate();
     },
@@ -28,7 +31,10 @@ export function ParticipantReferencesPage() {
 
   const removeLink = useMutation({
     mutationFn: (linkId: string) => api.delete(`/api/parties/${partyId}/me/links?linkId=${linkId}`),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      toast("Link removido");
+      invalidate();
+    },
   });
 
   if (!partyId) return null;
@@ -38,9 +44,10 @@ export function ParticipantReferencesPage() {
 
   return (
     <ParticipantLayout partyId={partyId} name={data.party.name} imageUrl={data.party.imageUrl}>
-      <Stack gap={32}>
+      <Stack gap={24}>
         {links.length < MAX_LINKS ? (
           <form
+            className="card"
             onSubmit={(e) => {
               e.preventDefault();
               if (url.trim()) addLink.mutate();
@@ -80,7 +87,7 @@ export function ParticipantReferencesPage() {
           {links.length === 0 ? (
             <EmptyState>Nenhum link ainda. Referências são o melhor antídoto contra presente-mico.</EmptyState>
           ) : (
-            <ul className="rows">
+            <ul className="rows card card--flush">
               {links.map((link) => (
                 <li key={link.id}>
                   <LinkPreview

@@ -1,8 +1,10 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Stack } from "@/shared/components/ui";
-import { Alert, ErrorBanner } from "@/shared/components/Feedback";
+import { ErrorBanner } from "@/shared/components/Feedback";
+import { Icon } from "@/shared/components/Icon";
+import { useOverlay } from "@/shared/components/Overlay";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
 import { useMyPartyView } from "./useMyPartyView";
 
@@ -10,10 +12,14 @@ export function ParticipantRsvpPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const { data, isLoading, isError, error } = useMyPartyView(partyId);
   const queryClient = useQueryClient();
+  const { toast } = useOverlay();
 
   const confirm = useMutation({
     mutationFn: (rsvp: "going" | "not_going") => api.post(`/api/parties/${partyId}/me/confirm`, { rsvp }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["participant", "me", partyId] }),
+    onSuccess: (_data, rsvp) => {
+      toast(rsvp === "going" ? "Presença confirmada" : "Resposta registrada");
+      void queryClient.invalidateQueries({ queryKey: ["participant", "me", partyId] });
+    },
   });
 
   if (!partyId) return null;
@@ -26,7 +32,7 @@ export function ParticipantRsvpPage() {
   return (
     <ParticipantLayout partyId={partyId} name={party.name} imageUrl={party.imageUrl} subtitle={party.description}>
       <Stack gap={24}>
-        <div className="rules">
+        <div className="card rules">
           <div className="rules__item">
             <div className="rules__label">Valor do presente</div>
             <div className="rules__value">
@@ -65,10 +71,35 @@ export function ParticipantRsvpPage() {
         </section>
 
         {confirm.isError && <ErrorBanner message={confirm.error.message} />}
-        {confirm.isSuccess && me.rsvp === "going" && (
-          <Alert tone="success">
-            Presença confirmada. Aproveite pra marcar suas categorias e deixar referências de presente.
-          </Alert>
+
+        {current === "going" && (
+          <section className="enter">
+            <h2 className="section-title">Agora, dê pistas pra quem te tirar</h2>
+            <div className="next-steps">
+              <Link to={`/p/${partyId}/preferences`} className="card next-step">
+                <span>
+                  <strong>Categorias</strong>
+                  <span className="hint">
+                    {me.preferredCategories.length > 0
+                      ? `${me.preferredCategories.length} marcadas`
+                      : "Que tipo de presente você curte"}
+                  </span>
+                </span>
+                <Icon name="arrowRight" size={18} />
+              </Link>
+              <Link to={`/p/${partyId}/references`} className="card next-step">
+                <span>
+                  <strong>Referências</strong>
+                  <span className="hint">
+                    {me.referenceLinks.length > 0
+                      ? `${me.referenceLinks.length} ${me.referenceLinks.length === 1 ? "link" : "links"}`
+                      : "Links do que você quer ganhar"}
+                  </span>
+                </span>
+                <Icon name="arrowRight" size={18} />
+              </Link>
+            </div>
+          </section>
         )}
       </Stack>
     </ParticipantLayout>

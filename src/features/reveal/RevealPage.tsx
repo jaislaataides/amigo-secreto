@@ -2,9 +2,8 @@ import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api, ApiClientError } from "@/shared/api/client";
-import { Badge, Button } from "@/shared/components/ui";
+import { Badge } from "@/shared/components/ui";
 import { EmptyState, FullPageSpinner } from "@/shared/components/Feedback";
-import { Icon } from "@/shared/components/Icon";
 import { LinkPreview } from "@/shared/components/LinkPreview";
 
 interface RevealResult {
@@ -51,15 +50,11 @@ export function RevealPage() {
     return (
       <main className="reveal-screen">
         <div className="reveal reveal--closed">
-          <div className="reveal__gift reveal__gift--wiggle">
-            <Icon name="gift" size={48} strokeWidth={1.75} />
-          </div>
-          <p className="reveal__eyebrow">O sorteio saiu</p>
-          <h1 className="reveal__title">Seu amigo secreto está aqui dentro</h1>
-          <p className="reveal__hint">Pra não pagar mico: confira se ninguém está espiando sua tela.</p>
-          <Button size="lg" onClick={() => setOpened(true)}>
-            Abrir presente
-          </Button>
+          <p className="reveal__hint">O sorteio saiu. Pra não pagar mico, confira se ninguém está espiando sua tela.</p>
+          <button type="button" className="slip slip--folded slip--button" onClick={() => setOpened(true)}>
+            <span className="slip__label">Seu papelzinho</span>
+            <span className="slip__cta">Toque pra abrir</span>
+          </button>
         </div>
       </main>
     );
@@ -68,33 +63,35 @@ export function RevealPage() {
   return (
     <main className="reveal-screen">
       <div className="reveal">
-        <p className="reveal__eyebrow">Você tirou</p>
-        <h1 className="reveal__name" aria-live="polite">
-          {data.receiverName}
-        </h1>
-        {data.receiverCategories.length > 0 && (
-          <div className="enter" style={{ animationDelay: "200ms" }}>
-            <p className="reveal__eyebrow" style={{ marginBottom: 10 }}>
-              Curte ganhar
-            </p>
-            <div className="reveal__chips">
-              {data.receiverCategories.map((c) => (
-                <Badge key={c}>{c}</Badge>
-              ))}
-            </div>
+        <article className="slip slip--open" aria-live="polite">
+          <div className="slip__top">
+            <p className="slip__label">Você tirou</p>
+            <h1 className="slip__name">
+              <span className="mark">{data.receiverName}</span>
+            </h1>
           </div>
-        )}
+          {data.receiverCategories.length > 0 && (
+            <div className="slip__bottom">
+              <p className="slip__label">Curte ganhar</p>
+              <div className="reveal__chips">
+                {data.receiverCategories.map((c) => (
+                  <Badge key={c}>{c}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </article>
       </div>
 
-      <div className="reveal__body enter" style={{ animationDelay: "300ms" }}>
-        <div className="reveal__body-inner">
+      <div className="reveal__body">
+        <div className="reveal__body-inner enter" style={{ animationDelay: "380ms" }}>
           <h2 className="section-title">Ideias de presente</h2>
           {data.referenceLinks.length === 0 ? (
             <EmptyState>
               {data.receiverName} ainda não adicionou nenhuma referência. Use as categorias como pista.
             </EmptyState>
           ) : (
-            <ul className="rows">
+            <ul className="rows card card--flush">
               {data.referenceLinks.map((link) => (
                 <li key={link.id}>
                   <LinkPreview {...link} />
@@ -103,7 +100,7 @@ export function RevealPage() {
             </ul>
           )}
 
-          <p className="hint" style={{ marginTop: 32 }}>
+          <p className="hint" style={{ marginTop: 24 }}>
             Só você vê isso. O link fica disponível por 15 dias após o sorteio.
           </p>
         </div>

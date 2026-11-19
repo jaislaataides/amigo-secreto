@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Button, CheckOption, FormSection, IconButton } from "@/shared/components/ui";
 import { ErrorBanner } from "@/shared/components/Feedback";
+import { useOverlay } from "@/shared/components/Overlay";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
 import { usePartyDetail } from "./usePartyDetail";
 
@@ -15,6 +16,7 @@ export function PartyExclusionsPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const { data, isLoading, isError, error } = usePartyDetail(partyId);
   const queryClient = useQueryClient();
+  const { toast } = useOverlay();
 
   const [groups, setGroups] = useState<Group[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
@@ -28,7 +30,10 @@ export function PartyExclusionsPage() {
       api.put(`/api/parties/${partyId}/exclusions`, {
         exclusions: groups.map((g) => ({ type: "group", participantIds: g.participantIds })),
       }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
+    onSuccess: () => {
+      toast("Exclusões salvas");
+      void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] });
+    },
   });
 
   if (!partyId) return null;
@@ -40,9 +45,11 @@ export function PartyExclusionsPage() {
 
   return (
     <PartyLayout partyId={partyId} name={data.name} status={data.status}>
+      <div className="card-stack">
       <FormSection
         title="Grupos de exclusão"
         description="Pessoas no mesmo grupo nunca se tiram entre si. Útil pra casais e famílias."
+        flush
       >
         {groups.length === 0 ? (
           <p className="muted">Nenhum grupo. Todo mundo pode tirar todo mundo.</p>
@@ -101,13 +108,9 @@ export function PartyExclusionsPage() {
           {save.isPending ? "Salvando…" : "Salvar exclusões"}
         </Button>
         {dirty && <span className="status status--warning">Alterações não salvas</span>}
-        {save.isSuccess && !dirty && <span className="status status--success">Salvo</span>}
       </div>
-      {save.isError && (
-        <div style={{ marginTop: 12 }}>
-          <ErrorBanner message={save.error.message} />
-        </div>
-      )}
+      {save.isError && <ErrorBanner message={save.error.message} />}
+      </div>
     </PartyLayout>
   );
 }

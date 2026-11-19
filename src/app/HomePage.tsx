@@ -15,7 +15,7 @@ export function HomePage() {
       <PageHeader title={firstName ? `Olá, ${firstName}` : "Olá"} />
 
       {canOrganize || role.admin ? (
-        <ul className="rows">
+        <ul className="rows card card--flush">
           {canOrganize && (
             <HomeRow to="/owner" title="Minhas parties" description="Criar e acompanhar seus amigos secretos." />
           )}

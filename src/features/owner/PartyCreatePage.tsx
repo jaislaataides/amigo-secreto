@@ -92,11 +92,14 @@ export function PartyCreatePage() {
     }
   }
 
+  const rangeError = Number(valueMax) < Number(valueMin) ? "O máximo precisa ser maior que o mínimo." : null;
+
   return (
     <Page>
       <PageHeader back={PARTY_BACK} title="Nova party" subtitle="Dá pra ajustar quase tudo depois." />
 
       <form
+        className="card-stack"
         onSubmit={(e) => {
           e.preventDefault();
           createParty.mutate();
@@ -135,8 +138,15 @@ export function PartyCreatePage() {
             <Field label="Valor mínimo" htmlFor="value-min">
               <MoneyInput id="value-min" value={valueMin} onChange={(e) => setValueMin(e.target.value)} required />
             </Field>
-            <Field label="Valor máximo" htmlFor="value-max">
-              <MoneyInput id="value-max" value={valueMax} onChange={(e) => setValueMax(e.target.value)} required />
+            <Field label="Valor máximo" htmlFor="value-max" error={rangeError}>
+              <MoneyInput
+                id="value-max"
+                value={valueMax}
+                aria-invalid={rangeError ? true : undefined}
+                aria-describedby={rangeError ? "value-max-error" : undefined}
+                onChange={(e) => setValueMax(e.target.value)}
+                required
+              />
             </Field>
           </div>
 
@@ -218,14 +228,10 @@ export function PartyCreatePage() {
           </Field>
         </FormSection>
 
-        {createParty.isError && (
-          <div style={{ marginBottom: 16 }}>
-            <ErrorBanner message={createParty.error.message} />
-          </div>
-        )}
+        {createParty.isError && <ErrorBanner message={createParty.error.message} />}
 
         <div className="form-footer">
-          <Button type="submit" size="lg" loading={createParty.isPending} disabled={compressingImage}>
+          <Button type="submit" size="lg" loading={createParty.isPending} disabled={compressingImage || Boolean(rangeError)}>
             {createParty.isPending ? "Criando…" : "Criar party"}
           </Button>
           <ButtonLink to="/owner" variant="ghost">
