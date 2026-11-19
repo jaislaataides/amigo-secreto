@@ -1,6 +1,6 @@
 import { FieldValue, type DocumentReference } from "firebase-admin/firestore";
 import { adminDb } from "../firebaseAdmin.js";
-import { getMailFrom, getResendClient } from "./resendClient.js";
+import { getMailFrom, getMailTransport } from "./mailTransport.js";
 import { renderMailTemplate } from "./templates.js";
 import type { MailTemplate } from "../../../shared/types.js";
 
@@ -15,15 +15,7 @@ export interface MailInput {
 async function deliver(ref: DocumentReference, input: MailInput): Promise<void> {
   try {
     const { subject, html } = await renderMailTemplate(input.template, input.payload);
-    // O SDK do Resend NÃO lança exceção quando a API rejeita o envio (ex:
-    // modo sandbox sem domínio verificado só aceita o e-mail da própria
-    // conta) — ele devolve { data, error } normalmente, sem throw. Por
-    // isso precisa checar `error` explicitamente, senão isso vira um
-    // "sucesso" silencioso que nunca entrega nada.
-    const result = await getResendClient().emails.send({ from: getMailFrom(), to: input.to, subject, html });
-    if (result.error) {
-      throw new Error(`${result.error.name}: ${result.error.message}`);
-    }
+    await getMailTransport().sendMail({ from: getMailFrom(), to: input.to, subject, html });
     await ref.update({ status: "sent", sentAt: FieldValue.serverTimestamp() });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

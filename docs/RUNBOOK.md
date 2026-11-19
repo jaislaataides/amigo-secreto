@@ -7,7 +7,7 @@ Guia operacional: setup inicial, segredos, deploy e manutenção.
 - Node 20+
 - Uma conta Google pra criar o projeto Firebase (fica no plano **Spark**, gratuito — nunca precisa virar Blaze)
 - Uma conta Vercel (plano Hobby, gratuito)
-- Uma conta [Resend](https://resend.com) (free tier)
+- Uma conta Gmail **dedicada** (não a pessoal) só pra enviar os e-mails do app via SMTP
 
 ## 2. Criar o projeto Firebase
 
@@ -31,15 +31,18 @@ openssl rand -hex 32      # -> CRON_SECRET
 
 Guarde os dois com cuidado — principalmente a KEK: perdê-la torna **todos** os sorteios já realizados irrecuperáveis (não há como decifrar nenhum assignment sem ela).
 
-## 4. Resend
+## 4. Conta de e-mail (Gmail dedicado + SMTP)
 
-1. Crie uma conta em resend.com e gere uma API key → `RESEND_API_KEY`.
-2. Sem domínio verificado, o Resend funciona em **modo sandbox**: só envia e-mails para o endereço da sua própria conta — suficiente pra testar o fluxo inteiro sozinho antes de convidar qualquer um.
-3. Pra produção, ver seção 8.
+Sem domínio próprio nem serviço de e-mail transacional terceiro, o envio é feito por SMTP direto, usando uma conta Gmail dedicada só pra isso (não a pessoal).
+
+1. Crie uma conta Gmail nova, separada (ex: `amigosecreto.app@gmail.com`).
+2. Ative a **verificação em duas etapas** nela (myaccount.google.com/security) — é pré-requisito pra gerar senha de app, e só aparece disponível depois que o 2FA está confirmado (pode levar um tempo pra liberar em contas muito novas).
+3. Gere uma **senha de app** em [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) (16 caracteres, sem espaços) → `SMTP_APP_PASSWORD`. O endereço da conta vai em `SMTP_USER`.
+4. Essa conta tem um limite diário de envio do Gmail (varia, mas é algo como ~500 e-mails/dia) — bem acima do necessário pra convites de amigo secreto.
 
 ## 5. Variáveis de ambiente
 
-Copie `.env.example` para `.env.local` e preencha tudo. As mesmas variáveis precisam existir no painel da Vercel (**Project Settings → Environment Variables**) — marque `FIREBASE_ADMIN_PRIVATE_KEY`, `MASTER_KEK_BASE64`, `RESEND_API_KEY` e `CRON_SECRET` como **Sensitive**.
+Copie `.env.example` para `.env.local` e preencha tudo. As mesmas variáveis precisam existir no painel da Vercel (**Project Settings → Environment Variables**) — marque `FIREBASE_ADMIN_PRIVATE_KEY`, `MASTER_KEK_BASE64`, `SMTP_APP_PASSWORD` e `CRON_SECRET` como **Sensitive**.
 
 `APP_BASE_URL` é a URL pública do deploy (ex: `https://seu-app.vercel.app`) — usada só pra montar os links dos e-mails.
 
@@ -75,15 +78,9 @@ Cria as categorias base (livre, doces, livros & HQs, jogos, beleza, casa & cozin
 3. Peça pra essa pessoa recarregar a página — o painel `/admin` já deve aparecer.
 4. Dali em diante, owners são aprovados pelo próprio painel `/admin` (sem precisar deste script de novo).
 
-## 10. Configurar domínio no Resend (produção)
+## 10. E-mail em produção
 
-Enquanto isso não é feito, o Resend só envia pro e-mail da sua própria conta (modo sandbox) — ok pra testar, não pra convidar participantes de verdade.
-
-1. No painel do Resend, adicione um **subdomínio dedicado** (ex: `mail.seudominio.com`) — não o domínio raiz, pra isolar a reputação de envio.
-2. Adicione os registros DNS que o Resend indicar: **SPF** (`TXT`) e **DKIM** (`CNAME`, geralmente 3 registros).
-3. Aguarde o status "Verified" no painel.
-4. Adicione um registro **DMARC** (`TXT` em `_dmarc.mail.seudominio.com`), política inicial `p=quarantine`.
-5. Atualize `MAIL_FROM` para usar o domínio verificado (ex: `Amigo Secreto <convites@mail.seudominio.com>`).
+Como o envio já é via SMTP direto com a conta Gmail dedicada (seção 4), não existe etapa extra de verificação de domínio — funciona pra qualquer destinatário desde o primeiro dia. Só fique de olho no limite diário de envio da conta (item 4 da seção 4) se o grupo de participantes for muito grande.
 
 ## 11. Rodando localmente
 
@@ -112,4 +109,4 @@ A KEK mestra nunca deveria precisar rotacionar no uso normal. Se precisar (ex: s
 
 ## 13. Nota sobre `npm audit`
 
-`npm audit` reporta algumas vulnerabilidades (`tar`, `tinypool`) que vêm de dependências de **desenvolvimento** (Vitest/esbuild) — nunca entram no bundle do front-end nem no runtime das API routes na Vercel. As dependências de produção (`firebase`, `firebase-admin`, `resend`, `cheerio`, etc.) são mantidas sem vulnerabilidades altas/críticas conhecidas (ver `package.json` → campo `overrides` pra o pin do `@grpc/grpc-js`).
+`npm audit` reporta algumas vulnerabilidades (`tar`, `tinypool`) que vêm de dependências de **desenvolvimento** (Vitest/esbuild) — nunca entram no bundle do front-end nem no runtime das API routes na Vercel. As dependências de produção (`firebase`, `firebase-admin`, `nodemailer`, `cheerio`, etc.) são mantidas sem vulnerabilidades altas/críticas conhecidas (ver `package.json` → campo `overrides` pra o pin do `@grpc/grpc-js`).
