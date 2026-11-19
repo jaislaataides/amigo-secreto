@@ -23,9 +23,20 @@ export function Page(props: { children: ReactNode; maxWidth?: number }) {
   );
 }
 
+/** Logotipo em texto: o "mico" destacado é o trocadilho do nome. */
+export function Wordmark() {
+  return (
+    <span className="wordmark">
+      A<em>mico</em> Secreto
+    </span>
+  );
+}
+
 export function PageHeader(props: {
   title: string;
   subtitle?: ReactNode;
+  /** Linha curta sob o título (status, contagens). */
+  meta?: ReactNode;
   actions?: ReactNode;
   back?: { to: string; label: string };
 }) {
@@ -39,6 +50,7 @@ export function PageHeader(props: {
           </Link>
         )}
         <h1 className="page-title">{props.title}</h1>
+        {props.meta && <div className="page-header__meta">{props.meta}</div>}
         {props.subtitle && <p className="page-subtitle">{props.subtitle}</p>}
       </div>
       {props.actions}
