@@ -5,7 +5,7 @@ import { api } from "@/shared/api/client";
 import { EmptyState, ErrorBanner, InlineLoading } from "@/shared/components/Feedback";
 import { Icon } from "@/shared/components/Icon";
 import { ButtonLink, Page, PageHeader, Section } from "@/shared/components/ui";
-import { PartyCard, useOwnerParties } from "@/features/owner/PartyCard";
+import { InvitedPartyCard, PartyCard, useInvitedParties, useOwnerParties } from "@/features/owner/PartyCard";
 import { FirstPartyOnboarding } from "@/features/owner/FirstPartyOnboarding";
 import { Steps, type Step } from "@/shared/components/Steps";
 
@@ -89,7 +89,42 @@ function OrganizerHome(props: { title: string; highlight?: string; isAdmin: bool
           )}
         </Section>
       )}
+
+      <InvitesSection hideWhenEmpty />
     </>
+  );
+}
+
+/** Convites (parties em que você é participante) com a sua resposta. */
+function InvitesSection(props: { hideWhenEmpty?: boolean }) {
+  const invited = useInvitedParties();
+  const list = invited.data?.parties ?? [];
+  if (props.hideWhenEmpty && (!invited.data || list.length === 0)) return null;
+
+  return (
+    <Section
+      title="Seus convites"
+      count={invited.data ? list.length : undefined}
+      actions={
+        list.length > HOME_PARTY_LIMIT ? (
+          <Link to="/owner" className="small">
+            Ver todos
+          </Link>
+        ) : undefined
+      }
+    >
+      {invited.isLoading && <InlineLoading />}
+      {invited.isError && <ErrorBanner message={invited.error.message} />}
+      {list.length > 0 && (
+        <ul className="party-grid list">
+          {list.slice(0, HOME_PARTY_LIMIT).map((party) => (
+            <li key={party.id}>
+              <InvitedPartyCard party={party} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
   );
 }
 
@@ -128,11 +163,20 @@ const STEPS: Step[] = [
 
 /** Participante não tem lista de parties (o acesso é pelo link do e-mail). */
 function ParticipantHome() {
+  const invited = useInvitedParties();
+  const hasInvites = (invited.data?.parties.length ?? 0) > 0;
+
   return (
     <>
-      <EmptyState icon="mail" title="Procurando sua party?">
-        Use o link que chegou no seu e-mail (convite ou resultado do sorteio).
-      </EmptyState>
+      {hasInvites ? (
+        <InvitesSection />
+      ) : invited.isLoading ? (
+        <InlineLoading />
+      ) : (
+        <EmptyState icon="mail" title="Nenhum convite por enquanto">
+          Quando alguém te chamar pra um amigo secreto, ele aparece aqui (e no seu e-mail).
+        </EmptyState>
+      )}
 
       <Section title="Como funciona">
         <Steps steps={STEPS} />

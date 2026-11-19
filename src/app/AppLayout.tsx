@@ -8,8 +8,6 @@ import { IconButton } from "@/shared/components/ui";
 
 export function AppLayout(props: { children: ReactNode }) {
   const { user, role, signOutUser } = useAuth();
-  // Admin tem acesso a tudo que um owner tem — organizar parties incluso.
-  const canOrganize = role.owner || role.admin;
   // Só depois da tela de entrada: o roxo dela recolhe até virar o cabeçalho.
   const [entering] = useState(cameFromSplash);
 
@@ -29,11 +27,9 @@ export function AppLayout(props: { children: ReactNode }) {
             <NavLink to="/home" className="app-nav__link">
               Início
             </NavLink>
-            {canOrganize && (
-              <NavLink to="/owner" className="app-nav__link">
-                Minhas parties
-              </NavLink>
-            )}
+            <NavLink to="/owner" className="app-nav__link">
+              Minhas parties
+            </NavLink>
             {role.admin && (
               <NavLink to="/admin" className="app-nav__link">
                 Admin

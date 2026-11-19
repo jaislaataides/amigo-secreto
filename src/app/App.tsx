@@ -60,7 +60,8 @@ export function App() {
             <Route
               path="/owner"
               element={
-                <Protected requireRole="owner">
+                // Aberta a todos: lista também os convites de quem só participa.
+                <Protected>
                   <OwnerDashboardPage />
                 </Protected>
               }

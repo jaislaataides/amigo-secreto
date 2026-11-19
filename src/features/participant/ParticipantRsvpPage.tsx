@@ -15,7 +15,11 @@ export function ParticipantRsvpPage() {
 
   const confirm = useMutation({
     mutationFn: (rsvp: "going" | "not_going") => api.post(`/api/parties/${partyId}/me/confirm`, { rsvp }),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["participant", "me", partyId] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["participant", "me", partyId] });
+      // A resposta aparece na pill do card em "Minhas parties".
+      void queryClient.invalidateQueries({ queryKey: ["participant", "invited"] });
+    },
   });
 
   if (!partyId) return null;
