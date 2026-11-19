@@ -4,6 +4,7 @@ import { api, ApiClientError } from "@/shared/api/client";
 import { Button, Card, Stack } from "@/shared/components/ui";
 import { Icon } from "@/shared/components/Icon";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
+import { useConfirm } from "@/shared/components/ConfirmDialog";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
 import { usePartyDetail } from "./usePartyDetail";
 
@@ -11,6 +12,7 @@ export function PartyDrawPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const { data, isLoading, isError, error } = usePartyDetail(partyId);
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
 
   const draw = useMutation({
     mutationFn: () => api.post<{ assignedCount: number }>(`/api/parties/${partyId}/draw`),
@@ -46,9 +48,9 @@ export function PartyDrawPage() {
                   Sorteio realizado
                 </h2>
                 <p className="muted" style={{ marginTop: 4 }}>
-              {draw.isSuccess
-                ? `${draw.data.assignedCount} participantes receberam o link de revelação por e-mail.`
-                : "Cada participante recebeu por e-mail um link pessoal com quem tirou."}
+                  {draw.isSuccess
+                    ? `${draw.data.assignedCount} participantes receberam o link de revelação por e-mail.`
+                    : "Cada participante recebeu por e-mail um link pessoal com quem tirou."}
                 </p>
               </div>
             </div>
@@ -84,7 +86,12 @@ export function PartyDrawPage() {
                   loading={draw.isPending}
                   disabled={!enough}
                   onClick={() => {
-                    if (window.confirm(`Sortear agora entre ${going} confirmados? Os e-mails saem na hora.`)) draw.mutate();
+                    void confirm({
+                      title: `Sortear entre ${going} confirmados?`,
+                      message:
+                        "Cada um recebe na hora um e-mail com o link de quem tirou. Depois disso não dá pra desfazer nem sortear de novo.",
+                      confirmLabel: "Sortear agora",
+                    }).then((ok) => ok && draw.mutate());
                   }}
                 >
                   {draw.isPending ? "Sorteando…" : "Realizar sorteio"}

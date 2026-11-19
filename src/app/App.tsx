@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { queryClient } from "@/shared/api/queryClient";
+import { ConfirmProvider } from "@/shared/components/ConfirmDialog";
 import { AuthProvider } from "@/auth/AuthContext";
 import { AuthGuard } from "@/auth/AuthGuard";
 import { LoginPage } from "@/auth/LoginPage";
@@ -34,126 +35,128 @@ function Protected(props: { requireRole?: "admin" | "owner"; children: ReactNode
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<LoginPage />} />
-            <Route path="/solicitar-acesso" element={<RequestOwnerAccessPage />} />
+      <ConfirmProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<LoginPage />} />
+              <Route path="/solicitar-acesso" element={<RequestOwnerAccessPage />} />
 
-            <Route
-              path="/home"
-              element={
-                <Protected>
-                  <HomePage />
-                </Protected>
-              }
-            />
+              <Route
+                path="/home"
+                element={
+                  <Protected>
+                    <HomePage />
+                  </Protected>
+                }
+              />
 
-            <Route
-              path="/admin"
-              element={
-                <Protected requireRole="admin">
-                  <AdminDashboardPage />
-                </Protected>
-              }
-            />
+              <Route
+                path="/admin"
+                element={
+                  <Protected requireRole="admin">
+                    <AdminDashboardPage />
+                  </Protected>
+                }
+              />
 
-            <Route
-              path="/owner"
-              element={
-                // Aberta a todos: lista também os convites de quem só participa.
-                <Protected>
-                  <OwnerDashboardPage />
-                </Protected>
-              }
-            />
-            <Route
-              path="/owner/parties/new"
-              element={
-                <Protected requireRole="owner">
-                  <PartyCreatePage />
-                </Protected>
-              }
-            />
-            <Route
-              path="/owner/parties/:partyId/edit"
-              element={
-                <Protected requireRole="owner">
-                  <PartyEditPage />
-                </Protected>
-              }
-            />
-            <Route
-              path="/owner/parties/:partyId/participants"
-              element={
-                <Protected requireRole="owner">
-                  <PartyParticipantsPage />
-                </Protected>
-              }
-            />
-            <Route
-              path="/owner/parties/:partyId/exclusions"
-              element={
-                <Protected requireRole="owner">
-                  <PartyExclusionsPage />
-                </Protected>
-              }
-            />
-            <Route
-              path="/owner/parties/:partyId/draw"
-              element={
-                <Protected requireRole="owner">
-                  <PartyDrawPage />
-                </Protected>
-              }
-            />
+              <Route
+                path="/owner"
+                element={
+                  // Aberta a todos: lista também os convites de quem só participa.
+                  <Protected>
+                    <OwnerDashboardPage />
+                  </Protected>
+                }
+              />
+              <Route
+                path="/owner/parties/new"
+                element={
+                  <Protected requireRole="owner">
+                    <PartyCreatePage />
+                  </Protected>
+                }
+              />
+              <Route
+                path="/owner/parties/:partyId/edit"
+                element={
+                  <Protected requireRole="owner">
+                    <PartyEditPage />
+                  </Protected>
+                }
+              />
+              <Route
+                path="/owner/parties/:partyId/participants"
+                element={
+                  <Protected requireRole="owner">
+                    <PartyParticipantsPage />
+                  </Protected>
+                }
+              />
+              <Route
+                path="/owner/parties/:partyId/exclusions"
+                element={
+                  <Protected requireRole="owner">
+                    <PartyExclusionsPage />
+                  </Protected>
+                }
+              />
+              <Route
+                path="/owner/parties/:partyId/draw"
+                element={
+                  <Protected requireRole="owner">
+                    <PartyDrawPage />
+                  </Protected>
+                }
+              />
 
-            <Route
-              path="/p/:partyId/preferences"
-              element={
-                <Protected>
-                  <ParticipantPreferencesPage />
-                </Protected>
-              }
-            />
-            <Route
-              path="/p/:partyId/sizes"
-              element={
-                <Protected>
-                  <ParticipantSizesPage />
-                </Protected>
-              }
-            />
-            <Route
-              path="/p/:partyId/references"
-              element={
-                <Protected>
-                  <ParticipantReferencesPage />
-                </Protected>
-              }
-            />
-            <Route
-              path="/p/:partyId/rsvp"
-              element={
-                <Protected>
-                  <ParticipantRsvpPage />
-                </Protected>
-              }
-            />
+              <Route
+                path="/p/:partyId/preferences"
+                element={
+                  <Protected>
+                    <ParticipantPreferencesPage />
+                  </Protected>
+                }
+              />
+              <Route
+                path="/p/:partyId/sizes"
+                element={
+                  <Protected>
+                    <ParticipantSizesPage />
+                  </Protected>
+                }
+              />
+              <Route
+                path="/p/:partyId/references"
+                element={
+                  <Protected>
+                    <ParticipantReferencesPage />
+                  </Protected>
+                }
+              />
+              <Route
+                path="/p/:partyId/rsvp"
+                element={
+                  <Protected>
+                    <ParticipantRsvpPage />
+                  </Protected>
+                }
+              />
 
-            {/* Sem AppLayout de propósito: a revelação é uma tela de foco único,
+              {/* Sem AppLayout de propósito: a revelação é uma tela de foco único,
                 sem navegação de distração — a pessoa só quer ver quem tirou. */}
-            <Route
-              path="/reveal/:partyId/:participantId"
-              // Sem AuthGuard: quem chega sem login entra ali mesmo, na tela da
-              // revelação, e o papelzinho abre na sequência (mesma URL).
-              element={<RevealPage />}
-            />
+              <Route
+                path="/reveal/:partyId/:participantId"
+                // Sem AuthGuard: quem chega sem login entra ali mesmo, na tela da
+                // revelação, e o papelzinho abre na sequência (mesma URL).
+                element={<RevealPage />}
+              />
 
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </ConfirmProvider>
     </QueryClientProvider>
   );
 }

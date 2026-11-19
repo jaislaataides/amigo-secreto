@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Avatar, Badge, Button, Card, IconButton, Input, Stack, type BadgeTone } from "@/shared/components/ui";
 import { Alert, EmptyState, ErrorBanner } from "@/shared/components/Feedback";
+import { useConfirm } from "@/shared/components/ConfirmDialog";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
 import { usePartyDetail } from "./usePartyDetail";
 
@@ -34,6 +35,7 @@ export function PartyParticipantsPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const { data, isLoading, isError, error } = usePartyDetail(partyId);
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [rows, setRows] = useState<Row[]>([{ name: "", email: "" }]);
 
   const invalidate = () => void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] });
@@ -139,8 +141,11 @@ export function PartyParticipantsPage() {
                         loading={resendInvite.isPending && resendInvite.variables === p.id}
                         disabled={resendInvite.isPending}
                         onClick={() => {
-                          if (window.confirm(`Reenviar o convite para ${p.email}? O link anterior deixa de funcionar.`))
-                            resendInvite.mutate(p.id);
+                          void confirm({
+                            title: `Reenviar convite para ${p.name}?`,
+                            message: `Um novo link vai pra ${p.email}. O link anterior deixa de funcionar.`,
+                            confirmLabel: "Reenviar",
+                          }).then((ok) => ok && resendInvite.mutate(p.id));
                         }}
                       />
                     )}
@@ -157,7 +162,12 @@ export function PartyParticipantsPage() {
                         loading={removeParticipant.isPending && removeParticipant.variables === p.id}
                         disabled={removeParticipant.isPending}
                         onClick={() => {
-                          if (window.confirm(`Remover ${p.name} da party?`)) removeParticipant.mutate(p.id);
+                          void confirm({
+                            title: `Remover ${p.name}?`,
+                            message: "A pessoa sai da party, junto com as categorias, medidas e links que ela deixou.",
+                            confirmLabel: "Remover",
+                            tone: "danger",
+                          }).then((ok) => ok && removeParticipant.mutate(p.id));
                         }}
                       />
                     )}
