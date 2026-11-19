@@ -6,6 +6,9 @@ import { Badge, Button, Stack } from "@/shared/components/ui";
 import { EmptyState, FullPageSpinner } from "@/shared/components/Feedback";
 import { Icon } from "@/shared/components/Icon";
 import { LinkPreview } from "@/shared/components/LinkPreview";
+import { useAuth } from "@/auth/AuthContext";
+import { AppSplash } from "@/auth/AppSplash";
+import { GoogleSignInButton } from "@/auth/GoogleSignInButton";
 
 interface RevealResult {
   receiverName: string;
@@ -26,11 +29,12 @@ export function RevealPage() {
   // O nome só aparece depois de um toque — evita spoiler pra quem estiver
   // olhando a tela junto, e dá um momento de "abrir o presente".
   const [opened, setOpened] = useState(false);
+  const { user, loading: authLoading, unauthorized } = useAuth();
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["reveal", partyId, participantId, token],
     queryFn: () => api.post<RevealResult>("/api/reveal", { partyId, participantId, token }),
-    enabled: Boolean(partyId && participantId && token),
+    enabled: Boolean(partyId && participantId && token && user),
     retry: false,
   });
 
@@ -39,6 +43,12 @@ export function RevealPage() {
       <RevealError message="Esse link está incompleto — falta o código de acesso. Abra o link exatamente como veio no e-mail." />
     );
   }
+
+  if (authLoading) return <AppSplash label="Carregando…" />;
+
+  // Normalmente quem clica no link do e-mail não está logado: entra aqui
+  // mesmo e o papelzinho abre na sequência, sem trocar de tela.
+  if (!user) return <RevealSignIn unauthorized={unauthorized} />;
 
   if (isLoading) return <FullPageSpinner />;
 
@@ -120,6 +130,32 @@ function RevealError(props: { message: string }) {
         <EmptyState icon="alert" title="Não deu pra abrir">
           {props.message}
         </EmptyState>
+      </div>
+    </main>
+  );
+}
+
+/** Tela fechada da revelação pra quem chegou pelo link sem estar logado. */
+function RevealSignIn(props: { unauthorized: boolean }) {
+  return (
+    <main className="reveal-screen">
+      <div className="reveal reveal--closed">
+        <div className="reveal__gift reveal__gift--wiggle">
+          <Icon name="lock" size={44} strokeWidth={1.75} />
+        </div>
+        <p className="reveal__eyebrow">O sorteio saiu</p>
+        <h1 className="reveal__title">Seu papelzinho está guardado</h1>
+        <p className="reveal__hint">
+          Pra abrir, entre com a conta Google do e-mail em que você recebeu este link. Só você consegue ver.
+        </p>
+        <div style={{ width: "100%", maxWidth: 360, display: "grid", gap: 12 }}>
+          {props.unauthorized && (
+            <p className="reveal__hint" style={{ margin: 0 }}>
+              Essa conta não participa de nenhuma party. Use a conta do e-mail que recebeu o link.
+            </p>
+          )}
+          <GoogleSignInButton label="Entrar com o Google pra abrir" />
+        </div>
       </div>
     </main>
   );

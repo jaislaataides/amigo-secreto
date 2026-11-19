@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { onAuthStateChanged, signInWithPopup, signOut, type User } from "firebase/auth";
+import { onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut, type User } from "firebase/auth";
 import { auth, googleProvider } from "@/shared/firebase/client";
 import { api, ApiClientError } from "@/shared/api/client";
 
@@ -111,7 +111,18 @@ export function AuthProvider(props: { children: ReactNode }) {
       unauthorized,
       signInWithGoogle: async () => {
         setUnauthorized(false);
-        await signInWithPopup(auth, googleProvider);
+        try {
+          await signInWithPopup(auth, googleProvider);
+        } catch (err) {
+          // Navegador interno de app de e-mail (Gmail, Outlook) costuma
+          // bloquear popup: entra pela página do Google e volta pra mesma URL.
+          const code = (err as { code?: string }).code;
+          if (code === "auth/popup-blocked" || code === "auth/operation-not-supported-in-this-environment") {
+            await signInWithRedirect(auth, googleProvider);
+            return;
+          }
+          throw err;
+        }
       },
       signOutUser: async () => {
         await signOut(auth);

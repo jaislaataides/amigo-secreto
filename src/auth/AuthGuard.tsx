@@ -4,6 +4,7 @@ import { EmptyState } from "@/shared/components/Feedback";
 import { AppSplash } from "./AppSplash";
 import { ButtonLink, Page } from "@/shared/components/ui";
 import { useAuth } from "./AuthContext";
+import { rememberReturnPath } from "./returnPath";
 
 export function AuthGuard(props: { children: ReactNode; requireRole?: "admin" | "owner" }) {
   const { user, loading, role } = useAuth();
@@ -12,6 +13,7 @@ export function AuthGuard(props: { children: ReactNode; requireRole?: "admin" | 
   if (loading) return <AppSplash label="Carregando…" />;
 
   if (!user) {
+    rememberReturnPath(`${location.pathname}${location.search}`);
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 

@@ -136,11 +136,9 @@ export function App() {
                 sem navegação de distração — a pessoa só quer ver quem tirou. */}
             <Route
               path="/reveal/:partyId/:participantId"
-              element={
-                <AuthGuard>
-                  <RevealPage />
-                </AuthGuard>
-              }
+              // Sem AuthGuard: quem chega sem login entra ali mesmo, na tela da
+              // revelação, e o papelzinho abre na sequência (mesma URL).
+              element={<RevealPage />}
             />
 
             <Route path="*" element={<NotFoundPage />} />
