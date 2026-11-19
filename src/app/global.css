@@ -1746,6 +1746,11 @@ select {
   animation-delay: 160ms;
 }
 
+/* Carregamento rápido não pisca spinner: ele só aparece após 200ms. */
+.loading--full {
+  animation: fade-in var(--dur-med) ease-out 200ms both;
+}
+
 /* Feedback que surge depois de uma ação. */
 .alert {
   animation: fade-in var(--dur-med) var(--ease-out) both;
@@ -1826,14 +1831,14 @@ select {
   }
 }
 
+/* Só opacidade: transform na página inteira cria um novo bloco de
+   contenção durante a animação e faz elementos fixos/sticky pularem. */
 @keyframes page-in {
   from {
     opacity: 0;
-    transform: translateY(4px);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 
