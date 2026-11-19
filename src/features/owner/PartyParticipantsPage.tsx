@@ -51,7 +51,9 @@ export function PartyParticipantsPage() {
 
   const removeParticipant = useMutation({
     mutationFn: (pid: string) => api.delete(`/api/parties/${partyId}/participants/${pid}`),
-    onSuccess: invalidate,
+    // Retorna a promessa: a mutação só termina quando a lista nova chega,
+    // então a linha fica em "removendo" até sumir, sem voltar ao normal antes.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
   });
 
   if (!partyId) return null;
@@ -97,7 +99,14 @@ export function PartyParticipantsPage() {
           <Card flush>
             <ul className="list">
               {data.participants.map((p) => (
-                <li key={p.id} className="list-row">
+                <li
+                  key={p.id}
+                  className={
+                    removeParticipant.isPending && removeParticipant.variables === p.id
+                      ? "list-row is-removing"
+                      : "list-row"
+                  }
+                >
                   <Avatar name={p.name} />
                   <div className="list-row__main">
                     <div className="list-row__title">
@@ -118,9 +127,14 @@ export function PartyParticipantsPage() {
                     {editable && (
                       <IconButton
                         icon="trash"
-                        label={`Remover ${p.name}`}
+                        label={
+                          removeParticipant.isPending && removeParticipant.variables === p.id
+                            ? `Removendo ${p.name}…`
+                            : `Remover ${p.name}`
+                        }
                         variant="danger"
                         size="sm"
+                        loading={removeParticipant.isPending && removeParticipant.variables === p.id}
                         disabled={removeParticipant.isPending}
                         onClick={() => {
                           if (window.confirm(`Remover ${p.name} da party?`)) removeParticipant.mutate(p.id);

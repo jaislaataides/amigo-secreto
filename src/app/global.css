@@ -1821,6 +1821,13 @@ select {
   animation: fade-in var(--dur-med) ease-out 200ms both;
 }
 
+/* Item sendo removido: esmaece e para de responder até sumir da lista. */
+.is-removing {
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity var(--dur-med) ease-out;
+}
+
 /* Feedback que surge depois de uma ação. */
 .alert {
   animation: fade-in var(--dur-med) var(--ease-out) both;

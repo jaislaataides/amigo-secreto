@@ -216,18 +216,27 @@ export function Button(
 
 /** Botão apenas com ícone — exige um rótulo acessível. */
 export function IconButton(
-  props: ButtonHTMLAttributes<HTMLButtonElement> & { icon: IconName; label: string; variant?: ButtonVariant; size?: ButtonSize },
+  props: ButtonHTMLAttributes<HTMLButtonElement> & {
+    icon: IconName;
+    label: string;
+    variant?: ButtonVariant;
+    size?: ButtonSize;
+    /** Troca o ícone por um spinner e bloqueia o botão. */
+    loading?: boolean;
+  },
 ) {
-  const { icon, label, variant = "ghost", size = "md", className, ...rest } = props;
+  const { icon, label, variant = "ghost", size = "md", loading, disabled, className, ...rest } = props;
   return (
     <button
       type="button"
       {...rest}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       aria-label={label}
       title={label}
       className={buttonClass(variant, size, false, cx("btn--icon", className))}
     >
-      <Icon name={icon} size={size === "sm" ? 16 : 18} />
+      {loading ? <span className="spinner" aria-hidden="true" /> : <Icon name={icon} size={size === "sm" ? 16 : 18} />}
     </button>
   );
 }

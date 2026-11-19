@@ -28,7 +28,8 @@ export function ParticipantReferencesPage() {
 
   const removeLink = useMutation({
     mutationFn: (linkId: string) => api.delete(`/api/parties/${partyId}/me/links?linkId=${linkId}`),
-    onSuccess: invalidate,
+    // Só termina quando a lista nova chega (o link some sem "voltar" antes).
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["participant", "me", partyId] }),
   });
 
   if (!partyId) return null;
@@ -85,22 +86,27 @@ export function ParticipantReferencesPage() {
             </EmptyState>
           ) : (
             <Stack gap={10}>
-              {links.map((link) => (
-                <LinkPreview
-                  key={link.id}
-                  {...link}
-                  action={
-                    <IconButton
-                      icon="trash"
-                      label={`Remover ${link.title || "link"}`}
-                      variant="danger"
-                      size="sm"
-                      disabled={removeLink.isPending}
-                      onClick={() => removeLink.mutate(link.id)}
+              {links.map((link) => {
+                const removing = removeLink.isPending && removeLink.variables === link.id;
+                return (
+                  <div key={link.id} className={removing ? "is-removing" : undefined}>
+                    <LinkPreview
+                      {...link}
+                      action={
+                        <IconButton
+                          icon="trash"
+                          label={removing ? "Removendo link…" : `Remover ${link.title || "link"}`}
+                          variant="danger"
+                          size="sm"
+                          loading={removing}
+                          disabled={removeLink.isPending}
+                          onClick={() => removeLink.mutate(link.id)}
+                        />
+                      }
                     />
-                  }
-                />
-              ))}
+                  </div>
+                );
+              })}
             </Stack>
           )}
           {removeLink.isError && (
