@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Alert, FullPageSpinner } from "@/shared/components/Feedback";
-import { Icon } from "@/shared/components/Icon";
-import { Button, Card } from "@/shared/components/ui";
+import { Button, Stack } from "@/shared/components/ui";
+import { AuthShell } from "./AuthShell";
 import { useAuth } from "./AuthContext";
 
 export function RequestOwnerAccessPage() {
@@ -19,15 +19,14 @@ export function RequestOwnerAccessPage() {
   if (loading) return <FullPageSpinner />;
 
   return (
-    <main className="center-screen">
-      <Card className="auth-card fade-up">
-        <div className="auth-card__mark">
-          <Icon name="sparkles" size={30} />
+    <AuthShell>
+      <Stack gap={20}>
+        <div>
+          <h1>Quero organizar</h1>
+          <p className="muted" style={{ marginTop: 6 }}>
+            Organizadores criam parties e convidam o grupo. Um admin aprova seu pedido antes.
+          </p>
         </div>
-        <h1 style={{ fontSize: 26 }}>Quero organizar</h1>
-        <p className="muted" style={{ margin: "8px 0 28px" }}>
-          Organizadores criam parties de amigo secreto e convidam o grupo. Um admin aprova seu pedido antes.
-        </p>
 
         {!user && (
           <Button size="lg" block onClick={() => void signInWithGoogle()}>
@@ -36,36 +35,30 @@ export function RequestOwnerAccessPage() {
         )}
 
         {user && !done && (
-          <Button size="lg" block loading={mutation.isPending} onClick={() => mutation.mutate()}>
-            {mutation.isPending ? "Enviando…" : "Solicitar acesso"}
-          </Button>
-        )}
-        {user && !done && (
-          <p className="hint" style={{ marginTop: 8 }}>
-            Como <strong>{user.email}</strong>
-          </p>
-        )}
-
-        {mutation.isError && (
-          <div style={{ marginTop: 16, textAlign: "left" }}>
-            <Alert tone="error">{mutation.error.message}</Alert>
+          <div>
+            <Button size="lg" block loading={mutation.isPending} onClick={() => mutation.mutate()}>
+              {mutation.isPending ? "Enviando…" : "Solicitar acesso"}
+            </Button>
+            <p className="hint" style={{ marginTop: 8 }}>
+              Como <strong>{user.email}</strong>
+            </p>
           </div>
         )}
+
+        {mutation.isError && <Alert tone="error">{mutation.error.message}</Alert>}
 
         {done && (
-          <div style={{ textAlign: "left" }}>
-            <Alert tone="success">
-              {done === "approved"
-                ? "Você já é um organizador aprovado — recarregue a página."
-                : "Pedido enviado! Avisaremos quando um admin aprovar."}
-            </Alert>
-          </div>
+          <Alert tone="success">
+            {done === "approved"
+              ? "Você já é um organizador aprovado — recarregue a página."
+              : "Pedido enviado! Avisaremos quando um admin aprovar."}
+          </Alert>
         )}
 
-        <p className="hint" style={{ marginTop: 24 }}>
+        <p className="hint">
           <Link to={user ? "/home" : "/"}>Voltar ao início</Link>
         </p>
-      </Card>
-    </main>
+      </Stack>
+    </AuthShell>
   );
 }

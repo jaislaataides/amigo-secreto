@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Card, Stack } from "@/shared/components/ui";
+import { Stack } from "@/shared/components/ui";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
 import { Icon, type IconName } from "@/shared/components/Icon";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
@@ -27,24 +27,20 @@ export function ParticipantRsvpPage() {
   return (
     <ParticipantLayout partyId={partyId} name={party.name} imageUrl={party.imageUrl} subtitle={party.description}>
       <Stack gap={24}>
-        <Card>
-          <div className="row" style={{ gap: 16, alignItems: "flex-start", flexWrap: "nowrap" }}>
-            <span className="choice__icon" style={{ background: "var(--color-primary-soft)", color: "var(--color-primary)" }}>
-              <Icon name="ticket" />
-            </span>
-            <div>
-              <div className="label">
-                De R$ {party.valueRange.min} a R$ {party.valueRange.max}
-              </div>
-              <p className="hint">Faixa de valor do presente</p>
-              {party.forbiddenItemsText && (
-                <p className="small" style={{ marginTop: 10 }}>
-                  <strong>Lista de micos:</strong> <span className="muted">{party.forbiddenItemsText}</span>
-                </p>
-              )}
+        <div className="rules">
+          <div className="rules__item">
+            <div className="rules__label">Valor do presente</div>
+            <div className="rules__value">
+              R$ {party.valueRange.min}–{party.valueRange.max}
             </div>
           </div>
-        </Card>
+          {party.forbiddenItemsText && (
+            <div className="rules__item">
+              <div className="rules__label">Lista de micos</div>
+              <p style={{ marginTop: 4 }}>{party.forbiddenItemsText}</p>
+            </div>
+          )}
+        </div>
 
         <section>
           <h2 className="section-title">Você vai participar?</h2>

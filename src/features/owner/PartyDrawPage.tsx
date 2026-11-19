@@ -30,22 +30,28 @@ export function PartyDrawPage() {
     <PartyLayout partyId={partyId} name={data.name} status={data.status}>
       <Stack gap={20}>
         <div className="stats">
-          <Stat value={going} label="confirmados" />
+          <Stat value={going} label="confirmados" accent />
           <Stat value={pending} label="aguardando" />
           <Stat value={declined} label="não vão" />
         </div>
 
         {alreadyDrawn || draw.isSuccess ? (
-          <Card className="reveal" style={{ padding: "40px 24px" }}>
-            <div className="reveal__gift" style={{ width: 80, height: 80, borderRadius: 24 }}>
-              <Icon name="checkCircle" size={36} />
-            </div>
-            <h2 style={{ fontSize: 24 }}>Sorteio realizado!</h2>
-            <p className="muted" style={{ marginTop: 8 }}>
+          <Card>
+            <div className="home-link" style={{ alignItems: "flex-start" }}>
+              <span className="home-link__icon">
+                <Icon name="check" size={24} strokeWidth={2.5} />
+              </span>
+              <div>
+                <h2 className="section-title" style={{ margin: 0 }}>
+                  Sorteio realizado
+                </h2>
+                <p className="muted" style={{ marginTop: 4 }}>
               {draw.isSuccess
                 ? `${draw.data.assignedCount} participantes receberam o link de revelação por e-mail.`
                 : "Cada participante recebeu por e-mail um link pessoal com quem tirou."}
-            </p>
+                </p>
+              </div>
+            </div>
           </Card>
         ) : (
           <Card>
@@ -92,9 +98,9 @@ export function PartyDrawPage() {
   );
 }
 
-function Stat(props: { value: number; label: string }) {
+function Stat(props: { value: number; label: string; accent?: boolean }) {
   return (
-    <div className="stat">
+    <div className={props.accent ? "stat stat--accent" : "stat"}>
       <div className="stat__value">{props.value}</div>
       <div className="stat__label">{props.label}</div>
     </div>

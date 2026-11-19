@@ -52,20 +52,15 @@ export function OwnerDashboardPage() {
           {data.parties.map((party) => (
             <li key={party.id}>
               <Link to={`/owner/parties/${party.id}/participants`} className="card card--flush card--interactive">
-                {party.imageUrl ? (
-                  <img src={party.imageUrl} alt="" className="party-card__cover" loading="lazy" />
-                ) : (
-                  <div className="party-card__cover party-card__cover--placeholder">
-                    <Icon name="gift" size={40} strokeWidth={1.5} />
-                  </div>
-                )}
+                {party.imageUrl && <img src={party.imageUrl} alt="" className="party-card__cover" loading="lazy" />}
                 <div className="party-card__body">
+                  {!party.imageUrl && (
+                    <span className="home-link__icon" style={{ marginBottom: 4 }}>
+                      <Icon name="gift" size={22} />
+                    </span>
+                  )}
                   <span className="party-card__name">{party.name}</span>
-                  <span>
-                    <Badge tone={STATUS_TONE[party.status] ?? "neutral"}>
-                      {STATUS_LABEL[party.status] ?? party.status}
-                    </Badge>
-                  </span>
+                  <Badge tone={STATUS_TONE[party.status] ?? "neutral"}>{STATUS_LABEL[party.status] ?? party.status}</Badge>
                 </div>
               </Link>
             </li>

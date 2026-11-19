@@ -1,8 +1,8 @@
 import { Link, Navigate, useLocation, type Location } from "react-router-dom";
 import { useState } from "react";
 import { Alert, FullPageSpinner } from "@/shared/components/Feedback";
-import { Icon } from "@/shared/components/Icon";
-import { Card } from "@/shared/components/ui";
+import { Stack } from "@/shared/components/ui";
+import { AuthShell } from "./AuthShell";
 import { useAuth } from "./AuthContext";
 
 export function LoginPage() {
@@ -22,41 +22,22 @@ export function LoginPage() {
   }
 
   return (
-    <main className="center-screen">
-      <Card className="auth-card fade-up">
-        <div className="auth-card__mark">
-          <Icon name="monkey" size={36} />
+    <AuthShell>
+      <Stack gap={20}>
+        <div>
+          <h1 className="sr-only">Amico Secreto</h1>
+          <h2>Entrar</h2>
+          <p className="muted" style={{ marginTop: 6 }}>
+            Use a conta Google do e-mail em que você recebeu o convite.
+          </p>
         </div>
-        <h1>Amico Secreto</h1>
-        <p className="muted" style={{ margin: "8px 0 20px" }}>
-          O amigo secreto em que ninguém paga mico.
-        </p>
-        <ul className="promise-list">
-          <li>
-            <Icon name="lock" size={18} /> Sorteio sem spoiler: cada um vê só quem tirou
-          </li>
-          <li>
-            <Icon name="link" size={18} /> Ideias e referências de quem você tirou
-          </li>
-          <li>
-            <Icon name="ban" size={18} /> Lista de micos: o que ninguém quer ganhar
-          </li>
-        </ul>
-
-        {from && !unauthorized && (
-          <div style={{ marginBottom: 16, textAlign: "left" }}>
-            <Alert tone="info">Entre com a conta do e-mail em que você recebeu o convite.</Alert>
-          </div>
-        )}
 
         {unauthorized && (
-          <div style={{ marginBottom: 16, textAlign: "left" }}>
-            <Alert tone="warning">
-              Esse e-mail não tem acesso a nada por aqui (não é organizador, admin, nem participante de nenhuma
-              party). Peça pra quem organiza te cadastrar, ou{" "}
-              <Link to="/solicitar-acesso">solicite virar organizador</Link>.
-            </Alert>
-          </div>
+          <Alert tone="warning">
+            Esse e-mail não tem acesso a nada por aqui (não é organizador, admin, nem participante de nenhuma
+            party). Peça pra quem organiza te cadastrar, ou{" "}
+            <Link to="/solicitar-acesso">solicite virar organizador</Link>.
+          </Alert>
         )}
 
         <button
@@ -80,17 +61,13 @@ export function LoginPage() {
           Entrar com o Google
         </button>
 
-        {error && (
-          <div style={{ marginTop: 12, textAlign: "left" }}>
-            <Alert tone="error">{error}</Alert>
-          </div>
-        )}
+        {error && <Alert tone="error">{error}</Alert>}
 
-        <p className="hint" style={{ marginTop: 24 }}>
+        <p className="hint">
           Quer organizar um amigo secreto? <Link to="/solicitar-acesso">Peça acesso de organizador</Link>
         </p>
-      </Card>
-    </main>
+      </Stack>
+    </AuthShell>
   );
 }
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api, ApiClientError } from "@/shared/api/client";
-import { Badge, Button, Page, Stack } from "@/shared/components/ui";
+import { Badge, Button, Stack } from "@/shared/components/ui";
 import { EmptyState, FullPageSpinner } from "@/shared/components/Feedback";
 import { Icon } from "@/shared/components/Icon";
 import { LinkPreview } from "@/shared/components/LinkPreview";
@@ -49,15 +49,15 @@ export function RevealPage() {
 
   if (!opened) {
     return (
-      <main className="center-screen">
-        <div className="reveal fade-up">
+      <main className="reveal-screen">
+        <div className="reveal reveal--closed">
           <div className="reveal__gift reveal__gift--wiggle">
-            <Icon name="gift" size={52} strokeWidth={1.75} />
+            <Icon name="gift" size={48} strokeWidth={1.75} />
           </div>
-          <p className="reveal__eyebrow">O sorteio saiu!</p>
-          <h1 style={{ fontSize: 30, marginTop: 8 }}>Seu amigo secreto está aqui dentro</h1>
+          <p className="reveal__eyebrow">O sorteio saiu</p>
+          <h1 className="reveal__title">Seu amigo secreto está aqui dentro</h1>
           <p className="reveal__hint">Pra não pagar mico: confira se ninguém está espiando sua tela.</p>
-          <Button size="lg" icon="sparkles" onClick={() => setOpened(true)}>
+          <Button size="lg" icon="gift" onClick={() => setOpened(true)}>
             Abrir presente
           </Button>
         </div>
@@ -66,51 +66,48 @@ export function RevealPage() {
   }
 
   return (
-    <Page maxWidth={560}>
-      <div className="reveal" style={{ paddingTop: 16 }}>
-        <div className="reveal__gift" style={{ width: 88, height: 88, borderRadius: 26 }}>
-          <Icon name="gift" size={40} strokeWidth={1.75} />
-        </div>
+    <main className="reveal-screen">
+      <div className="reveal">
         <p className="reveal__eyebrow">Você tirou</p>
         <h1 className="reveal__name" aria-live="polite">
           {data.receiverName}
         </h1>
         {data.receiverCategories.length > 0 && (
-          <div className="fade-up" style={{ animationDelay: "200ms" }}>
-            <p className="hint" style={{ marginBottom: 8 }}>
-              Curte presentes de
+          <div className="enter" style={{ animationDelay: "200ms" }}>
+            <p className="reveal__eyebrow" style={{ marginBottom: 10 }}>
+              Curte ganhar
             </p>
             <div className="reveal__chips">
               {data.receiverCategories.map((c) => (
-                <Badge key={c} tone="brand">
-                  {c}
-                </Badge>
+                <Badge key={c}>{c}</Badge>
               ))}
             </div>
           </div>
         )}
       </div>
 
-      <section className="fade-up" style={{ animationDelay: "320ms" }}>
-        <h2 className="section-title">Ideias de presente</h2>
-        {data.referenceLinks.length === 0 ? (
-          <EmptyState icon="link">
-            {data.receiverName} ainda não adicionou nenhuma referência. Vale usar as categorias acima como pista!
-          </EmptyState>
-        ) : (
-          <Stack gap={10}>
-            {data.referenceLinks.map((link) => (
-              <LinkPreview key={link.id} {...link} />
-            ))}
-          </Stack>
-        )}
-      </section>
+      <div className="reveal__body enter" style={{ animationDelay: "300ms" }}>
+        <div className="reveal__body-inner">
+          <h2 className="section-title">Ideias de presente</h2>
+          {data.referenceLinks.length === 0 ? (
+            <EmptyState icon="link">
+              {data.receiverName} ainda não adicionou nenhuma referência. Vale usar as categorias como pista!
+            </EmptyState>
+          ) : (
+            <Stack gap={10}>
+              {data.referenceLinks.map((link) => (
+                <LinkPreview key={link.id} {...link} />
+              ))}
+            </Stack>
+          )}
 
-      <p className="hint" style={{ textAlign: "center", marginTop: 40, display: "flex", gap: 6, justifyContent: "center" }}>
-        <Icon name="lock" size={16} />
-        Só você vê isso. Disponível por 15 dias após o sorteio.
-      </p>
-    </Page>
+          <p className="hint" style={{ marginTop: 32, display: "flex", gap: 6, alignItems: "flex-start" }}>
+            <Icon name="lock" size={16} />
+            Só você vê isso. Disponível por 15 dias após o sorteio.
+          </p>
+        </div>
+      </div>
+    </main>
   );
 }
 

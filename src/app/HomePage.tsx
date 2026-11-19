@@ -46,17 +46,19 @@ export function HomePage() {
 
 function HomeCard(props: { to: string; icon: IconName; title: string; description: string }) {
   return (
-    <Link to={props.to} className="card card--interactive">
-      <span className="empty__icon" style={{ background: "var(--color-primary-soft)", color: "var(--color-primary)" }}>
+    <Link to={props.to} className="card card--interactive home-link">
+      <span className="home-link__icon">
         <Icon name={props.icon} size={24} />
       </span>
-      <div className="row row--between" style={{ marginTop: 12 }}>
-        <h2 style={{ fontSize: 20 }}>{props.title}</h2>
-        <Icon name="arrowRight" size={18} />
-      </div>
-      <p className="muted small" style={{ marginTop: 4 }}>
-        {props.description}
-      </p>
+      <span>
+        <span className="party-card__name" style={{ display: "block" }}>
+          {props.title}
+        </span>
+        <span className="muted small">{props.description}</span>
+      </span>
+      <span className="home-link__arrow">
+        <Icon name="arrowRight" size={20} />
+      </span>
     </Link>
   );
 }
