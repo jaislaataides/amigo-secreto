@@ -1,8 +1,7 @@
 import { Link, Navigate, useLocation, type Location } from "react-router-dom";
 import { useState } from "react";
 import { Alert, FullPageSpinner } from "@/shared/components/Feedback";
-import { Icon } from "@/shared/components/Icon";
-import { Card } from "@/shared/components/ui";
+import { Card, Wordmark } from "@/shared/components/ui";
 import { useAuth } from "./AuthContext";
 
 export function LoginPage() {
@@ -23,13 +22,13 @@ export function LoginPage() {
 
   return (
     <main className="center-screen">
-      <Card className="auth-card fade-up">
-        <div className="auth-card__mark">
-          <Icon name="gift" size={32} />
-        </div>
-        <h1>Amigo Secreto</h1>
-        <p className="muted" style={{ margin: "8px 0 28px" }}>
-          Organize o amigo secreto do seu grupo, sem complicação.
+      <Card className="auth-card">
+        <h1>
+          <Wordmark />
+        </h1>
+        <p className="muted" style={{ margin: "10px 0 28px" }}>
+          O amigo secreto em que ninguém paga mico: sorteio sem spoiler, lista do que não dar e dicas de quem você
+          tirou.
         </p>
 
         {from && !unauthorized && (

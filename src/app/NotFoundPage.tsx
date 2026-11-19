@@ -7,10 +7,10 @@ export function NotFoundPage() {
       <div style={{ width: "100%", maxWidth: 440 }}>
         <EmptyState
           icon="gift"
-          title="Página não encontrada"
+          title="Ops, esse mico foi nosso"
           action={<ButtonLink to="/">Voltar ao início</ButtonLink>}
         >
-          Esse endereço não existe — talvez o link tenha sido copiado pela metade.
+          Essa página não existe — talvez o link tenha sido copiado pela metade.
         </EmptyState>
       </div>
     </main>

@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Alert, FullPageSpinner } from "@/shared/components/Feedback";
-import { Icon } from "@/shared/components/Icon";
 import { Button, Card } from "@/shared/components/ui";
 import { useAuth } from "./AuthContext";
 
@@ -20,11 +19,8 @@ export function RequestOwnerAccessPage() {
 
   return (
     <main className="center-screen">
-      <Card className="auth-card fade-up">
-        <div className="auth-card__mark">
-          <Icon name="sparkles" size={30} />
-        </div>
-        <h1 style={{ fontSize: 26 }}>Quero organizar</h1>
+      <Card className="auth-card">
+        <h1 style={{ fontSize: 28 }}>Quero organizar</h1>
         <p className="muted" style={{ margin: "8px 0 28px" }}>
           Organizadores criam parties de amigo secreto e convidam o grupo. Um admin aprova seu pedido antes.
         </p>
