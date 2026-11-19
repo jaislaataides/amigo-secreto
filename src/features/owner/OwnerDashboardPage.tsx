@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Badge, ButtonLink, Page, PageHeader } from "@/shared/components/ui";
+import { Badge, ButtonLink, Card, Page, PageHeader } from "@/shared/components/ui";
+import { Icon } from "@/shared/components/Icon";
 import { EmptyState, ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
 import { STATUS_LABEL, STATUS_TONE } from "./partyStatus";
 
@@ -19,7 +20,7 @@ export function OwnerDashboardPage() {
   });
 
   return (
-    <Page maxWidth={960}>
+    <Page>
       <PageHeader
         title="Minhas parties"
         subtitle="Seus amigos secretos, do convite ao sorteio."
@@ -47,29 +48,32 @@ export function OwnerDashboardPage() {
       )}
 
       {data && data.parties.length > 0 && (
-        <ul className="party-grid list">
-          {data.parties.map((party) => (
-            <li key={party.id}>
-              <Link to={`/owner/parties/${party.id}/participants`} className="card card--flush card--interactive">
-                {party.imageUrl ? (
-                  <img src={party.imageUrl} alt="" className="party-card__cover" loading="lazy" />
-                ) : (
-                  <div className="party-card__cover party-card__cover--placeholder" aria-hidden="true">
-                    {initials(party.name)}
-                  </div>
-                )}
-                <div className="party-card__body">
-                  <span className="party-card__name">{party.name}</span>
-                  <span>
+        <Card flush>
+          <ul className="list">
+            {data.parties.map((party) => (
+              <li key={party.id}>
+                <Link to={`/owner/parties/${party.id}/participants`} className="party-row">
+                  {party.imageUrl ? (
+                    <img src={party.imageUrl} alt="" className="thumb" loading="lazy" />
+                  ) : (
+                    <span className="thumb" aria-hidden="true">
+                      {initials(party.name)}
+                    </span>
+                  )}
+                  <span className="party-row__main">
+                    <span className="party-row__name">{party.name}</span>
                     <Badge tone={STATUS_TONE[party.status] ?? "neutral"}>
                       {STATUS_LABEL[party.status] ?? party.status}
                     </Badge>
                   </span>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                  <span className="party-row__chevron">
+                    <Icon name="arrowRight" size={18} />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
     </Page>
   );
