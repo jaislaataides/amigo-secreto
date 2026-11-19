@@ -80,6 +80,7 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --dur-fast: 120ms;
   --dur-med: 220ms;
+  --dur-slow: 320ms;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -768,6 +769,17 @@ select {
   transition: background var(--dur-fast), border-color var(--dur-fast);
 }
 
+.option__box svg {
+  transform: scale(0.4);
+  opacity: 0;
+  transition: transform var(--dur-med) var(--ease-out), opacity var(--dur-fast);
+}
+
+.option.is-checked .option__box svg {
+  transform: none;
+  opacity: 1;
+}
+
 .option.is-checked .option__box {
   background: var(--color-primary-ink);
   border-color: var(--color-primary-ink);
@@ -1006,14 +1018,23 @@ select {
   color: var(--color-fg);
 }
 
-.tab.active::after {
+.tab::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   height: 3px;
+  background: var(--color-border-strong);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-med) var(--ease-out);
+}
+
+.tab.active::after {
   background: var(--color-primary-ink);
+  transform: none;
+  animation: underline-in var(--dur-slow) var(--ease-out) both;
 }
 
 /* ---------- Feedback ---------- */
@@ -1661,10 +1682,6 @@ a.row-item {
   color: var(--color-brand);
 }
 
-.reveal__gift--wiggle {
-  animation: wiggle 2.4s var(--ease-out) infinite;
-}
-
 .reveal__eyebrow {
   color: var(--color-on-brand-muted);
   font-size: 17px;
@@ -1777,5 +1794,193 @@ a.row-item {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Movimento
+   Regra: movimento só quando diz algo. Entradas curtas (≤ 320ms, ease-out
+   forte), hover que aponta direção, e só três animações "em repouso":
+   o macaquinho do logo (raro), o presente fechado da revelação e o
+   pontinho de "pendente". Tudo some com prefers-reduced-motion.
+   ========================================================================== */
+
+/* Entrada de página: aparece no lugar, sem deslizar a tela inteira. */
+.page,
+.center-screen > *,
+.auth__panel {
+  animation: page-in var(--dur-med) var(--ease-out) both;
+}
+
+/* Login: a promessa da marca entra em cascata, uma vez. */
+.auth__promises li {
+  animation: enter var(--dur-slow) var(--ease-out) both;
+}
+
+.auth__promises li:nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.auth__promises li:nth-child(3) {
+  animation-delay: 160ms;
+}
+
+/* Feedback que surge depois de uma ação ("Salvo", alertas). */
+.status,
+.alert {
+  animation: fade-in var(--dur-med) var(--ease-out) both;
+}
+
+/* Pendente pulsa devagar: algo ainda está esperando. */
+.status--warning::before {
+  animation: pulse-dot 2.4s ease-out infinite;
+}
+
+/* Botão: o ícone acompanha a pressão; o resto já tem scale no :active. */
+.btn svg {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+/* Revelação aberta: o nome entra primeiro, o resto em seguida. */
+.reveal__chips {
+  animation: enter var(--dur-slow) var(--ease-out) 180ms both;
+}
+
+.reveal__body {
+  animation: enter var(--dur-slow) var(--ease-out) 280ms both;
+}
+
+/* Presente fechado: balança de vez em quando, não sem parar. */
+.reveal__gift--wiggle {
+  animation: wiggle 6s var(--ease-out) 1.2s infinite;
+}
+
+@media (hover: hover) {
+  /* Setas dão um passo na direção do destino. */
+  a.row-item svg:last-child,
+  .card--interactive svg:last-child {
+    transition: transform var(--dur-med) var(--ease-out);
+  }
+
+  a.row-item:hover svg:last-child,
+  .card--interactive:hover svg:last-child {
+    transform: translateX(3px);
+  }
+
+  .page-header__back svg {
+    transition: transform var(--dur-med) var(--ease-out);
+  }
+
+  .page-header__back:hover svg {
+    transform: translateX(-3px);
+  }
+
+  /* Aba ainda não ativa mostra um traço discreto antes do clique. */
+  .tab:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* Macaquinho acena quando o cursor passa pelo logo. */
+  .brand:hover .brand__mark {
+    animation: monkey-wave 600ms var(--ease-out);
+  }
+
+  .btn--primary:hover:not(:disabled) svg,
+  .btn--secondary:hover:not(:disabled) svg {
+    transform: scale(1.08);
+  }
+
+  .image-picker svg {
+    transition: transform var(--dur-med) var(--ease-out);
+  }
+
+  .image-picker:hover svg {
+    transform: translateY(-2px);
+  }
+
+  .tag button svg {
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .tag button:hover svg {
+    transform: rotate(90deg);
+  }
+
+  .reveal__gift--wiggle:hover {
+    animation-play-state: paused;
+  }
+}
+
+/* Em repouso: o macaquinho olha pro lado uma vez a cada ~14s. */
+.brand__mark {
+  transform-origin: 50% 80%;
+  animation: monkey-idle 14s ease-in-out 4s infinite;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes underline-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes pulse-dot {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-warning-dot) 55%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 5px transparent;
+  }
+}
+
+@keyframes monkey-wave {
+  0% {
+    transform: rotate(0);
+  }
+  30% {
+    transform: rotate(-14deg);
+  }
+  60% {
+    transform: rotate(8deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+@keyframes monkey-idle {
+  0%,
+  92%,
+  100% {
+    transform: none;
+  }
+  95% {
+    transform: rotate(-10deg);
+  }
+  97.5% {
+    transform: rotate(4deg);
   }
 }
