@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { queryClient } from "@/shared/api/queryClient";
@@ -16,7 +17,17 @@ import { ParticipantPreferencesPage } from "@/features/participant/ParticipantPr
 import { ParticipantReferencesPage } from "@/features/participant/ParticipantReferencesPage";
 import { ParticipantRsvpPage } from "@/features/participant/ParticipantRsvpPage";
 import { RevealPage } from "@/features/reveal/RevealPage";
+import { AppLayout } from "./AppLayout";
 import { NotFoundPage } from "./NotFoundPage";
+
+/** AuthGuard + cabeçalho de navegação, combinados — a maioria das rotas logadas usa os dois. */
+function Protected(props: { requireRole?: "admin" | "owner"; children: ReactNode }) {
+  return (
+    <AuthGuard requireRole={props.requireRole}>
+      <AppLayout>{props.children}</AppLayout>
+    </AuthGuard>
+  );
+}
 
 export function App() {
   return (
@@ -30,86 +41,88 @@ export function App() {
             <Route
               path="/admin"
               element={
-                <AuthGuard requireRole="admin">
+                <Protected requireRole="admin">
                   <AdminDashboardPage />
-                </AuthGuard>
+                </Protected>
               }
             />
 
             <Route
               path="/owner"
               element={
-                <AuthGuard requireRole="owner">
+                <Protected requireRole="owner">
                   <OwnerDashboardPage />
-                </AuthGuard>
+                </Protected>
               }
             />
             <Route
               path="/owner/parties/new"
               element={
-                <AuthGuard requireRole="owner">
+                <Protected requireRole="owner">
                   <PartyCreatePage />
-                </AuthGuard>
+                </Protected>
               }
             />
             <Route
               path="/owner/parties/:partyId/edit"
               element={
-                <AuthGuard requireRole="owner">
+                <Protected requireRole="owner">
                   <PartyEditPage />
-                </AuthGuard>
+                </Protected>
               }
             />
             <Route
               path="/owner/parties/:partyId/participants"
               element={
-                <AuthGuard requireRole="owner">
+                <Protected requireRole="owner">
                   <PartyParticipantsPage />
-                </AuthGuard>
+                </Protected>
               }
             />
             <Route
               path="/owner/parties/:partyId/exclusions"
               element={
-                <AuthGuard requireRole="owner">
+                <Protected requireRole="owner">
                   <PartyExclusionsPage />
-                </AuthGuard>
+                </Protected>
               }
             />
             <Route
               path="/owner/parties/:partyId/draw"
               element={
-                <AuthGuard requireRole="owner">
+                <Protected requireRole="owner">
                   <PartyDrawPage />
-                </AuthGuard>
+                </Protected>
               }
             />
 
             <Route
               path="/p/:partyId/preferences"
               element={
-                <AuthGuard>
+                <Protected>
                   <ParticipantPreferencesPage />
-                </AuthGuard>
+                </Protected>
               }
             />
             <Route
               path="/p/:partyId/references"
               element={
-                <AuthGuard>
+                <Protected>
                   <ParticipantReferencesPage />
-                </AuthGuard>
+                </Protected>
               }
             />
             <Route
               path="/p/:partyId/rsvp"
               element={
-                <AuthGuard>
+                <Protected>
                   <ParticipantRsvpPage />
-                </AuthGuard>
+                </Protected>
               }
             />
 
+            {/* Sem AppLayout de propósito: a revelação é uma tela de foco único,
+                sem navegação de distração — a pessoa só quer ver quem tirou. */}
             <Route
               path="/reveal/:partyId/:participantId"
               element={

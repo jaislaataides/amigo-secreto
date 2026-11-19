@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Badge, Button, Card, Input, Page, PageHeader } from "@/shared/components/ui";
 import { ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
-import { useAuth } from "@/auth/AuthContext";
 
 interface AuthorizedOwnerRow {
   email: string;
@@ -21,7 +20,6 @@ interface PartyRow {
 }
 
 export function AdminDashboardPage() {
-  const { signOutUser } = useAuth();
   const owners = useQuery({
     queryKey: ["admin", "owners"],
     queryFn: () => api.get<{ owners: AuthorizedOwnerRow[] }>("/api/admin/owners"),
@@ -33,14 +31,7 @@ export function AdminDashboardPage() {
 
   return (
     <Page maxWidth={860}>
-      <PageHeader
-        title="Painel do admin"
-        actions={
-          <Button variant="secondary" onClick={() => void signOutUser()}>
-            Sair
-          </Button>
-        }
-      />
+      <PageHeader title="Painel do admin" />
 
       <section style={{ marginBottom: 40 }}>
         <h2 style={{ fontSize: 16, marginBottom: 12 }}>Pedidos de acesso de organizador</h2>

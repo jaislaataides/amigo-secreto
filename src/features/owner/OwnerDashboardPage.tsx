@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Badge, Button, Card, Page, PageHeader } from "@/shared/components/ui";
 import { EmptyState, ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
-import { useAuth } from "@/auth/AuthContext";
 
 interface PartyRow {
   id: string;
@@ -29,7 +28,6 @@ const STATUS_TONE: Record<string, "neutral" | "success" | "warning"> = {
 };
 
 export function OwnerDashboardPage() {
-  const { signOutUser } = useAuth();
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["owner", "parties"],
     queryFn: () => api.get<{ parties: PartyRow[] }>("/api/parties"),
@@ -40,14 +38,9 @@ export function OwnerDashboardPage() {
       <PageHeader
         title="Minhas parties"
         actions={
-          <div style={{ display: "flex", gap: 8 }}>
-            <Link to="/owner/parties/new">
-              <Button>+ Nova party</Button>
-            </Link>
-            <Button variant="secondary" onClick={() => void signOutUser()}>
-              Sair
-            </Button>
-          </div>
+          <Link to="/owner/parties/new">
+            <Button>+ Nova party</Button>
+          </Link>
         }
       />
 
