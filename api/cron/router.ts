@@ -3,13 +3,13 @@ import { processMail } from "./_handlers/processMail.js";
 import { purgeExpiredParties } from "./_handlers/purgeExpiredParties.js";
 import { sendReminders } from "./_handlers/sendReminders.js";
 
-/** Roteador único pros 3 cron jobs (ver api/parties/[...slug].ts e vercel.json). */
+/** Roteador único pros 3 cron jobs (ver api/parties/router.ts). */
 export default async function router(req: VercelRequest, res: VercelResponse) {
-  const raw = req.query.slug;
-  const slug = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
+  const segments = pathname.replace(/^\/api\/cron\/?/, "").split("/").filter(Boolean);
 
-  if (slug.length === 1) {
-    switch (slug[0]) {
+  if (segments.length === 1) {
+    switch (segments[0]) {
       case "process-mail":
         return processMail(req, res);
       case "purge-expired-parties":

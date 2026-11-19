@@ -1,6 +1,8 @@
 {
   "rewrites": [
     { "source": "/api/parties/:path*", "destination": "/api/parties/router" },
+    { "source": "/api/owners/:path*", "destination": "/api/owners/router" },
+    { "source": "/api/cron/:path*", "destination": "/api/cron/router" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "crons": [
