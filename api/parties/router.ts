@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { listParties } from "./_handlers/list.js";
 import { createParty } from "./_handlers/create.js";
 import { getPartyDetail } from "./_handlers/detail.js";
 import { runDraw } from "./_handlers/draw.js";
@@ -14,33 +15,41 @@ import { addParticipants } from "./_handlers/participantsAdd.js";
 import { removeParticipant } from "./_handlers/participantRemove.js";
 
 /**
- * Roteador único pra /api/parties/<1+ segmentos> — o plano Hobby da Vercel
- * limita a 12 funções serverless por deploy, e /api/parties/* sozinho tinha
- * 14 arquivos de rota. Consolidar num catch-all (`[...slug]`) os junta numa
- * função só, sem mudar NENHUMA URL que o front já chama — a lógica de cada
- * rota continua intacta em api/parties/_handlers/*.ts (prefixo `_` exclui
- * esses arquivos do roteamento automático da Vercel).
+ * Roteador único pra tudo em /api/parties/** — um arquivo sem colchetes,
+ * mapeado via rewrite no vercel.json (`/api/parties/:path*` ->
+ * `/api/parties/router`). Fizemos assim (em vez de um arquivo
+ * `[...slug].ts`) porque a combinação de um `index.ts` + um catch-all de
+ * colchete no MESMO diretório não estava recebendo os segmentos certos em
+ * produção (`/api/parties/create` caía direto no 404 do fallback) — com o
+ * rewrite, a gente mesmo faz o parse de `req.url`, sem depender da
+ * inferência de rotas por pastas da Vercel pra esse caso específico.
  *
- * O caminho "vazio" (`GET /api/parties`, sem segmentos) não passa por aqui
- * — `[...slug]` exige pelo menos 1 segmento; esse caso tem seu próprio
- * arquivo em api/parties/index.ts.
+ * Isso junta numa função só o que eram 14 arquivos de rota (o plano Hobby
+ * da Vercel limita a 12 funções por deploy) — nenhuma URL que o front já
+ * chama muda; a lógica de cada rota continua intacta em
+ * api/parties/_handlers/*.ts (prefixo `_` exclui esses arquivos do
+ * roteamento automático da Vercel).
  */
 export default async function router(req: VercelRequest, res: VercelResponse) {
-  const raw = req.query.slug;
-  const slug = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
+  const segments = pathname.replace(/^\/api\/parties\/?/, "").split("/").filter(Boolean);
 
-  if (slug.length === 1 && slug[0] === "create") {
+  if (segments.length === 0) {
+    return listParties(req, res);
+  }
+
+  if (segments.length === 1 && segments[0] === "create") {
     return createParty(req, res);
   }
 
-  const [partyId, section, third] = slug;
+  const [partyId, section, third] = segments;
   req.query.id = partyId;
 
-  if (slug.length === 1) {
+  if (segments.length === 1) {
     return getPartyDetail(req, res);
   }
 
-  if (slug.length === 2) {
+  if (segments.length === 2) {
     switch (section) {
       case "draw":
         return runDraw(req, res);
@@ -59,7 +68,7 @@ export default async function router(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  if (slug.length === 3) {
+  if (segments.length === 3) {
     if (section === "me") {
       switch (third) {
         case "preferences":
