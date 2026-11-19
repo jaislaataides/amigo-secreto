@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api, ApiClientError } from "@/shared/api/client";
-import { Badge, Card, Page } from "@/shared/components/ui";
-import { ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
+import { Badge, Button, Page, Stack } from "@/shared/components/ui";
+import { EmptyState, FullPageSpinner } from "@/shared/components/Feedback";
+import { Icon } from "@/shared/components/Icon";
+import { LinkPreview } from "@/shared/components/LinkPreview";
 
 interface RevealResult {
   receiverName: string;
@@ -20,6 +23,9 @@ export function RevealPage() {
   const { partyId, participantId } = useParams<{ partyId: string; participantId: string }>();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("t");
+  // O nome só aparece depois de um toque — evita spoiler pra quem estiver
+  // olhando a tela junto, e dá um momento de "abrir o presente".
+  const [opened, setOpened] = useState(false);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["reveal", partyId, participantId, token],
@@ -30,59 +36,92 @@ export function RevealPage() {
 
   if (!token) {
     return (
-      <Page maxWidth={480}>
-        <ErrorBanner message="Link inválido — falta o token de acesso. Use o link exatamente como veio no e-mail." />
-      </Page>
+      <RevealError message="Esse link está incompleto — falta o código de acesso. Abra o link exatamente como veio no e-mail." />
     );
   }
 
   if (isLoading) return <FullPageSpinner />;
 
-  if (isError) {
+  if (isError || !data) {
     const message = error instanceof ApiClientError ? error.message : "Não foi possível revelar o resultado.";
+    return <RevealError message={message} />;
+  }
+
+  if (!opened) {
     return (
-      <Page maxWidth={480}>
-        <ErrorBanner message={message} />
-      </Page>
+      <main className="center-screen">
+        <div className="reveal fade-up">
+          <div className="reveal__gift reveal__gift--wiggle">
+            <Icon name="gift" size={52} strokeWidth={1.75} />
+          </div>
+          <p className="reveal__eyebrow">O sorteio saiu!</p>
+          <h1 style={{ fontSize: 30, marginTop: 8 }}>Seu amigo secreto está aqui dentro</h1>
+          <p className="reveal__hint">Confira se ninguém está espiando a sua tela antes de abrir.</p>
+          <Button size="lg" icon="sparkles" onClick={() => setOpened(true)}>
+            Abrir presente
+          </Button>
+        </div>
+      </main>
     );
   }
 
   return (
-    <Page maxWidth={480}>
-      <div style={{ textAlign: "center", marginBottom: 24 }}>
-        <p style={{ color: "#71717a", fontSize: 14 }}>Você tirou</p>
-        <h1 style={{ fontSize: 32, margin: "4px 0" }}>🎁 {data!.receiverName}</h1>
+    <Page maxWidth={560}>
+      <div className="reveal" style={{ paddingTop: 16 }}>
+        <div className="reveal__gift" style={{ width: 88, height: 88, borderRadius: 26 }}>
+          <Icon name="gift" size={40} strokeWidth={1.75} />
+        </div>
+        <p className="reveal__eyebrow">Você tirou</p>
+        <h1 className="reveal__name" aria-live="polite">
+          {data.receiverName}
+        </h1>
+        {data.receiverCategories.length > 0 && (
+          <div className="fade-up" style={{ animationDelay: "200ms" }}>
+            <p className="hint" style={{ marginBottom: 8 }}>
+              Curte presentes de
+            </p>
+            <div className="reveal__chips">
+              {data.receiverCategories.map((c) => (
+                <Badge key={c} tone="brand">
+                  {c}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {data!.receiverCategories.length > 0 && (
-        <div style={{ textAlign: "center", marginBottom: 24, display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
-          {data!.receiverCategories.map((c) => (
-            <Badge key={c}>{c}</Badge>
-          ))}
-        </div>
-      )}
+      <section className="fade-up" style={{ animationDelay: "320ms" }}>
+        <h2 className="section-title">Ideias de presente</h2>
+        {data.referenceLinks.length === 0 ? (
+          <EmptyState icon="link">
+            {data.receiverName} ainda não adicionou nenhuma referência. Vale usar as categorias acima como pista!
+          </EmptyState>
+        ) : (
+          <Stack gap={10}>
+            {data.referenceLinks.map((link) => (
+              <LinkPreview key={link.id} {...link} />
+            ))}
+          </Stack>
+        )}
+      </section>
 
-      <h2 style={{ fontSize: 16 }}>Referências de presente</h2>
-      {data!.referenceLinks.length === 0 && (
-        <p style={{ color: "#71717a", fontSize: 14 }}>Essa pessoa ainda não adicionou nenhuma referência.</p>
-      )}
-      {data!.referenceLinks.map((link) => (
-        <Card key={link.id} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          {link.imageUrl && (
-            <img src={link.imageUrl} alt="" style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8 }} />
-          )}
-          <div style={{ minWidth: 0 }}>
-            <a href={link.url} target="_blank" rel="noreferrer" style={{ fontWeight: 600, fontSize: 14 }}>
-              {link.title || link.url}
-            </a>
-            {link.description && <p style={{ color: "#71717a", fontSize: 13, margin: "4px 0 0" }}>{link.description}</p>}
-          </div>
-        </Card>
-      ))}
-
-      <p style={{ color: "#a1a1aa", fontSize: 12, textAlign: "center", marginTop: 32 }}>
-        Este resultado fica disponível por 15 dias após o sorteio.
+      <p className="hint" style={{ textAlign: "center", marginTop: 40, display: "flex", gap: 6, justifyContent: "center" }}>
+        <Icon name="lock" size={16} />
+        Só você vê isso. Disponível por 15 dias após o sorteio.
       </p>
     </Page>
+  );
+}
+
+function RevealError(props: { message: string }) {
+  return (
+    <main className="center-screen">
+      <div style={{ width: "100%", maxWidth: 460 }}>
+        <EmptyState icon="alert" title="Não deu pra abrir">
+          {props.message}
+        </EmptyState>
+      </div>
+    </main>
   );
 }

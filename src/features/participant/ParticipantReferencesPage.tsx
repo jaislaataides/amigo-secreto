@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Button, Card, Input, Page, PageHeader } from "@/shared/components/ui";
-import { EmptyState, ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
-import { ParticipantTabs } from "./ParticipantTabs";
+import { Button, Card, IconButton, Input, Stack } from "@/shared/components/ui";
+import { Alert, EmptyState, ErrorBanner } from "@/shared/components/Feedback";
+import { LinkPreview } from "@/shared/components/LinkPreview";
+import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
 import { useMyPartyView } from "./useMyPartyView";
 
 const MAX_LINKS = 10;
@@ -18,7 +19,7 @@ export function ParticipantReferencesPage() {
   const invalidate = () => void queryClient.invalidateQueries({ queryKey: ["participant", "me", partyId] });
 
   const addLink = useMutation({
-    mutationFn: () => api.post(`/api/parties/${partyId}/me/links`, { url }),
+    mutationFn: () => api.post(`/api/parties/${partyId}/me/links`, { url: url.trim() }),
     onSuccess: () => {
       setUrl("");
       invalidate();
@@ -31,51 +32,84 @@ export function ParticipantReferencesPage() {
   });
 
   if (!partyId) return null;
-  if (isLoading) return <FullPageSpinner />;
-  if (isError) return <ErrorBanner message={error.message} />;
+  if (isLoading || isError || !data) return <ParticipantLoadState isLoading={isLoading} error={error} />;
 
-  const links = data!.me.referenceLinks;
+  const links = data.me.referenceLinks;
 
   return (
-    <Page>
-      <PageHeader
-        title={data!.party.name}
-        subtitle="Cole links de produtos (ex: AliExpress, Amazon, Shopee) que você gostaria de ganhar."
-      />
-      <ParticipantTabs partyId={partyId} />
+    <ParticipantLayout partyId={partyId} name={data.party.name} imageUrl={data.party.imageUrl}>
+      <Stack gap={20}>
+        {links.length < MAX_LINKS ? (
+          <Card>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (url.trim()) addLink.mutate();
+              }}
+            >
+              <Stack gap={10}>
+                <label htmlFor="ref-url" className="section-title" style={{ margin: 0 }}>
+                  Adicionar referência
+                </label>
+                <p className="hint" id="ref-url-hint">
+                  Cole o link de um produto que você gostaria de ganhar (Amazon, Shopee, AliExpress…).
+                </p>
+                <div className="row" style={{ flexWrap: "nowrap" }}>
+                  <Input
+                    id="ref-url"
+                    inputMode="url"
+                    placeholder="https://…"
+                    aria-describedby="ref-url-hint"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                  />
+                  <Button type="submit" icon="plus" loading={addLink.isPending} disabled={!url.trim()}>
+                    {addLink.isPending ? "Buscando…" : "Adicionar"}
+                  </Button>
+                </div>
+                {addLink.isError && <ErrorBanner message={addLink.error.message} />}
+              </Stack>
+            </form>
+          </Card>
+        ) : (
+          <Alert tone="info">Você chegou ao limite de {MAX_LINKS} links. Remova um pra adicionar outro.</Alert>
+        )}
 
-      {links.length === 0 && <EmptyState>Nenhum link adicionado ainda.</EmptyState>}
-      {links.map((link) => (
-        <Card key={link.id} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          {link.imageUrl && (
-            <img src={link.imageUrl} alt="" style={{ width: 64, height: 64, objectFit: "cover", borderRadius: 8 }} />
+        <section>
+          <h2 className="section-title">
+            Suas referências <span className="count">{links.length}/{MAX_LINKS}</span>
+          </h2>
+          {links.length === 0 ? (
+            <EmptyState icon="link" title="Nenhum link ainda">
+              Referências ajudam muito quem te tirou a acertar no presente.
+            </EmptyState>
+          ) : (
+            <Stack gap={10}>
+              {links.map((link) => (
+                <LinkPreview
+                  key={link.id}
+                  {...link}
+                  action={
+                    <IconButton
+                      icon="trash"
+                      label={`Remover ${link.title || "link"}`}
+                      variant="danger"
+                      size="sm"
+                      disabled={removeLink.isPending}
+                      onClick={() => removeLink.mutate(link.id)}
+                    />
+                  }
+                />
+              ))}
+            </Stack>
           )}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <a href={link.url} target="_blank" rel="noreferrer" style={{ fontWeight: 600, fontSize: 14 }}>
-              {link.title || link.url}
-            </a>
-            {link.description && (
-              <p style={{ color: "#71717a", fontSize: 13, margin: "4px 0 0" }}>{link.description}</p>
-            )}
-          </div>
-          <Button variant="danger" onClick={() => removeLink.mutate(link.id)}>
-            Remover
-          </Button>
-        </Card>
-      ))}
-
-      {links.length < MAX_LINKS ? (
-        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-          <Input placeholder="https://..." value={url} onChange={(e) => setUrl(e.target.value)} />
-          <Button disabled={!url.trim() || addLink.isPending} onClick={() => addLink.mutate()}>
-            {addLink.isPending ? "Adicionando…" : "Adicionar"}
-          </Button>
-        </div>
-      ) : (
-        <p style={{ color: "#71717a", fontSize: 13 }}>Limite de {MAX_LINKS} links atingido.</p>
-      )}
-
-      {addLink.isError && <ErrorBanner message={addLink.error.message} />}
-    </Page>
+          {removeLink.isError && (
+            <div style={{ marginTop: 10 }}>
+              <ErrorBanner message={removeLink.error.message} />
+            </div>
+          )}
+        </section>
+      </Stack>
+    </ParticipantLayout>
   );
 }

@@ -1,9 +1,10 @@
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Badge, Button, Card, Page, PageHeader } from "@/shared/components/ui";
-import { ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
-import { ParticipantTabs } from "./ParticipantTabs";
+import { Card, Stack } from "@/shared/components/ui";
+import { Alert, ErrorBanner } from "@/shared/components/Feedback";
+import { Icon, type IconName } from "@/shared/components/Icon";
+import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
 import { useMyPartyView } from "./useMyPartyView";
 
 export function ParticipantRsvpPage() {
@@ -17,46 +18,91 @@ export function ParticipantRsvpPage() {
   });
 
   if (!partyId) return null;
-  if (isLoading) return <FullPageSpinner />;
-  if (isError) return <ErrorBanner message={error.message} />;
+  if (isLoading || isError || !data) return <ParticipantLoadState isLoading={isLoading} error={error} />;
 
-  const { party, me } = data!;
+  const { party, me } = data;
+  // Mostra a escolha otimista enquanto a requisição está em andamento.
+  const current = confirm.isPending ? confirm.variables : me.rsvp;
 
   return (
-    <Page>
-      <PageHeader title={party.name} subtitle={party.description} />
-      <ParticipantTabs partyId={partyId} />
+    <ParticipantLayout partyId={partyId} name={party.name} imageUrl={party.imageUrl} subtitle={party.description}>
+      <Stack gap={24}>
+        <Card>
+          <div className="row" style={{ gap: 16, alignItems: "flex-start", flexWrap: "nowrap" }}>
+            <span className="choice__icon" style={{ background: "var(--color-primary-soft)", color: "var(--color-primary)" }}>
+              <Icon name="ticket" />
+            </span>
+            <div>
+              <div className="label">
+                De R$ {party.valueRange.min} a R$ {party.valueRange.max}
+              </div>
+              <p className="hint">Faixa de valor do presente</p>
+              {party.forbiddenItemsText && (
+                <p className="small" style={{ marginTop: 10 }}>
+                  <strong>Evite:</strong> <span className="muted">{party.forbiddenItemsText}</span>
+                </p>
+              )}
+            </div>
+          </div>
+        </Card>
 
-      <Card>
-        <p>
-          Faixa de valor: <strong>R$ {party.valueRange.min}</strong> a <strong>R$ {party.valueRange.max}</strong>
-        </p>
-        {party.forbiddenItemsText && (
-          <p style={{ color: "#71717a", fontSize: 14 }}>Evite: {party.forbiddenItemsText}</p>
+        <section>
+          <h2 className="section-title">Você vai participar?</h2>
+          <div className="choices" role="group" aria-label="Confirmação de presença">
+            <Choice
+              kind="yes"
+              icon="thumbsUp"
+              label="Vou participar"
+              pressed={current === "going"}
+              disabled={confirm.isPending}
+              onClick={() => confirm.mutate("going")}
+            />
+            <Choice
+              kind="no"
+              icon="x"
+              label="Não vou dessa vez"
+              pressed={current === "not_going"}
+              disabled={confirm.isPending}
+              onClick={() => confirm.mutate("not_going")}
+            />
+          </div>
+          <p className="hint" style={{ marginTop: 12, display: "flex", gap: 6, alignItems: "flex-start" }}>
+            <Icon name="lock" size={16} />
+            O resultado do sorteio chega no seu e-mail, num link pessoal — ninguém mais consegue abrir.
+          </p>
+        </section>
+
+        {confirm.isError && <ErrorBanner message={confirm.error.message} />}
+        {confirm.isSuccess && me.rsvp === "going" && (
+          <Alert tone="success">
+            Presença confirmada! Aproveite pra marcar suas categorias favoritas e deixar referências de presente.
+          </Alert>
         )}
-      </Card>
+      </Stack>
+    </ParticipantLayout>
+  );
+}
 
-      <h2 style={{ fontSize: 16 }}>Você vai participar?</h2>
-      <p style={{ color: "#71717a", fontSize: 13, marginBottom: 16 }}>
-        Se confirmar, o resultado do sorteio chegará pra você por e-mail, num link pessoal e intransferível — ninguém
-        mais consegue abri-lo.
-      </p>
-
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <Button disabled={confirm.isPending} onClick={() => confirm.mutate("going")}>
-          Vou participar
-        </Button>
-        <Button variant="secondary" disabled={confirm.isPending} onClick={() => confirm.mutate("not_going")}>
-          Não vou participar
-        </Button>
-        {me.rsvp !== "pending" && (
-          <Badge tone={me.rsvp === "going" ? "success" : "neutral"}>
-            {me.rsvp === "going" ? "Você confirmou: vai" : "Você confirmou: não vai"}
-          </Badge>
-        )}
-      </div>
-
-      {confirm.isError && <ErrorBanner message={confirm.error.message} />}
-    </Page>
+function Choice(props: {
+  kind: "yes" | "no";
+  icon: IconName;
+  label: string;
+  pressed: boolean;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={`choice choice--${props.kind}`}
+      aria-pressed={props.pressed}
+      disabled={props.disabled}
+      onClick={props.onClick}
+    >
+      <span className="choice__icon">
+        <Icon name={props.pressed ? "check" : props.icon} />
+      </span>
+      {props.label}
+    </button>
   );
 }

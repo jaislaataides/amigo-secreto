@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Button, Page, PageHeader } from "@/shared/components/ui";
-import { ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
-import { ParticipantTabs } from "./ParticipantTabs";
+import { Button, CheckOption, Stack } from "@/shared/components/ui";
+import { Alert, ErrorBanner } from "@/shared/components/Feedback";
+import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
 import { useMyPartyView } from "./useMyPartyView";
 
 export function ParticipantPreferencesPage() {
@@ -23,32 +23,43 @@ export function ParticipantPreferencesPage() {
   });
 
   if (!partyId) return null;
-  if (isLoading) return <FullPageSpinner />;
-  if (isError) return <ErrorBanner message={error.message} />;
+  if (isLoading || isError || !data) return <ParticipantLoadState isLoading={isLoading} error={error} />;
+
+  const dirty = [...selected].sort().join("|") !== [...data.me.preferredCategories].sort().join("|");
 
   return (
-    <Page>
-      <PageHeader title={data!.party.name} subtitle="Em quais categorias você gostaria de receber um presente?" />
-      <ParticipantTabs partyId={partyId} />
+    <ParticipantLayout partyId={partyId} name={data.party.name} imageUrl={data.party.imageUrl}>
+      <Stack gap={20}>
+        <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
+          <legend className="section-title" style={{ padding: 0 }}>
+            Que tipo de presente você curte?
+          </legend>
+          <p className="hint" style={{ marginBottom: 12 }}>
+            Marque quantas quiser — quem te tirar vai ver essas categorias.
+          </p>
+          <div className="options">
+            {data.party.categories.map((c) => (
+              <CheckOption
+                key={c.id}
+                label={c.label}
+                checked={selected.includes(c.id)}
+                onChange={(checked) =>
+                  setSelected(checked ? [...selected, c.id] : selected.filter((id) => id !== c.id))
+                }
+              />
+            ))}
+          </div>
+        </fieldset>
 
-      {data!.party.categories.map((c) => (
-        <label key={c.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0" }}>
-          <input
-            type="checkbox"
-            checked={selected.includes(c.id)}
-            onChange={(e) =>
-              setSelected(e.target.checked ? [...selected, c.id] : selected.filter((id) => id !== c.id))
-            }
-          />
-          {c.label}
-        </label>
-      ))}
-
-      {save.isError && <ErrorBanner message={save.error.message} />}
-      <Button disabled={save.isPending} onClick={() => save.mutate()} style={{ marginTop: 16 }}>
-        {save.isPending ? "Salvando…" : "Salvar preferências"}
-      </Button>
-      {save.isSuccess && <p style={{ color: "#166534", fontSize: 13, marginTop: 8 }}>Salvo!</p>}
-    </Page>
+        {save.isError && <ErrorBanner message={save.error.message} />}
+        {save.isSuccess && !dirty && <Alert tone="success">Preferências salvas!</Alert>}
+        <div className="form-actions">
+          <Button loading={save.isPending} disabled={!dirty} onClick={() => save.mutate()}>
+            {save.isPending ? "Salvando…" : "Salvar preferências"}
+          </Button>
+          {dirty && <span className="hint">Alterações não salvas</span>}
+        </div>
+      </Stack>
+    </ParticipantLayout>
   );
 }
