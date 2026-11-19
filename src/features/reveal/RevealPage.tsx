@@ -68,10 +68,12 @@ export function RevealPage() {
   return (
     <main className="reveal-screen">
       <div className="reveal">
-        <p className="reveal__eyebrow">Você tirou</p>
-        <h1 className="reveal__name" aria-live="polite">
-          {data.receiverName}
-        </h1>
+        <div className="slip slip--paper slip--unfold">
+          <p className="slip__eyebrow">Você tirou</p>
+          <h1 className="reveal__name" aria-live="polite">
+            {data.receiverName}
+          </h1>
+        </div>
         {data.receiverCategories.length > 0 && (
           <div className="enter" style={{ animationDelay: "200ms" }}>
             <p className="reveal__eyebrow" style={{ marginBottom: 10 }}>

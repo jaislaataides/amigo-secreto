@@ -281,7 +281,7 @@ select {
 
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .app-header {
-    background: color-mix(in srgb, var(--color-brand) 86%, transparent);
+    background: color-mix(in srgb, var(--color-brand) 94%, transparent);
     -webkit-backdrop-filter: blur(14px) saturate(1.5);
     backdrop-filter: blur(14px) saturate(1.5);
   }
@@ -1202,7 +1202,7 @@ select {
 
 .stat__value {
   font-weight: 800;
-  font-size: 34px;
+  font-size: 44px;
   line-height: 1;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
@@ -1980,5 +1980,113 @@ select {
 @media (prefers-reduced-motion: reduce) {
   .entry-curtain {
     display: none;
+  }
+}
+
+/* ==========================================================================
+   Assinatura visual (o que faz o app parecer o Amico Secreto)
+   1. Capas geradas: components/GeneratedCover.tsx.
+   2. Papelzinho: .slip (canto dobrado + picote) na revelação e nas regras.
+   3. Padrão da marca: macaquinhos e presentes em tom sobre tom nas áreas
+      roxas.
+   4. Rabisco verde: .squiggle sob a palavra-chave do título e no nome
+      revelado. Números grandes nas estatísticas.
+   Cada um aparece em poucos lugares, de propósito.
+   ========================================================================== */
+
+:root {
+  --color-paper: #fffdf7;
+  --color-paper-ink: #1c1226;
+  --color-paper-muted: #6b5f78;
+  --color-paper-accent: #3a1d57;
+  --brand-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cg fill='%23ffffff' fill-opacity='.06'%3E%3Ccircle cx='18' cy='18' r='6'/%3E%3Ccircle cx='10.5' cy='18' r='2.6'/%3E%3Ccircle cx='25.5' cy='18' r='2.6'/%3E%3C/g%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.06' stroke-width='1.6'%3E%3Crect x='48' y='51' width='12' height='9' rx='1'/%3E%3Crect x='47' y='48' width='14' height='3' rx='1'/%3E%3Cpath d='M54 48v12'/%3E%3C/g%3E%3C/svg%3E");
+  --squiggle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='8' viewBox='0 0 20 8'%3E%3Cpath d='M0 5Q5 0 10 5T20 5' fill='none' stroke='%237ad35a' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* 3. Padrão da marca */
+/* Fora do cabeçalho: ali, em faixa estreita, o padrão vira listra. */
+.auth__brand,
+.splash,
+.reveal-screen {
+  background-image: var(--brand-pattern);
+}
+
+/* 4. Rabisco verde */
+.squiggle {
+  background: var(--squiggle) repeat-x left bottom / 20px 8px;
+  padding-bottom: 0.14em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* 2. Papelzinho: canto dobrado no alto à direita, picote embaixo. */
+.slip {
+  position: relative;
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
+  /* Duas camadas: o corpo inteiro opaco + só a faixa de baixo com os
+     furinhos (mascarar a altura toda deixava riscos verticais). */
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - 10px) no-repeat,
+    radial-gradient(circle 5px at 8px 100%, #0000 96%, #000) left bottom / 16px 10px repeat-x;
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - 10px) no-repeat,
+    radial-gradient(circle 5px at 8px 100%, #0000 96%, #000) left bottom / 16px 10px repeat-x;
+  padding-bottom: 6px;
+}
+
+.slip::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background: var(--color-border-strong);
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
+
+.slip--paper {
+  max-width: 460px;
+  margin: 0 auto var(--space-6);
+  padding: var(--space-5) var(--space-5) var(--space-6);
+  background: var(--color-paper);
+  color: var(--color-paper-ink);
+  rotate: -1.2deg;
+}
+
+.slip--paper::after {
+  background: #e3dccd;
+}
+
+.slip__eyebrow {
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-paper-muted);
+}
+
+.slip--paper .reveal__name {
+  color: var(--color-paper-accent);
+  margin-bottom: 0;
+  animation: none;
+}
+
+/* O papel desdobra ao abrir (momento raro, então pode ter mais presença). */
+.slip--unfold {
+  transform-origin: top center;
+  animation: unfold 640ms var(--ease-out) both;
+}
+
+@keyframes unfold {
+  from {
+    opacity: 0;
+    transform: perspective(700px) rotateX(-80deg);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    transform: none;
   }
 }

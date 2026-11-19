@@ -12,7 +12,7 @@ export function HomePage() {
 
   return (
     <Page>
-      <PageHeader title={firstName ? `Olá, ${firstName}!` : "Olá!"} subtitle="O que você quer fazer hoje?" />
+      <PageHeader title={firstName ? `Olá, ${firstName}!` : "Olá!"} highlight={firstName} subtitle="O que você quer fazer hoje?" />
 
       {canOrganize || role.admin ? (
         <div className="party-grid">

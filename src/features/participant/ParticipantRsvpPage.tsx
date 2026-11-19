@@ -28,7 +28,7 @@ export function ParticipantRsvpPage() {
   return (
     <ParticipantLayout partyId={partyId} name={party.name} imageUrl={party.imageUrl} subtitle={party.description}>
       <Stack gap={24}>
-        <div className="rules">
+        <div className="rules slip">
           <div className="rules__item">
             <div className="rules__label">Valor do presente</div>
             <div className="rules__value">

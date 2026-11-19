@@ -25,6 +25,8 @@ export function Page(props: { children: ReactNode; maxWidth?: number }) {
 
 export function PageHeader(props: {
   title: string;
+  /** Palavra do título que ganha o rabisco verde (só em telas principais). */
+  highlight?: string;
   subtitle?: ReactNode;
   actions?: ReactNode;
   back?: { to: string; label: string };
@@ -38,11 +40,23 @@ export function PageHeader(props: {
             {props.back.label}
           </Link>
         )}
-        <h1 className="page-title">{props.title}</h1>
+        <h1 className="page-title">{withSquiggle(props.title, props.highlight)}</h1>
         {props.subtitle && <p className="page-subtitle">{props.subtitle}</p>}
       </div>
       {props.actions}
     </header>
+  );
+}
+
+function withSquiggle(title: string, word?: string): ReactNode {
+  const i = word ? title.lastIndexOf(word) : -1;
+  if (!word || i < 0) return title;
+  return (
+    <>
+      {title.slice(0, i)}
+      <span className="squiggle">{word}</span>
+      {title.slice(i + word.length)}
+    </>
   );
 }
 

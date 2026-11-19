@@ -34,7 +34,7 @@ export function AdminDashboardPage() {
 
   return (
     <Page maxWidth={860}>
-      <PageHeader title="Painel do admin" subtitle="Aprove organizadores e ajuste o tamanho das parties." />
+      <PageHeader title="Painel do admin" highlight="admin" subtitle="Aprove organizadores e ajuste o tamanho das parties." />
 
       <Section title="Pedidos de organizador" count={pendingCount}>
         {owners.isLoading && <InlineLoading />}
