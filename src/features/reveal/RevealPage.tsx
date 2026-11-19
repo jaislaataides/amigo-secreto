@@ -13,6 +13,7 @@ import { GoogleSignInButton } from "@/auth/GoogleSignInButton";
 interface RevealResult {
   receiverName: string;
   receiverCategories: string[];
+  receiverSizes: { top: string | null; bottom: string | null; shoe: string | null; sock: string | null } | null;
   referenceLinks: {
     id: string;
     url: string;
@@ -75,6 +76,13 @@ export function RevealPage() {
     );
   }
 
+  const SIZE_LABELS = { top: "Camisa", bottom: "Calça", shoe: "Sapato", sock: "Meia" } as const;
+  const sizeChips = data.receiverSizes
+    ? (Object.keys(SIZE_LABELS) as (keyof typeof SIZE_LABELS)[])
+        .filter((k) => data.receiverSizes?.[k])
+        .map((k) => `${SIZE_LABELS[k]} ${data.receiverSizes![k]}`)
+    : [];
+
   return (
     <main className="reveal-screen">
       <div className="reveal">
@@ -92,6 +100,18 @@ export function RevealPage() {
             <div className="reveal__chips">
               {data.receiverCategories.map((c) => (
                 <Badge key={c}>{c}</Badge>
+              ))}
+            </div>
+          </div>
+        )}
+        {sizeChips.length > 0 && (
+          <div className="enter" style={{ animationDelay: "260ms", marginTop: 20 }}>
+            <p className="reveal__eyebrow" style={{ marginBottom: 10 }}>
+              Medidas
+            </p>
+            <div className="reveal__chips">
+              {sizeChips.map((chip) => (
+                <Badge key={chip}>{chip}</Badge>
               ))}
             </div>
           </div>

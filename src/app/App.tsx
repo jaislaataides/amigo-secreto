@@ -16,6 +16,7 @@ import { PartyDrawPage } from "@/features/owner/PartyDrawPage";
 import { ParticipantPreferencesPage } from "@/features/participant/ParticipantPreferencesPage";
 import { ParticipantReferencesPage } from "@/features/participant/ParticipantReferencesPage";
 import { ParticipantRsvpPage } from "@/features/participant/ParticipantRsvpPage";
+import { ParticipantSizesPage } from "@/features/participant/ParticipantSizesPage";
 import { RevealPage } from "@/features/reveal/RevealPage";
 import { AppLayout } from "./AppLayout";
 import { HomePage } from "./HomePage";
@@ -112,6 +113,14 @@ export function App() {
               element={
                 <Protected>
                   <ParticipantPreferencesPage />
+                </Protected>
+              }
+            />
+            <Route
+              path="/p/:partyId/sizes"
+              element={
+                <Protected>
+                  <ParticipantSizesPage />
                 </Protected>
               }
             />

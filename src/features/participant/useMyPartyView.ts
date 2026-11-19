@@ -20,6 +20,14 @@ export interface MyReferenceLink {
   fetchStatus: "ok" | "failed";
 }
 
+/** Medidas (texto livre curto, todas opcionais). */
+export interface MySizes {
+  top: string | null;
+  bottom: string | null;
+  shoe: string | null;
+  sock: string | null;
+}
+
 export interface MyPartyView {
   party: {
     id: string;
@@ -37,6 +45,7 @@ export interface MyPartyView {
     email: string;
     rsvp: "pending" | "going" | "not_going";
     preferredCategories: string[];
+    sizes: MySizes | null;
     referenceLinks: MyReferenceLink[];
   };
 }
