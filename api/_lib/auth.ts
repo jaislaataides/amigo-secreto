@@ -37,8 +37,9 @@ export function requireAdmin(decoded: DecodedIdToken): void {
   }
 }
 
+/** Admin tem acesso a tudo que um owner tem — organizar parties incluso. */
 export function requireOwner(decoded: DecodedIdToken): void {
-  if (decoded.owner !== true) {
+  if (decoded.owner !== true && decoded.admin !== true) {
     throw new ApiError(403, "forbidden", "Ação restrita a organizadores aprovados.");
   }
 }

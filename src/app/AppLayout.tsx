@@ -4,8 +4,8 @@ import { useAuth } from "@/auth/AuthContext";
 
 export function AppLayout(props: { children: ReactNode }) {
   const { user, role, signOutUser } = useAuth();
-
-  const homePath = role.admin ? "/admin" : role.owner ? "/owner" : "/";
+  // Admin tem acesso a tudo que um owner tem — organizar parties incluso.
+  const canOrganize = role.owner || role.admin;
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -21,12 +21,13 @@ export function AppLayout(props: { children: ReactNode }) {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <Link to={homePath} style={{ fontWeight: 700, fontSize: 16, textDecoration: "none", color: "inherit" }}>
+          <Link to="/home" style={{ fontWeight: 700, fontSize: 16, textDecoration: "none", color: "inherit" }}>
             🎁 Amigo Secreto
           </Link>
           <nav style={{ display: "flex", gap: 16 }}>
+            <HeaderLink to="/home">Início</HeaderLink>
             {role.admin && <HeaderLink to="/admin">Painel admin</HeaderLink>}
-            {role.owner && <HeaderLink to="/owner">Minhas parties</HeaderLink>}
+            {canOrganize && <HeaderLink to="/owner">Minhas parties</HeaderLink>}
           </nav>
         </div>
 

@@ -13,7 +13,10 @@ export function AuthGuard(props: { children: ReactNode; requireRole?: "admin" | 
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
-  if (props.requireRole && !role[props.requireRole]) {
+  // Admin tem acesso a tudo que um owner tem — organizar parties incluso.
+  const satisfiesRequiredRole = !props.requireRole || role[props.requireRole] || (props.requireRole === "owner" && role.admin);
+
+  if (!satisfiesRequiredRole) {
     return (
       <div style={{ padding: 32, textAlign: "center", color: "#71717a" }}>
         <p>Você não tem permissão para acessar esta página.</p>

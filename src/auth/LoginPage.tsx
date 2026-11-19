@@ -4,7 +4,7 @@ import { FullPageSpinner } from "@/shared/components/Feedback";
 import { useAuth } from "./AuthContext";
 
 export function LoginPage() {
-  const { user, loading, role, unauthorized, signInWithGoogle, signOutUser } = useAuth();
+  const { user, loading, unauthorized, signInWithGoogle } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
   const from = (location.state as { from?: Location } | null)?.from;
@@ -13,28 +13,9 @@ export function LoginPage() {
 
   if (user) {
     // Quem chegou aqui via AuthGuard (ex: link de convite/revelação sem
-    // estar logado) volta pro link original em vez de cair num dashboard
-    // genérico — isso vale pra qualquer papel, não só participante.
-    if (from) return <Navigate to={`${from.pathname}${from.search}`} replace />;
-    if (role.admin) return <Navigate to="/admin" replace />;
-    if (role.owner) return <Navigate to="/owner" replace />;
-    return (
-      <main style={pageStyle}>
-        <h1 style={titleStyle}>🎁 Amigo Secreto</h1>
-        <p style={{ color: "#52525b" }}>
-          Você está logado como <strong>{user.email}</strong>.
-        </p>
-        <p style={{ color: "#71717a", fontSize: 14 }}>
-          Para acessar uma party, use o link que você recebeu por e-mail (convite ou resultado do sorteio).
-        </p>
-        <p style={{ fontSize: 14 }}>
-          Quer organizar um amigo secreto? <a href="/solicitar-acesso">Peça acesso de organizador</a>.
-        </p>
-        <button onClick={() => void signOutUser()} style={linkButtonStyle}>
-          Sair
-        </button>
-      </main>
-    );
+    // estar logado) volta pro link original em vez da home — vale pra
+    // qualquer papel, não só participante.
+    return <Navigate to={from ? `${from.pathname}${from.search}` : "/home"} replace />;
   }
 
   return (
@@ -87,13 +68,4 @@ const googleButtonStyle: CSSProperties = {
   fontSize: 15,
   fontWeight: 600,
   cursor: "pointer",
-};
-
-const linkButtonStyle: CSSProperties = {
-  background: "none",
-  border: "none",
-  color: "#71717a",
-  textDecoration: "underline",
-  cursor: "pointer",
-  marginTop: 16,
 };

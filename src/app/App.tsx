@@ -18,6 +18,7 @@ import { ParticipantReferencesPage } from "@/features/participant/ParticipantRef
 import { ParticipantRsvpPage } from "@/features/participant/ParticipantRsvpPage";
 import { RevealPage } from "@/features/reveal/RevealPage";
 import { AppLayout } from "./AppLayout";
+import { HomePage } from "./HomePage";
 import { NotFoundPage } from "./NotFoundPage";
 
 /** AuthGuard + cabeçalho de navegação, combinados — a maioria das rotas logadas usa os dois. */
@@ -37,6 +38,15 @@ export function App() {
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/solicitar-acesso" element={<RequestOwnerAccessPage />} />
+
+            <Route
+              path="/home"
+              element={
+                <Protected>
+                  <HomePage />
+                </Protected>
+              }
+            />
 
             <Route
               path="/admin"
