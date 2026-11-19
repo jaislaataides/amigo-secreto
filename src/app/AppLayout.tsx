@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { MonkeyMark } from "@/shared/components/MonkeyMark";
+import { BrandName } from "@/shared/components/BrandName";
 import { cameFromSplash } from "./entryCue";
 import { IconButton } from "@/shared/components/ui";
 
@@ -21,9 +22,7 @@ export function AppLayout(props: { children: ReactNode }) {
             <span className="brand__mark">
               <MonkeyMark />
             </span>
-            <span>
-              A<em className="brand__mico">mico</em> Secreto
-            </span>
+            <BrandName />
           </Link>
 
           <nav className="app-nav" aria-label="Principal">

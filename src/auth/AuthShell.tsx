@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Icon } from "@/shared/components/Icon";
 import { MonkeyMark } from "@/shared/components/MonkeyMark";
+import { BrandName } from "@/shared/components/BrandName";
 
 /** Login e pedido de acesso: painel de marca à esquerda (topo no celular), ação à direita. */
 export function AuthShell(props: { children: ReactNode }) {
@@ -11,9 +12,7 @@ export function AuthShell(props: { children: ReactNode }) {
           <span className="brand__mark">
             <MonkeyMark />
           </span>
-          <span>
-            A<em className="brand__mico">mico</em> Secreto
-          </span>
+          <BrandName />
         </span>
         <p className="auth__headline">
           Amigo secreto <em>sem pagar mico.</em>
