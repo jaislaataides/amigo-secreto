@@ -49,6 +49,14 @@ export interface Category {
   createdAt: FirestoreTimestampLike;
 }
 
+/** Medidas pra presente de roupa/calçado. Texto livre curto, todas opcionais. */
+export interface Sizes {
+  top: string | null; // camisa/blusa
+  bottom: string | null; // calça/shorts
+  shoe: string | null; // sapato
+  sock: string | null; // meia
+}
+
 export interface Participant {
   name: string;
   email: string;
@@ -57,6 +65,7 @@ export interface Participant {
   rsvp: Rsvp;
   rsvpAt?: FirestoreTimestampLike | null;
   preferredCategories: string[];
+  sizes?: Sizes | null;
   createdAt: FirestoreTimestampLike;
   updatedAt: FirestoreTimestampLike;
   /**

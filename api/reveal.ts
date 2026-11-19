@@ -96,6 +96,7 @@ export default withErrorHandling(async (req: VercelRequest, res: VercelResponse)
   res.status(200).json({
     receiverName: receiver.name,
     receiverCategories: receiver.preferredCategories.map((id) => categoryLabels.get(id) ?? id),
+    receiverSizes: receiver.sizes ?? null,
     referenceLinks: receiverLinksSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
   });
 });

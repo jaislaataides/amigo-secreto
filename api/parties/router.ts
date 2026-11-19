@@ -10,6 +10,7 @@ import { setMaxParticipants } from "./_handlers/setMaxParticipants.js";
 import { updateRules } from "./_handlers/updateRules.js";
 import { getMe } from "./_handlers/meIndex.js";
 import { setMyPreferences } from "./_handlers/mePreferences.js";
+import { setMySizes } from "./_handlers/meSizes.js";
 import { handleMyLinks } from "./_handlers/meLinks.js";
 import { confirmRsvp } from "./_handlers/meConfirm.js";
 import { addParticipants } from "./_handlers/participantsAdd.js";
@@ -80,6 +81,8 @@ export default async function router(req: VercelRequest, res: VercelResponse) {
       switch (third) {
         case "preferences":
           return setMyPreferences(req, res);
+        case "sizes":
+          return setMySizes(req, res);
         case "links":
           return handleMyLinks(req, res);
         case "confirm":

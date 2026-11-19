@@ -38,6 +38,7 @@ export const getMe = withErrorHandling(async (req: VercelRequest, res: VercelRes
       email: participant.email,
       rsvp: participant.rsvp,
       preferredCategories: participant.preferredCategories,
+      sizes: participant.sizes ?? null,
       referenceLinks: linksSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
     },
   });
