@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
-import { Alert, FullPageSpinner } from "@/shared/components/Feedback";
+import { Alert } from "@/shared/components/Feedback";
+import { AppSplash } from "./AppSplash";
 import { Button, Stack } from "@/shared/components/ui";
 import { AuthShell } from "./AuthShell";
 import { useAuth } from "./AuthContext";
@@ -16,7 +17,7 @@ export function RequestOwnerAccessPage() {
     onSuccess: (data) => setDone(data.status),
   });
 
-  if (loading) return <FullPageSpinner />;
+  if (loading) return <AppSplash label="Carregando…" />;
 
   return (
     <AuthShell>

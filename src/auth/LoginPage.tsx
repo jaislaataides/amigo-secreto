@@ -1,6 +1,7 @@
 import { Link, Navigate, useLocation, type Location } from "react-router-dom";
 import { useState } from "react";
-import { Alert, FullPageSpinner } from "@/shared/components/Feedback";
+import { Alert } from "@/shared/components/Feedback";
+import { AppSplash } from "./AppSplash";
 import { Stack } from "@/shared/components/ui";
 import { AuthShell } from "./AuthShell";
 import { useAuth } from "./AuthContext";
@@ -12,7 +13,7 @@ export function LoginPage() {
   const location = useLocation();
   const from = (location.state as { from?: Location } | null)?.from;
 
-  if (loading) return <FullPageSpinner />;
+  if (loading) return <AppSplash />;
 
   if (user) {
     // Quem chegou aqui via AuthGuard (ex: link de convite/revelação sem

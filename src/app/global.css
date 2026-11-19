@@ -1888,3 +1888,77 @@ select {
     transform: rotate(4deg);
   }
 }
+
+/* ---------- Entrada no app (login → página) ----------
+   Enquanto a sessão é conferida: tela roxa com o macaquinho (AppSplash).
+   Quando o app monta, uma cortina do mesmo roxo recolhe pra cima e vira
+   o cabeçalho (AppLayout), revelando a página. Ver src/app/entryCue.ts. */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-4);
+  background: var(--color-brand);
+  color: var(--color-on-brand-muted);
+  /* Sessão que resolve num piscar não chega a mostrar a tela. */
+  animation: fade-in var(--dur-med) ease-out 120ms both;
+}
+
+.splash__mark {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-card);
+  background: var(--color-primary);
+  color: var(--color-brand);
+  animation: splash-bob 1.4s ease-in-out infinite;
+}
+
+.splash__label {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.entry-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--color-brand);
+  transform-origin: top;
+  pointer-events: none;
+  animation: curtain-up 560ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+.app-header--entering .app-header__inner {
+  animation: fade-in var(--dur-slow) ease-out 260ms both;
+}
+
+@keyframes splash-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  50% {
+    transform: translateY(-5px) rotate(-4deg);
+  }
+}
+
+@keyframes curtain-up {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry-curtain {
+    display: none;
+  }
+}

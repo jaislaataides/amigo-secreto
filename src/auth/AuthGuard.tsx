@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
-import { EmptyState, FullPageSpinner } from "@/shared/components/Feedback";
+import { EmptyState } from "@/shared/components/Feedback";
+import { AppSplash } from "./AppSplash";
 import { ButtonLink, Page } from "@/shared/components/ui";
 import { useAuth } from "./AuthContext";
 
@@ -8,7 +9,7 @@ export function AuthGuard(props: { children: ReactNode; requireRole?: "admin" | 
   const { user, loading, role } = useAuth();
   const location = useLocation();
 
-  if (loading) return <FullPageSpinner />;
+  if (loading) return <AppSplash label="Carregando…" />;
 
   if (!user) {
     return <Navigate to="/" state={{ from: location }} replace />;

@@ -44,6 +44,10 @@ export function AuthProvider(props: { children: ReactNode }) {
         return;
       }
 
+      // Logo após o login a conta ainda está sendo validada (sync-role);
+      // sem isso a tela de login ficava parada até a home aparecer de repente.
+      setLoading(true);
+
       try {
         // Garante que os custom claims (admin/owner) estão atualizados no
         // Firestore antes de ler o token — necessário logo após aprovação

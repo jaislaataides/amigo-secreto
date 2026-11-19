@@ -1,17 +1,21 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { MonkeyMark } from "@/shared/components/MonkeyMark";
+import { cameFromSplash } from "./entryCue";
 import { IconButton } from "@/shared/components/ui";
 
 export function AppLayout(props: { children: ReactNode }) {
   const { user, role, signOutUser } = useAuth();
   // Admin tem acesso a tudo que um owner tem — organizar parties incluso.
   const canOrganize = role.owner || role.admin;
+  // Só depois da tela de entrada: o roxo dela recolhe até virar o cabeçalho.
+  const [entering] = useState(cameFromSplash);
 
   return (
     <>
-      <header className="app-header">
+      {entering && <div className="entry-curtain" aria-hidden="true" />}
+      <header className={entering ? "app-header app-header--entering" : "app-header"}>
         <div className="app-header__inner">
           <Link to="/home" className="brand">
             <span className="brand__mark">
