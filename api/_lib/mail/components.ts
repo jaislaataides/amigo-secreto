@@ -17,12 +17,14 @@ import {
 // uma rota diretamente — dava ERR_MODULE_NOT_FOUND em produção mesmo
 // existindo no repositório. React.createElement equivale 1:1 ao JSX.
 
+// Mesma paleta do app (src/app/global.css), tema claro.
 const colors = {
-  bg: "#f4f4f5",
+  bg: "#f8f6fb",
   card: "#ffffff",
-  text: "#18181b",
-  muted: "#71717a",
-  accent: "#b91c1c",
+  text: "#1f1a2b",
+  muted: "#5f5873",
+  accent: "#6d28d9",
+  border: "#e4ddee",
 };
 
 function Layout(props: { preview: string; children?: ReactNode }) {
@@ -49,14 +51,14 @@ function Layout(props: { preview: string; children?: ReactNode }) {
               margin: "0 0 16px",
             },
           },
-          "🎁 Amigo Secreto",
+          "Amico Secreto",
         ),
         props.children,
-        h(Hr, { style: { borderColor: "#e4e4e7", margin: "24px 0" } }),
+        h(Hr, { style: { borderColor: colors.border, margin: "24px 0" } }),
         h(
           Text,
           { style: { color: colors.muted, fontSize: 12, margin: 0 } },
-          "Você recebeu este e-mail porque foi convidado(a) ou é organizador(a) de um Amigo Secreto nesta plataforma.",
+          "Você recebeu este e-mail porque participa ou organiza um amigo secreto no Amico Secreto.",
         ),
       ),
     ),
@@ -72,8 +74,8 @@ function CtaButton(props: { href: string; children?: ReactNode }) {
         backgroundColor: colors.accent,
         color: "#ffffff",
         padding: "12px 20px",
-        borderRadius: 8,
-        fontWeight: 600,
+        borderRadius: 999,
+        fontWeight: 700,
         textDecoration: "none",
         display: "inline-block",
       },
@@ -97,9 +99,12 @@ function MutedParagraph(children: ReactNode, fontSize = 13) {
 export function InviteEmail(props: { participantName: string; partyName: string; joinUrl: string }) {
   return h(
     Layout,
-    { preview: `Você foi convidado para o Amigo Secreto "${props.partyName}"` },
+    { preview: `Você foi convidado(a) pro amigo secreto "${props.partyName}"` },
     Heading20(`Olá, ${props.participantName}!`),
-    Paragraph(h("span", null, "Você foi convidado(a) para o Amigo Secreto ", h("strong", null, props.partyName), ".")),
+    Paragraph(h("span", null, "Você foi convidado(a) pro amigo secreto ", h("strong", null, props.partyName), ".")),
+    Paragraph(
+      "Lá você confirma presença, marca o que curte ganhar e deixa referências — pra ninguém pagar mico no presente.",
+    ),
     h(Section, { style: { margin: "24px 0" } }, h(CtaButton, { href: props.joinUrl }, "Participar agora")),
     MutedParagraph("Entre com a conta Google do e-mail que recebeu este convite."),
   );
@@ -111,7 +116,7 @@ export function ReminderEmail(props: { participantName: string; partyName: strin
     { preview: `Lembrete: confirme sua presença em "${props.partyName}"` },
     Heading20(`Olá, ${props.participantName}!`),
     Paragraph(
-      h("span", null, "Ainda não vimos sua confirmação para o Amigo Secreto ", h("strong", null, props.partyName), "."),
+      h("span", null, "Ainda não vimos sua confirmação pro amigo secreto ", h("strong", null, props.partyName), "."),
     ),
     h(Section, { style: { margin: "24px 0" } }, h(CtaButton, { href: props.joinUrl }, "Confirmar presença")),
   );
@@ -146,12 +151,12 @@ export function RsvpAckEmail(props: { participantName: string; partyName: string
 export function RevealLinkEmail(props: { participantName: string; partyName: string; revealUrl: string }) {
   return h(
     Layout,
-    { preview: `Seu resultado do Amigo Secreto "${props.partyName}" já está disponível!` },
+    { preview: `Saiu o sorteio de "${props.partyName}"! Veja quem você tirou` },
     Heading20(`Olá, ${props.participantName}!`),
     Paragraph(h("span", null, "O sorteio de ", h("strong", null, props.partyName), " foi realizado!")),
     h(Section, { style: { margin: "24px 0" } }, h(CtaButton, { href: props.revealUrl }, "Ver quem eu tirei")),
     MutedParagraph(
-      "Esse link é pessoal e intransferível — só funciona pra você, logado com este e-mail. Fica disponível por 15 dias após o sorteio.",
+      "Esse link é pessoal e intransferível — só funciona pra você, logado com este e-mail. Abra longe de olhares curiosos pra não pagar mico. Fica disponível por 15 dias após o sorteio.",
     ),
   );
 }

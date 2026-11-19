@@ -20,5 +20,5 @@ export function getMailTransport(): Transporter {
 }
 
 export function getMailFrom(): string {
-  return process.env.MAIL_FROM ?? `Amigo Secreto <${process.env.SMTP_USER ?? ""}>`;
+  return process.env.MAIL_FROM ?? `Amico Secreto <${process.env.SMTP_USER ?? ""}>`;
 }

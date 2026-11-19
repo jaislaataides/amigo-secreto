@@ -22,7 +22,7 @@ export async function renderMailTemplate(
     case "invite": {
       const p = payload as { participantName: string; partyName: string; joinUrl: string };
       return {
-        subject: `Você foi convidado para o Amigo Secreto "${p.partyName}"`,
+        subject: `Você foi convidado(a) pro amigo secreto "${p.partyName}"`,
         html: await render(InviteEmail(p)),
       };
     }
@@ -46,7 +46,7 @@ export async function renderMailTemplate(
     case "reveal_link": {
       const p = payload as { participantName: string; partyName: string; revealUrl: string };
       return {
-        subject: `Seu resultado do Amigo Secreto "${p.partyName}" já está disponível!`,
+        subject: `Saiu o sorteio de "${p.partyName}"! Veja quem você tirou`,
         html: await render(RevealLinkEmail(p)),
       };
     }
