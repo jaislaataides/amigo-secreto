@@ -51,7 +51,8 @@ export function PartyParticipantsPage() {
     },
   });
 
-  // Novo código + novo e-mail de convite; o link anterior deixa de valer.
+  // Antes do sorteio reenvia o convite (link anterior deixa de valer); depois
+  // do sorteio reenvia o e-mail de revelação com o resultado.
   const resendInvite = useMutation({
     mutationFn: (pid: string) => api.post(`/api/parties/${partyId}/participants/${pid}/resend`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
@@ -129,26 +130,33 @@ export function PartyParticipantsPage() {
                       </Badge>
                     )}
                     <Badge tone={RSVP_TONE[p.rsvp]}>{RSVP_LABEL[p.rsvp]}</Badge>
-                    {!p.isOwner && data.status !== "canceled" && (
-                      <IconButton
-                        icon="mail"
-                        label={
-                          resendInvite.isPending && resendInvite.variables === p.id
-                            ? `Reenviando convite para ${p.name}…`
-                            : `Reenviar convite para ${p.name}`
-                        }
-                        size="sm"
-                        loading={resendInvite.isPending && resendInvite.variables === p.id}
-                        disabled={resendInvite.isPending}
-                        onClick={() => {
-                          void confirm({
-                            title: `Reenviar convite para ${p.name}?`,
-                            message: `Um novo link vai pra ${p.email}. O link anterior deixa de funcionar.`,
-                            confirmLabel: "Reenviar",
-                          }).then((ok) => ok && resendInvite.mutate(p.id));
-                        }}
-                      />
-                    )}
+                    {!p.isOwner &&
+                      data.status !== "canceled" &&
+                      (data.status !== "drawn" || p.rsvp === "going") && (
+                        <IconButton
+                          icon="mail"
+                          label={
+                            resendInvite.isPending && resendInvite.variables === p.id
+                              ? `Reenviando para ${p.name}…`
+                              : data.status === "drawn"
+                                ? `Reenviar resultado para ${p.name}`
+                                : `Reenviar convite para ${p.name}`
+                          }
+                          size="sm"
+                          loading={resendInvite.isPending && resendInvite.variables === p.id}
+                          disabled={resendInvite.isPending}
+                          onClick={() => {
+                            const drawn = data.status === "drawn";
+                            void confirm({
+                              title: drawn ? `Reenviar resultado para ${p.name}?` : `Reenviar convite para ${p.name}?`,
+                              message: drawn
+                                ? `Um novo e-mail com o link do resultado vai pra ${p.email}.`
+                                : `Um novo link vai pra ${p.email}. O link anterior deixa de funcionar.`,
+                              confirmLabel: "Reenviar",
+                            }).then((ok) => ok && resendInvite.mutate(p.id));
+                          }}
+                        />
+                      )}
                     {editable && (
                       <IconButton
                         icon="trash"
@@ -181,7 +189,7 @@ export function PartyParticipantsPage() {
         {resendInvite.isError && <ErrorBanner message={resendInvite.error.message} />}
         {resendInvite.isSuccess && !resendInvite.isPending && (
           <Alert tone="success">
-            Convite reenviado para{" "}
+            {data.status === "drawn" ? "Resultado reenviado" : "Convite reenviado"} para{" "}
             {data.participants.find((p) => p.id === resendInvite.variables)?.email ?? "o participante"}.
           </Alert>
         )}
