@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { MonkeyMark } from "@/shared/components/MonkeyMark";
 import { BrandName } from "@/shared/components/BrandName";
@@ -8,6 +8,7 @@ import { IconButton } from "@/shared/components/ui";
 
 export function AppLayout(props: { children: ReactNode }) {
   const { user, role, signOutUser } = useAuth();
+  const navigate = useNavigate();
   // Só depois da tela de entrada: o roxo dela recolhe até virar o cabeçalho.
   const [entering] = useState(cameFromSplash);
 
@@ -39,7 +40,17 @@ export function AppLayout(props: { children: ReactNode }) {
 
           <div className="app-header__user">
             {user?.email && <span className="app-header__email">{user.email}</span>}
-            <IconButton icon="logout" label="Sair" onClick={() => void signOutUser()} />
+            <IconButton
+              icon="logout"
+              label="Sair"
+              onClick={async () => {
+                await signOutUser();
+                // Explícito: em rotas guiadas pelo ParticipantGuard (ex: /p/:partyId/...),
+                // sair não navega sozinho pra lugar nenhum — ficaria preso na mesma URL,
+                // mostrando o aviso de login "de convite" em vez da tela real de entrada.
+                navigate("/", { replace: true });
+              }}
+            />
           </div>
         </div>
       </header>
