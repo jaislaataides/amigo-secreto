@@ -21,17 +21,8 @@ export const runDraw = withErrorHandling(async (req: VercelRequest, res: VercelR
   const { ref, party } = await loadPartyOrThrow(partyId);
   requirePartyOwnerOrAdmin(party, decoded);
 
-  if (party.status === "canceled") {
-    throw new ApiError(409, "already-drawn", "Esta party foi cancelada.");
-  }
-
-  // Sortear de novo só é permitido antes do prazo de confirmação vencer —
-  // depois disso, o resultado já pode ter sido aberto por alguém e vira
-  // definitivo (ver reveal.ts: o link de posse velho deixa de valer assim
-  // que a gente sobrescreve o documento abaixo).
-  const isRedraw = party.status === "drawn";
-  if (isRedraw && Date.now() >= party.rsvpDeadline.toMillis()) {
-    throw new ApiError(409, "redraw-window-closed", "O prazo pra sortear novamente já passou.");
+  if (party.status === "drawn" || party.status === "canceled") {
+    throw new ApiError(409, "already-drawn", "Esta party já foi sorteada (ou foi cancelada).");
   }
 
   const [participantsSnap, exclusionsSnap] = await Promise.all([
@@ -43,22 +34,20 @@ export const runDraw = withErrorHandling(async (req: VercelRequest, res: VercelR
   const going = participants.filter((p) => effectiveRsvp(p) === "going");
   const pending = participants.filter((p) => effectiveRsvp(p) === "pending");
 
-  if (!isRedraw) {
-    const allResponded = pending.length === 0;
-    const deadlinePassed = Date.now() >= party.rsvpDeadline.toMillis();
-    const eligible = allResponded || (deadlinePassed && going.length >= MIN_GOING_PARTICIPANTS);
+  const allResponded = pending.length === 0;
+  const deadlinePassed = Date.now() >= party.rsvpDeadline.toMillis();
+  const eligible = allResponded || (deadlinePassed && going.length >= MIN_GOING_PARTICIPANTS);
 
-    if (!eligible) {
-      throw new ApiError(
-        409,
-        "draw-not-ready",
-        allResponded
-          ? "Aguardando confirmações."
-          : `Ainda há ${pending.length} participante(s) sem responder, e o prazo (${party.rsvpDeadline
-              .toDate()
-              .toLocaleDateString("pt-BR")}) ainda não venceu.`,
-      );
-    }
+  if (!eligible) {
+    throw new ApiError(
+      409,
+      "draw-not-ready",
+      allResponded
+        ? "Aguardando confirmações."
+        : `Ainda há ${pending.length} participante(s) sem responder, e o prazo (${party.rsvpDeadline
+            .toDate()
+            .toLocaleDateString("pt-BR")}) ainda não venceu.`,
+    );
   }
 
   if (going.length < MIN_GOING_PARTICIPANTS) {
@@ -106,25 +95,12 @@ export const runDraw = withErrorHandling(async (req: VercelRequest, res: VercelR
 
   const revealNonceByParticipant = new Map<string, string>();
 
-  // Num re-sorteio, os participantes elegíveis podem ter mudado (alguém
-  // desistiu, alguém novo confirmou) — limpa tudo que existia antes pra não
-  // sobrar assignment/token órfão de quem não está mais no sorteio novo.
-  const [staleAssignments, staleTokens] = isRedraw
-    ? await Promise.all([
-        ref.collection("assignments").listDocuments(),
-        ref.collection("possessionTokens").listDocuments(),
-      ])
-    : [[], []];
-
   await adminDb.runTransaction(async (tx) => {
     const freshSnap = await tx.get(ref);
     const freshParty = freshSnap.data();
-    if (freshParty?.status === "drawn" && !isRedraw) {
+    if (freshParty?.status === "drawn") {
       throw new ApiError(409, "already-drawn", "Esta party já foi sorteada.");
     }
-
-    for (const docRef of staleAssignments) tx.delete(docRef);
-    for (const docRef of staleTokens) tx.delete(docRef);
 
     for (const [giverId, receiverId] of outcome.assignments) {
       const encrypted = encryptAssignment(dek, partyId, giverId, receiverId);
@@ -172,5 +148,5 @@ export const runDraw = withErrorHandling(async (req: VercelRequest, res: VercelR
     payload: { partyName: party.name },
   }).catch(() => undefined);
 
-  res.status(200).json({ ok: true, assignedCount: outcome.assignments.size, redraw: isRedraw });
+  res.status(200).json({ ok: true, assignedCount: outcome.assignments.size });
 });
