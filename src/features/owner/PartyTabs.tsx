@@ -10,6 +10,10 @@ export function PartyTabs(props: { partyId: string }) {
         { to: `${base}/edit`, label: "Regras", icon: "sliders" },
         { to: `${base}/exclusions`, label: "Exclusões", icon: "ban" },
         { to: `${base}/draw`, label: "Sorteio", icon: "shuffle" },
+        // Fora do /owner/parties/* de propósito: são as preferências pessoais
+        // do organizador como participante, não regras da party (ver
+        // ParticipantLayout, que mostra o caminho de volta pra cá).
+        { to: `/p/${props.partyId}/preferences`, label: "Meu presente", icon: "gift" },
       ]}
     />
   );

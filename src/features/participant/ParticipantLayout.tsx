@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { GeneratedCover } from "@/shared/components/GeneratedCover";
-import { Page, PageHeader, ButtonLink } from "@/shared/components/ui";
+import { Page, PageHeader } from "@/shared/components/ui";
 import { EmptyState, ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
 import { ApiClientError } from "@/shared/api/client";
 import { ParticipantTabs } from "./ParticipantTabs";
@@ -11,7 +11,7 @@ export function ParticipantLayout(props: {
   name: string;
   imageUrl: string | null;
   subtitle?: ReactNode;
-  /** Mostra um link de volta pro painel de organizador (quem criou a party também é participante dela). */
+  /** Quem criou a party também é participante dela — mostra um link de volta pro painel de organizador. */
   isOwner?: boolean;
   children: ReactNode;
 }) {
@@ -22,14 +22,14 @@ export function ParticipantLayout(props: {
       ) : (
         <GeneratedCover seed={props.partyId} className="cover" ratio={3} />
       )}
-      {props.isOwner && (
-        <div style={{ marginBottom: 12 }}>
-          <ButtonLink to={`/owner/parties/${props.partyId}/participants`} variant="secondary" size="sm" icon="arrowLeft">
-            Voltar pro painel da party
-          </ButtonLink>
-        </div>
-      )}
-      <PageHeader title={props.name} subtitle={props.subtitle} />
+      {/* Essas páginas são sobre a pessoa (categorias, referências, medidas), não
+        sobre as regras da party — fácil de confundir pra quem também organiza. */}
+      <p className="hint" style={{ margin: "4px 0" }}>Suas informações pessoais nesta party</p>
+      <PageHeader
+        back={props.isOwner ? { to: `/owner/parties/${props.partyId}/participants`, label: "Painel da party" } : undefined}
+        title={props.name}
+        subtitle={props.subtitle}
+      />
       <ParticipantTabs partyId={props.partyId} />
       {props.children}
     </Page>
