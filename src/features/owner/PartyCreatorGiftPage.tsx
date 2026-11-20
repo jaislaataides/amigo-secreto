@@ -4,6 +4,7 @@ import { useMyPartyView } from "@/features/participant/useMyPartyView";
 import { PreferenceCategoriesForm } from "@/features/participant/PreferenceCategoriesForm";
 import { ReferenceLinksForm } from "@/features/participant/ReferenceLinksForm";
 import { SizesForm } from "@/features/participant/SizesForm";
+import { EmptyState } from "@/shared/components/Feedback";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
 
 /**
@@ -18,6 +19,8 @@ export function PartyCreatorGiftPage() {
   if (!partyId) return null;
   if (isLoading || isError || !data) return <PartyLoadState isLoading={isLoading} error={error} />;
 
+  const drawn = data.party.status === "drawn";
+
   return (
     <PartyLayout
       partyId={partyId}
@@ -25,15 +28,21 @@ export function PartyCreatorGiftPage() {
       status={data.party.status}
       subtitle="Suas preferências como participante da própria party."
     >
-      <Stack gap={32}>
-        <PreferenceCategoriesForm
-          partyId={partyId}
-          categories={data.party.categories}
-          preferredCategories={data.me.preferredCategories}
-        />
-        <ReferenceLinksForm partyId={partyId} links={data.me.referenceLinks} />
-        <SizesForm partyId={partyId} rsvp={data.me.rsvp} sizes={data.me.sizes} />
-      </Stack>
+      {drawn ? (
+        <EmptyState icon="lock" title="Sorteio realizado!">
+          Verifique seu e-mail — o resultado chegou num link pessoal. Não dá mais pra editar nada por aqui.
+        </EmptyState>
+      ) : (
+        <Stack gap={32}>
+          <PreferenceCategoriesForm
+            partyId={partyId}
+            categories={data.party.categories}
+            preferredCategories={data.me.preferredCategories}
+          />
+          <ReferenceLinksForm partyId={partyId} links={data.me.referenceLinks} />
+          <SizesForm partyId={partyId} rsvp={data.me.rsvp} sizes={data.me.sizes} />
+        </Stack>
+      )}
     </PartyLayout>
   );
 }

@@ -37,6 +37,7 @@ export function ParticipantRsvpPage() {
       imageUrl={party.imageUrl}
       subtitle={party.description}
       isOwner={me.isOwner}
+      partyStatus={party.status}
     >
       <Stack gap={24}>
         <div className="rules slip">

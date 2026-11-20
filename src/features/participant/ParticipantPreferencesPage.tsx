@@ -16,7 +16,13 @@ export function ParticipantPreferencesPage() {
   if (isLoading || isError || !data) return <ParticipantLoadState isLoading={isLoading} error={error} />;
 
   return (
-    <ParticipantLayout partyId={partyId} name={data.party.name} imageUrl={data.party.imageUrl} isOwner={data.me.isOwner}>
+    <ParticipantLayout
+      partyId={partyId}
+      name={data.party.name}
+      imageUrl={data.party.imageUrl}
+      isOwner={data.me.isOwner}
+      partyStatus={data.party.status}
+    >
       <Stack gap={20}>
         <PreferenceCategoriesForm
           ref={formRef}

@@ -13,8 +13,11 @@ export function ParticipantLayout(props: {
   subtitle?: ReactNode;
   /** Quem criou a party também é participante dela — mostra um link de volta pro painel de organizador. */
   isOwner?: boolean;
+  /** Sorteio já feito: trava tudo, não dá mais pra editar nada daqui. */
+  partyStatus: string;
   children: ReactNode;
 }) {
+  const drawn = props.partyStatus === "drawn";
   return (
     <Page>
       {props.imageUrl ? (
@@ -22,16 +25,26 @@ export function ParticipantLayout(props: {
       ) : (
         <GeneratedCover seed={props.partyId} className="cover" ratio={3} />
       )}
-      {/* Essas páginas são sobre a pessoa (categorias, referências, medidas), não
-        sobre as regras da party — fácil de confundir pra quem também organiza. */}
-      <p className="hint" style={{ margin: "4px 0" }}>Suas informações pessoais nesta party</p>
+      {!drawn && (
+        // Essas páginas são sobre a pessoa (categorias, referências, medidas), não
+        // sobre as regras da party — fácil de confundir pra quem também organiza.
+        <p className="hint" style={{ margin: "4px 0" }}>Suas informações pessoais nesta party</p>
+      )}
       <PageHeader
         back={props.isOwner ? { to: `/owner/parties/${props.partyId}/participants`, label: "Painel da party" } : undefined}
         title={props.name}
         subtitle={props.subtitle}
       />
-      <ParticipantTabs partyId={props.partyId} />
-      {props.children}
+      {drawn ? (
+        <EmptyState icon="lock" title="Sorteio realizado!">
+          Verifique seu e-mail — o resultado chegou num link pessoal. Não dá mais pra editar nada por aqui.
+        </EmptyState>
+      ) : (
+        <>
+          <ParticipantTabs partyId={props.partyId} />
+          {props.children}
+        </>
+      )}
     </Page>
   );
 }
