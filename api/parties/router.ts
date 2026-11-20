@@ -16,6 +16,7 @@ import { confirmRsvp } from "./_handlers/meConfirm.js";
 import { addParticipants } from "./_handlers/participantsAdd.js";
 import { removeParticipant } from "./_handlers/participantRemove.js";
 import { resendInvite } from "./_handlers/participantResend.js";
+import { resendResults } from "./_handlers/resendResults.js";
 
 /**
  * Roteador único pra tudo em /api/parties/** — um arquivo sem colchetes,
@@ -73,6 +74,8 @@ export default async function router(req: VercelRequest, res: VercelResponse) {
         return getMe(req, res);
       case "participants":
         return addParticipants(req, res);
+      case "resend-results":
+        return resendResults(req, res);
     }
   }
 

@@ -19,6 +19,12 @@ export function PartyDrawPage() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["owner", "party", partyId] }),
   });
 
+  // Reenvia pra todo mundo de uma vez — pra reenviar só pra uma pessoa, ver a
+  // aba Participantes.
+  const resendResults = useMutation({
+    mutationFn: () => api.post<{ sentCount: number; totalCount: number }>(`/api/parties/${partyId}/resend-results`),
+  });
+
   if (!partyId) return null;
   if (isLoading || isError || !data) return <PartyLoadState isLoading={isLoading} error={error} />;
 
@@ -39,21 +45,46 @@ export function PartyDrawPage() {
 
         {alreadyDrawn || draw.isSuccess ? (
           <Card>
-            <div className="home-link" style={{ alignItems: "flex-start" }}>
-              <span className="home-link__icon">
-                <Icon name="check" size={24} strokeWidth={2.5} />
-              </span>
-              <div>
-                <h2 className="section-title" style={{ margin: 0 }}>
-                  Sorteio realizado
-                </h2>
-                <p className="muted" style={{ marginTop: 4 }}>
-                  {draw.isSuccess
-                    ? `${draw.data.assignedCount} participantes receberam o link de revelação por e-mail.`
-                    : "Cada participante recebeu por e-mail um link pessoal com quem tirou."}
-                </p>
+            <Stack gap={16}>
+              <div className="home-link" style={{ alignItems: "flex-start" }}>
+                <span className="home-link__icon">
+                  <Icon name="check" size={24} strokeWidth={2.5} />
+                </span>
+                <div>
+                  <h2 className="section-title" style={{ margin: 0 }}>
+                    Sorteio realizado
+                  </h2>
+                  <p className="muted" style={{ marginTop: 4 }}>
+                    {draw.isSuccess
+                      ? `${draw.data.assignedCount} participantes receberam o link de revelação por e-mail.`
+                      : "Cada participante recebeu por e-mail um link pessoal com quem tirou."}
+                  </p>
+                </div>
               </div>
-            </div>
+
+              {resendResults.isError && <ErrorBanner message={resendResults.error.message} />}
+              {resendResults.isSuccess && (
+                <Alert tone="success">
+                  {resendResults.data.sentCount} de {resendResults.data.totalCount} e-mails reenviados.
+                </Alert>
+              )}
+              <div className="form-actions">
+                <Button
+                  variant="secondary"
+                  icon="mail"
+                  loading={resendResults.isPending}
+                  onClick={() => {
+                    void confirm({
+                      title: "Reenviar resultados pra todo mundo?",
+                      message: "Cada confirmado recebe de novo o e-mail com o link de quem tirou (mesmo link de antes).",
+                      confirmLabel: "Reenviar pra todos",
+                    }).then((ok) => ok && resendResults.mutate());
+                  }}
+                >
+                  {resendResults.isPending ? "Reenviando…" : "Reenviar resultados pra todo mundo"}
+                </Button>
+              </div>
+            </Stack>
           </Card>
         ) : (
           <Card>
