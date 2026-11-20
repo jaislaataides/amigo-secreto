@@ -22,6 +22,7 @@ import { DateInputBR } from "@/shared/components/DateInputBR";
 import { joinMicos } from "@/shared/micos";
 import { ImagePickerBox } from "@/shared/components/ImagePickerBox";
 import { ErrorBanner, InlineLoading } from "@/shared/components/Feedback";
+import { AppSplash } from "@/auth/AppSplash";
 import { PARTY_BACK } from "./partyStatus";
 
 function defaultDeadline(): string {
@@ -95,6 +96,13 @@ export function PartyCreatePage() {
     } finally {
       setCompressingImage(false);
     }
+  }
+
+  // Mesma tela de entrada do app (macaquinho balançando) — criar a party e
+  // ir pra etapa 2 (preencher os dados do criador) merece essa pausa, em vez
+  // de um spinner de botão só.
+  if (createParty.isPending || createParty.isSuccess) {
+    return <AppSplash label="Criando sua party…" />;
   }
 
   return (
@@ -240,8 +248,8 @@ export function PartyCreatePage() {
           {createParty.isError && <ErrorBanner message={createParty.error.message} />}
 
           <div className="form-actions">
-            <Button type="submit" size="lg" loading={createParty.isPending} disabled={compressingImage}>
-              {createParty.isPending ? "Criando…" : "Criar party"}
+            <Button type="submit" size="lg" disabled={compressingImage}>
+              Criar party
             </Button>
             <ButtonLink to="/owner" variant="ghost">
               Cancelar
