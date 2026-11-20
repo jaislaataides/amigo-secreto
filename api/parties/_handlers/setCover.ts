@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { FieldValue } from "firebase-admin/firestore";
 import { validateImageDataUrl } from "../../_lib/image.js";
-import { requireMethod, verifyAuth } from "../../_lib/auth.js";
+import { ApiError, requireMethod, verifyAuth } from "../../_lib/auth.js";
 import { readJsonBody, requireQueryParam, withErrorHandling } from "../../_lib/http.js";
 import { loadPartyOrThrow, requirePartyOwnerOrAdmin } from "../../_lib/party.js";
 
@@ -21,6 +21,10 @@ export const setCover = withErrorHandling(async (req: VercelRequest, res: Vercel
   const partyId = requireQueryParam(req, "id");
   const { ref, party } = await loadPartyOrThrow(partyId);
   requirePartyOwnerOrAdmin(party, decoded);
+
+  if (party.status === "drawn" || party.status === "canceled") {
+    throw new ApiError(409, "party-locked", "Não é possível editar uma party já sorteada ou cancelada.");
+  }
 
   const body = readJsonBody<SetCoverBody>(req);
   const imageUrl = body.imageDataUrl === null ? null : validateImageDataUrl(body.imageDataUrl);

@@ -102,9 +102,27 @@ export function PartyEditPage() {
   if (isLoading || isError || !form || !data) return <PartyLoadState isLoading={isLoading || (!form && !isError)} error={error} />;
 
   const micos = parseMicos(data.forbiddenItemsText);
+  const drawn = data.status === "drawn";
 
   return (
     <PartyLayout partyId={partyId} name={data.name} status={data.status} isOwner={data.isOwner}>
+      {drawn ? (
+        <Card>
+          <div className="home-link" style={{ alignItems: "flex-start" }}>
+            <span className="home-link__icon">
+              <Icon name="lock" size={24} strokeWidth={2.5} />
+            </span>
+            <div>
+              <h2 className="section-title" style={{ margin: 0 }}>
+                Sorteio realizado!
+              </h2>
+              <p className="muted" style={{ marginTop: 4 }}>
+                As regras da party ficam travadas depois do sorteio — não dá mais pra editar nada aqui.
+              </p>
+            </div>
+          </div>
+        </Card>
+      ) : (
       <Stack gap={20}>
         <div>
           <ImagePickerBox
@@ -283,6 +301,7 @@ export function PartyEditPage() {
           </Stack>
         </Card>
       </Stack>
+      )}
     </PartyLayout>
   );
 }

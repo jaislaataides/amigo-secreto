@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Badge, Button, Card, CheckOption, IconButton, Stack } from "@/shared/components/ui";
+import { Icon } from "@/shared/components/Icon";
 import { Alert, EmptyState, ErrorBanner } from "@/shared/components/Feedback";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
 import { usePartyDetail } from "./usePartyDetail";
@@ -37,6 +38,7 @@ export function PartyExclusionsPage() {
   const nameById = new Map(data.participants.map((p) => [p.id, p.name]));
   const savedSignature = JSON.stringify(data.exclusions.map((e) => e.participantIds));
   const dirty = JSON.stringify(groups.map((g) => g.participantIds)) !== savedSignature;
+  const drawn = data.status === "drawn";
 
   return (
     <PartyLayout
@@ -46,6 +48,23 @@ export function PartyExclusionsPage() {
       isOwner={data.isOwner}
       subtitle="Pessoas no mesmo grupo nunca se tiram entre si — ótimo pra casais e famílias."
     >
+      {drawn ? (
+        <Card>
+          <div className="home-link" style={{ alignItems: "flex-start" }}>
+            <span className="home-link__icon">
+              <Icon name="lock" size={24} strokeWidth={2.5} />
+            </span>
+            <div>
+              <h2 className="section-title" style={{ margin: 0 }}>
+                Sorteio realizado!
+              </h2>
+              <p className="muted" style={{ marginTop: 4 }}>
+                As exclusões ficam travadas depois do sorteio — não dá mais pra editar nada aqui.
+              </p>
+            </div>
+          </div>
+        </Card>
+      ) : (
       <Stack gap={20}>
         <section>
           <h2 className="section-title">
@@ -126,6 +145,7 @@ export function PartyExclusionsPage() {
           {dirty && <span className="hint">Você tem alterações não salvas.</span>}
         </div>
       </Stack>
+      )}
     </PartyLayout>
   );
 }
