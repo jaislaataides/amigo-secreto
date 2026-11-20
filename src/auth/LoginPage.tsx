@@ -31,7 +31,7 @@ export function LoginPage() {
           <h1 className="sr-only">Amico Secreto</h1>
           <h2>Entrar</h2>
           <p className="muted" style={{ marginTop: 6 }}>
-            Use a conta Google do e-mail em que você recebeu o convite.
+            Entre com sua conta Google pra continuar.
           </p>
         </div>
 
