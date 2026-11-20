@@ -29,6 +29,8 @@ export interface PartyDetail {
   description: string;
   imageUrl: string | null;
   status: string;
+  /** Quem criou esta party (diferente de um admin só gerenciando ela). */
+  isOwner: boolean;
   valueRange: { min: number; max: number; currency: string };
   forbiddenItemsText: string;
   maxParticipants: number;

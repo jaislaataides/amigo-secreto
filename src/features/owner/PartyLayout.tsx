@@ -10,6 +10,8 @@ export function PartyLayout(props: {
   name: string;
   status: string;
   subtitle?: ReactNode;
+  /** Quem criou a party (não um admin só gerenciando) — mostra a aba "Meu presente". */
+  isOwner?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -22,7 +24,7 @@ export function PartyLayout(props: {
           <Badge tone={STATUS_TONE[props.status] ?? "neutral"}>{STATUS_LABEL[props.status] ?? props.status}</Badge>
         }
       />
-      <PartyTabs partyId={props.partyId} />
+      <PartyTabs partyId={props.partyId} isOwner={props.isOwner} />
       {props.children}
     </Page>
   );

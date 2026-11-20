@@ -43,6 +43,7 @@ export function PartyExclusionsPage() {
       partyId={partyId}
       name={data.name}
       status={data.status}
+      isOwner={data.isOwner}
       subtitle="Pessoas no mesmo grupo nunca se tiram entre si — ótimo pra casais e famílias."
     >
       <Stack gap={20}>

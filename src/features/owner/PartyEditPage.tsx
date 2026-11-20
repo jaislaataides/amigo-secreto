@@ -104,7 +104,7 @@ export function PartyEditPage() {
   const micos = parseMicos(data.forbiddenItemsText);
 
   return (
-    <PartyLayout partyId={partyId} name={data.name} status={data.status}>
+    <PartyLayout partyId={partyId} name={data.name} status={data.status} isOwner={data.isOwner}>
       <Stack gap={20}>
         <div>
           <ImagePickerBox

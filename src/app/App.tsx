@@ -10,6 +10,7 @@ import { RequestOwnerAccessPage } from "@/auth/RequestOwnerAccessPage";
 import { AdminDashboardPage } from "@/features/admin/AdminDashboardPage";
 import { OwnerDashboardPage } from "@/features/owner/OwnerDashboardPage";
 import { PartyCreatePage } from "@/features/owner/PartyCreatePage";
+import { PartyCreatorGiftPage } from "@/features/owner/PartyCreatorGiftPage";
 import { PartyEditPage } from "@/features/owner/PartyEditPage";
 import { PartyParticipantsPage } from "@/features/owner/PartyParticipantsPage";
 import { PartyExclusionsPage } from "@/features/owner/PartyExclusionsPage";
@@ -107,6 +108,14 @@ export function App() {
                 element={
                   <Protected requireRole="owner">
                     <PartyDrawPage />
+                  </Protected>
+                }
+              />
+              <Route
+                path="/owner/parties/:partyId/my-gift"
+                element={
+                  <Protected requireRole="owner">
+                    <PartyCreatorGiftPage />
                   </Protected>
                 }
               />

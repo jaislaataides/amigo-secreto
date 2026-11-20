@@ -1,121 +1,21 @@
-import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/shared/api/client";
-import { Button, Card, IconButton, Input, Stack } from "@/shared/components/ui";
-import { Alert, EmptyState, ErrorBanner } from "@/shared/components/Feedback";
-import { LinkPreview } from "@/shared/components/LinkPreview";
+import { Stack } from "@/shared/components/ui";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
 import { ParticipantStepNav } from "./ParticipantStepNav";
+import { ReferenceLinksForm } from "./ReferenceLinksForm";
 import { useMyPartyView } from "./useMyPartyView";
-
-const MAX_LINKS = 10;
 
 export function ParticipantReferencesPage() {
   const { partyId } = useParams<{ partyId: string }>();
   const { data, isLoading, isError, error } = useMyPartyView(partyId);
-  const queryClient = useQueryClient();
-  const [url, setUrl] = useState("");
-
-  const invalidate = () => void queryClient.invalidateQueries({ queryKey: ["participant", "me", partyId] });
-
-  const addLink = useMutation({
-    mutationFn: () => api.post(`/api/parties/${partyId}/me/links`, { url: url.trim() }),
-    onSuccess: () => {
-      setUrl("");
-      invalidate();
-    },
-  });
-
-  const removeLink = useMutation({
-    mutationFn: (linkId: string) => api.delete(`/api/parties/${partyId}/me/links?linkId=${linkId}`),
-    // Só termina quando a lista nova chega (o link some sem "voltar" antes).
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["participant", "me", partyId] }),
-  });
 
   if (!partyId) return null;
   if (isLoading || isError || !data) return <ParticipantLoadState isLoading={isLoading} error={error} />;
 
-  const links = data.me.referenceLinks;
-
   return (
     <ParticipantLayout partyId={partyId} name={data.party.name} imageUrl={data.party.imageUrl} isOwner={data.me.isOwner}>
       <Stack gap={20}>
-        {links.length < MAX_LINKS ? (
-          <Card>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (url.trim()) addLink.mutate();
-              }}
-            >
-              <Stack gap={10}>
-                <label htmlFor="ref-url" className="section-title" style={{ margin: 0 }}>
-                  Adicionar referência
-                </label>
-                <p className="hint" id="ref-url-hint">
-                  Cole o link de algo que você gostaria de ganhar (Amazon, Shopee, AliExpress…). Quanto mais pistas, menor o risco de mico.
-                </p>
-                <div className="row" style={{ flexWrap: "nowrap" }}>
-                  <Input
-                    id="ref-url"
-                    inputMode="url"
-                    placeholder="https://…"
-                    aria-describedby="ref-url-hint"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                  />
-                  <Button type="submit" icon="plus" loading={addLink.isPending} disabled={!url.trim()}>
-                    {addLink.isPending ? "Buscando…" : "Adicionar"}
-                  </Button>
-                </div>
-                {addLink.isError && <ErrorBanner message={addLink.error.message} />}
-              </Stack>
-            </form>
-          </Card>
-        ) : (
-          <Alert tone="info">Você chegou ao limite de {MAX_LINKS} links. Remova um pra adicionar outro.</Alert>
-        )}
-
-        <section>
-          <h2 className="section-title">
-            Suas referências <span className="count">{links.length}/{MAX_LINKS}</span>
-          </h2>
-          {links.length === 0 ? (
-            <EmptyState icon="link" title="Nenhum link ainda">
-              Referências são o melhor antídoto contra presente-mico.
-            </EmptyState>
-          ) : (
-            <Stack gap={10}>
-              {links.map((link) => {
-                const removing = removeLink.isPending && removeLink.variables === link.id;
-                return (
-                  <div key={link.id} className={removing ? "is-removing" : undefined}>
-                    <LinkPreview
-                      {...link}
-                      action={
-                        <IconButton
-                          icon="trash"
-                          label={removing ? "Removendo link…" : `Remover ${link.title || "link"}`}
-                          variant="danger"
-                          size="sm"
-                          loading={removing}
-                          disabled={removeLink.isPending}
-                          onClick={() => removeLink.mutate(link.id)}
-                        />
-                      }
-                    />
-                  </div>
-                );
-              })}
-            </Stack>
-          )}
-          {removeLink.isError && (
-            <div style={{ marginTop: 10 }}>
-              <ErrorBanner message={removeLink.error.message} />
-            </div>
-          )}
-        </section>
+        <ReferenceLinksForm partyId={partyId} links={data.me.referenceLinks} />
         <ParticipantStepNav partyId={partyId} currentKey="references" me={data.me} />
       </Stack>
     </ParticipantLayout>

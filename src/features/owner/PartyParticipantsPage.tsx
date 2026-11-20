@@ -78,7 +78,7 @@ export function PartyParticipantsPage() {
   }
 
   return (
-    <PartyLayout partyId={partyId} name={data.name} status={data.status}>
+    <PartyLayout partyId={partyId} name={data.name} status={data.status} isOwner={data.isOwner}>
       <Stack gap={20}>
         <Card>
           <div className="row row--between" style={{ marginBottom: 10 }}>

@@ -25,6 +25,9 @@ export const getPartyDetail = withErrorHandling(async (req: VercelRequest, res: 
   res.status(200).json({
     id: partyId,
     ...party,
+    // Quem criou a party (não um admin só gerenciando) também é participante
+    // dela — usado pra mostrar a aba "Meu presente" só pra essa pessoa.
+    isOwner: party.ownerUid === decoded.uid,
     categories: categoriesSnap.docs.map((d) => ({ id: d.id, ...d.data() })),
     participants: participantsSnap.docs.map((d) => {
       const data = d.data() as Participant;

@@ -74,7 +74,7 @@ export function PartyCreatePage() {
     // O organizador já participa da própria party (ver effectiveRsvp) e não
     // precisa confirmar presença, mas ainda precisa preencher categorias
     // favoritas/referências — isso vira a "etapa 2" logo após criar.
-    onSuccess: (data) => navigate(`/p/${data.partyId}/preferences`),
+    onSuccess: (data) => navigate(`/owner/parties/${data.partyId}/my-gift`),
   });
 
   async function handleImageSelected(file: File | undefined) {

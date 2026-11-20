@@ -35,7 +35,7 @@ export function PartyDrawPage() {
   const canRedraw = alreadyDrawn && Date.now() < deadlineMillis(data.rsvpDeadline);
 
   return (
-    <PartyLayout partyId={partyId} name={data.name} status={data.status}>
+    <PartyLayout partyId={partyId} name={data.name} status={data.status} isOwner={data.isOwner}>
       <Stack gap={20}>
         <div className="stats">
           <Stat value={going} label="confirmados" accent />
