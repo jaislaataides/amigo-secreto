@@ -810,7 +810,10 @@ select {
   width: 20px;
   height: 20px;
   border-radius: 4px;
-  border: 2px solid var(--color-border-strong);
+  /* --color-border-strong não tem contraste suficiente contra a superfície
+     no tema escuro (quase invisível) — checkbox precisa de mais contraste
+     que um divisor comum. */
+  border: 2px solid var(--color-fg-subtle);
   background: var(--color-surface);
   color: transparent;
   transition: background var(--dur-fast), border-color var(--dur-fast);
