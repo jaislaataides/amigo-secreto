@@ -48,7 +48,7 @@ export function AppLayout(props: { children: ReactNode }) {
                 // Explícito: em rotas guiadas pelo ParticipantGuard (ex: /p/:partyId/...),
                 // sair não navega sozinho pra lugar nenhum — ficaria preso na mesma URL,
                 // mostrando o aviso de login "de convite" em vez da tela real de entrada.
-                navigate("/", { replace: true });
+                navigate("/login", { replace: true });
               }}
             />
           </div>

@@ -7,7 +7,7 @@ import { AppLayout } from "@/app/AppLayout";
 
 /**
  * Quem chega pelo link do convite muitas vezes não está logado ainda — em
- * vez de mandar pra "/" e perder o convite de vista (como o AuthGuard faz),
+ * vez de mandar pra "/login" e perder o convite de vista (como o AuthGuard faz),
  * a autenticação acontece na própria página (mesmo padrão do RevealPage).
  * Quem já está logado (com a conta certa) passa direto, sem pedir login
  * de novo.

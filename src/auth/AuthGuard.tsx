@@ -14,7 +14,7 @@ export function AuthGuard(props: { children: ReactNode; requireRole?: "admin" | 
 
   if (!user) {
     rememberReturnPath(`${location.pathname}${location.search}`);
-    return <Navigate to="/" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Admin tem acesso a tudo que um owner tem — organizar parties incluso.

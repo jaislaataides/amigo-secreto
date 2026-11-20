@@ -5,6 +5,7 @@ import { queryClient } from "@/shared/api/queryClient";
 import { ConfirmProvider } from "@/shared/components/ConfirmDialog";
 import { AuthProvider } from "@/auth/AuthContext";
 import { AuthGuard } from "@/auth/AuthGuard";
+import { LandingPage } from "@/auth/LandingPage";
 import { LoginPage } from "@/auth/LoginPage";
 import { RequestOwnerAccessPage } from "@/auth/RequestOwnerAccessPage";
 import { AdminDashboardPage } from "@/features/admin/AdminDashboardPage";
@@ -41,7 +42,8 @@ export function App() {
         <AuthProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<LoginPage />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
               <Route path="/solicitar-acesso" element={<RequestOwnerAccessPage />} />
 
               <Route
@@ -121,7 +123,7 @@ export function App() {
               />
 
               {/* ParticipantGuard em vez de Protected: quem chega pelo convite autentica
-                na própria página, sem round-trip pra "/" (ver ParticipantGuard.tsx). */}
+                na própria página, sem round-trip pra "/login" (ver ParticipantGuard.tsx). */}
               <Route
                 path="/p/:partyId/preferences"
                 element={
