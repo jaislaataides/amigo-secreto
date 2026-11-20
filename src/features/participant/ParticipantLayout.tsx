@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { GeneratedCover } from "@/shared/components/GeneratedCover";
-import { Page, PageHeader } from "@/shared/components/ui";
+import { Badge, Page, PageHeader } from "@/shared/components/ui";
 import { EmptyState, ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
 import { ApiClientError } from "@/shared/api/client";
 import { ParticipantTabs } from "./ParticipantTabs";
@@ -15,6 +15,8 @@ export function ParticipantLayout(props: {
   isOwner?: boolean;
   /** Sorteio já feito: trava tudo, não dá mais pra editar nada daqui. */
   partyStatus: string;
+  /** Só pra mostrar na tela de "sorteio realizado" — quem entrou no sorteio. */
+  participants: { name: string }[];
   children: ReactNode;
 }) {
   const drawn = props.partyStatus === "drawn";
@@ -36,9 +38,23 @@ export function ParticipantLayout(props: {
         subtitle={props.subtitle}
       />
       {drawn ? (
-        <EmptyState icon="lock" title="Sorteio realizado!">
-          Verifique seu e-mail — o resultado chegou num link pessoal. Não dá mais pra editar nada por aqui.
-        </EmptyState>
+        <>
+          <EmptyState icon="lock" title="Sorteio realizado!">
+            Verifique seu e-mail — o resultado chegou num link pessoal. Não dá mais pra editar nada por aqui.
+          </EmptyState>
+          {props.participants.length > 0 && (
+            <section style={{ marginTop: 24 }}>
+              <h2 className="section-title">
+                Quem participou <span className="count">{props.participants.length}</span>
+              </h2>
+              <div className="row" style={{ gap: 6 }}>
+                {props.participants.map((p) => (
+                  <Badge key={p.name}>{p.name}</Badge>
+                ))}
+              </div>
+            </section>
+          )}
+        </>
       ) : (
         <>
           <ParticipantTabs partyId={props.partyId} />

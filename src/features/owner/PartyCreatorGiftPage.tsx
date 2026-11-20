@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { Stack } from "@/shared/components/ui";
+import { Badge, Stack } from "@/shared/components/ui";
 import { useMyPartyView } from "@/features/participant/useMyPartyView";
 import { PreferenceCategoriesForm } from "@/features/participant/PreferenceCategoriesForm";
 import { ReferenceLinksForm } from "@/features/participant/ReferenceLinksForm";
@@ -29,9 +29,23 @@ export function PartyCreatorGiftPage() {
       subtitle="Suas preferências como participante da própria party."
     >
       {drawn ? (
-        <EmptyState icon="lock" title="Sorteio realizado!">
-          Verifique seu e-mail — o resultado chegou num link pessoal. Não dá mais pra editar nada por aqui.
-        </EmptyState>
+        <>
+          <EmptyState icon="lock" title="Sorteio realizado!">
+            Verifique seu e-mail — o resultado chegou num link pessoal. Não dá mais pra editar nada por aqui.
+          </EmptyState>
+          {data.party.participants.length > 0 && (
+            <section style={{ marginTop: 24 }}>
+              <h2 className="section-title">
+                Quem participou <span className="count">{data.party.participants.length}</span>
+              </h2>
+              <div className="row" style={{ gap: 6 }}>
+                {data.party.participants.map((p) => (
+                  <Badge key={p.name}>{p.name}</Badge>
+                ))}
+              </div>
+            </section>
+          )}
+        </>
       ) : (
         <Stack gap={32}>
           <PreferenceCategoriesForm

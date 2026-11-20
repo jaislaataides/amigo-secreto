@@ -19,6 +19,7 @@ export function ParticipantReferencesPage() {
       imageUrl={data.party.imageUrl}
       isOwner={data.me.isOwner}
       partyStatus={data.party.status}
+      participants={data.party.participants}
     >
       <Stack gap={20}>
         <ReferenceLinksForm partyId={partyId} links={data.me.referenceLinks} />

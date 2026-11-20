@@ -22,6 +22,7 @@ export function ParticipantSizesPage() {
       imageUrl={data.party.imageUrl}
       isOwner={data.me.isOwner}
       partyStatus={data.party.status}
+      participants={data.party.participants}
     >
       <Stack gap={20}>
         <SizesForm ref={formRef} partyId={partyId} rsvp={data.me.rsvp} sizes={data.me.sizes} />

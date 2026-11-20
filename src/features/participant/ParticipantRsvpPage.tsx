@@ -38,6 +38,7 @@ export function ParticipantRsvpPage() {
       subtitle={party.description}
       isOwner={me.isOwner}
       partyStatus={party.status}
+      participants={party.participants}
     >
       <Stack gap={24}>
         <div className="rules slip">

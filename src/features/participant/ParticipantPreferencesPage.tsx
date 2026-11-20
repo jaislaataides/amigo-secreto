@@ -22,6 +22,7 @@ export function ParticipantPreferencesPage() {
       imageUrl={data.party.imageUrl}
       isOwner={data.me.isOwner}
       partyStatus={data.party.status}
+      participants={data.party.participants}
     >
       <Stack gap={20}>
         <PreferenceCategoriesForm

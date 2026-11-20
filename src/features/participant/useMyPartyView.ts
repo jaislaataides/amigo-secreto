@@ -38,6 +38,8 @@ export interface MyPartyView {
     forbiddenItemsText: string;
     status: string;
     categories: MyPartyCategory[];
+    /** Só nome — de quem efetivamente vai participar (quem entrou no sorteio). */
+    participants: { name: string }[];
   };
   me: {
     id: string;
