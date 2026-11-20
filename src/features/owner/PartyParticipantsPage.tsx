@@ -130,33 +130,46 @@ export function PartyParticipantsPage() {
                       </Badge>
                     )}
                     <Badge tone={RSVP_TONE[p.rsvp]}>{RSVP_LABEL[p.rsvp]}</Badge>
-                    {!p.isOwner &&
-                      data.status !== "canceled" &&
-                      (data.status !== "drawn" || p.rsvp === "going") && (
-                        <IconButton
-                          icon="mail"
-                          label={
-                            resendInvite.isPending && resendInvite.variables === p.id
-                              ? `Reenviando para ${p.name}…`
-                              : data.status === "drawn"
-                                ? `Reenviar resultado para ${p.name}`
-                                : `Reenviar convite para ${p.name}`
-                          }
-                          size="sm"
-                          loading={resendInvite.isPending && resendInvite.variables === p.id}
-                          disabled={resendInvite.isPending}
-                          onClick={() => {
-                            const drawn = data.status === "drawn";
-                            void confirm({
-                              title: drawn ? `Reenviar resultado para ${p.name}?` : `Reenviar convite para ${p.name}?`,
-                              message: drawn
-                                ? `Um novo e-mail com o link do resultado vai pra ${p.email}.`
-                                : `Um novo link vai pra ${p.email}. O link anterior deixa de funcionar.`,
-                              confirmLabel: "Reenviar",
-                            }).then((ok) => ok && resendInvite.mutate(p.id));
-                          }}
-                        />
-                      )}
+                    {!p.isOwner && data.status !== "canceled" && data.status !== "drawn" && (
+                      <IconButton
+                        icon="mail"
+                        label={
+                          resendInvite.isPending && resendInvite.variables === p.id
+                            ? `Reenviando convite para ${p.name}…`
+                            : `Reenviar convite para ${p.name}`
+                        }
+                        size="sm"
+                        loading={resendInvite.isPending && resendInvite.variables === p.id}
+                        disabled={resendInvite.isPending}
+                        onClick={() => {
+                          void confirm({
+                            title: `Reenviar convite para ${p.name}?`,
+                            message: `Um novo link vai pra ${p.email}. O link anterior deixa de funcionar.`,
+                            confirmLabel: "Reenviar",
+                          }).then((ok) => ok && resendInvite.mutate(p.id));
+                        }}
+                      />
+                    )}
+                    {!p.isOwner && data.status === "drawn" && p.rsvp === "going" && (
+                      // Botão com texto visível (não só ícone): depois do sorteio é a
+                      // única ação que sobra pra essa pessoa, merece ser fácil de achar.
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        icon="mail"
+                        loading={resendInvite.isPending && resendInvite.variables === p.id}
+                        disabled={resendInvite.isPending}
+                        onClick={() => {
+                          void confirm({
+                            title: `Reenviar resultado para ${p.name}?`,
+                            message: `Um novo e-mail com o link do resultado vai pra ${p.email}.`,
+                            confirmLabel: "Reenviar",
+                          }).then((ok) => ok && resendInvite.mutate(p.id));
+                        }}
+                      >
+                        {resendInvite.isPending && resendInvite.variables === p.id ? "Reenviando…" : "Reenviar resultado"}
+                      </Button>
+                    )}
                     {editable && (
                       <IconButton
                         icon="trash"
