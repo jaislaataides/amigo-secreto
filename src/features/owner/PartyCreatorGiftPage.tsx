@@ -1,10 +1,10 @@
 import { useParams } from "react-router-dom";
-import { Badge, Stack } from "@/shared/components/ui";
+import { Badge, Card, Stack } from "@/shared/components/ui";
+import { Icon } from "@/shared/components/Icon";
 import { useMyPartyView } from "@/features/participant/useMyPartyView";
 import { PreferenceCategoriesForm } from "@/features/participant/PreferenceCategoriesForm";
 import { ReferenceLinksForm } from "@/features/participant/ReferenceLinksForm";
 import { SizesForm } from "@/features/participant/SizesForm";
-import { EmptyState } from "@/shared/components/Feedback";
 import { PartyLayout, PartyLoadState } from "./PartyLayout";
 
 /**
@@ -30,9 +30,21 @@ export function PartyCreatorGiftPage() {
     >
       {drawn ? (
         <>
-          <EmptyState icon="lock" title="Sorteio realizado!">
-            Verifique seu e-mail — o resultado chegou num link pessoal. Não dá mais pra editar nada por aqui.
-          </EmptyState>
+          <Card>
+            <div className="home-link" style={{ alignItems: "flex-start" }}>
+              <span className="home-link__icon">
+                <Icon name="lock" size={24} strokeWidth={2.5} />
+              </span>
+              <div>
+                <h2 className="section-title" style={{ margin: 0 }}>
+                  Sorteio realizado!
+                </h2>
+                <p className="muted" style={{ marginTop: 4 }}>
+                  Verifique seu e-mail — o resultado chegou num link pessoal. Não dá mais pra editar nada por aqui.
+                </p>
+              </div>
+            </div>
+          </Card>
           {data.party.participants.length > 0 && (
             <section style={{ marginTop: 24 }}>
               <h2 className="section-title">

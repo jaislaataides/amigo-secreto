@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { GeneratedCover } from "@/shared/components/GeneratedCover";
-import { Badge, Page, PageHeader } from "@/shared/components/ui";
+import { Badge, Card, Page, PageHeader } from "@/shared/components/ui";
+import { Icon } from "@/shared/components/Icon";
 import { EmptyState, ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
 import { ApiClientError } from "@/shared/api/client";
 import { ParticipantTabs } from "./ParticipantTabs";
@@ -39,9 +40,21 @@ export function ParticipantLayout(props: {
       />
       {drawn ? (
         <>
-          <EmptyState icon="lock" title="Sorteio realizado!">
-            Verifique seu e-mail — o resultado chegou num link pessoal. Não dá mais pra editar nada por aqui.
-          </EmptyState>
+          <Card>
+            <div className="home-link" style={{ alignItems: "flex-start" }}>
+              <span className="home-link__icon">
+                <Icon name="lock" size={24} strokeWidth={2.5} />
+              </span>
+              <div>
+                <h2 className="section-title" style={{ margin: 0 }}>
+                  Sorteio realizado!
+                </h2>
+                <p className="muted" style={{ marginTop: 4 }}>
+                  Verifique seu e-mail — o resultado chegou num link pessoal. Não dá mais pra editar nada por aqui.
+                </p>
+              </div>
+            </div>
+          </Card>
           {props.participants.length > 0 && (
             <section style={{ marginTop: 24 }}>
               <h2 className="section-title">
