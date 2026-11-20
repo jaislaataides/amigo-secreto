@@ -25,7 +25,7 @@ export function ParticipantGuard(props: { children: ReactNode }) {
             <Icon name="lock" size={44} strokeWidth={1.75} />
           </div>
           <p className="reveal__eyebrow">Convite de amigo secreto</p>
-          <h1 className="reveal__title">Entra pra continuar</h1>
+          <h1 className="reveal__title">Entre pra continuar</h1>
           <p className="reveal__hint">Use a conta Google do e-mail em que você recebeu o convite.</p>
           <div style={{ width: "100%", maxWidth: 360, display: "grid", gap: 12 }}>
             {unauthorized && (
