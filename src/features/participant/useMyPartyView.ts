@@ -43,6 +43,7 @@ export interface MyPartyView {
     id: string;
     name: string;
     email: string;
+    isOwner: boolean;
     rsvp: "pending" | "going" | "not_going";
     preferredCategories: string[];
     sizes: MySizes | null;

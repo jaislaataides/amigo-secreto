@@ -48,7 +48,7 @@ export function ParticipantSizesPage() {
   if (isLoading || isError || !data) return <ParticipantLoadState isLoading={isLoading} error={error} />;
 
   const layout = (children: ReactNode) => (
-    <ParticipantLayout partyId={partyId} name={data.party.name} imageUrl={data.party.imageUrl}>
+    <ParticipantLayout partyId={partyId} name={data.party.name} imageUrl={data.party.imageUrl} isOwner={data.me.isOwner}>
       {children}
     </ParticipantLayout>
   );

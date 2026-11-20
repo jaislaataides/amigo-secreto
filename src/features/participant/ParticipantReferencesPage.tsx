@@ -38,7 +38,7 @@ export function ParticipantReferencesPage() {
   const links = data.me.referenceLinks;
 
   return (
-    <ParticipantLayout partyId={partyId} name={data.party.name} imageUrl={data.party.imageUrl}>
+    <ParticipantLayout partyId={partyId} name={data.party.name} imageUrl={data.party.imageUrl} isOwner={data.me.isOwner}>
       <Stack gap={20}>
         {links.length < MAX_LINKS ? (
           <Card>

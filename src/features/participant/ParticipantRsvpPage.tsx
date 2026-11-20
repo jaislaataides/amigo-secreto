@@ -30,7 +30,13 @@ export function ParticipantRsvpPage() {
   const current = confirm.isPending ? confirm.variables : me.rsvp;
 
   return (
-    <ParticipantLayout partyId={partyId} name={party.name} imageUrl={party.imageUrl} subtitle={party.description}>
+    <ParticipantLayout
+      partyId={partyId}
+      name={party.name}
+      imageUrl={party.imageUrl}
+      subtitle={party.description}
+      isOwner={me.isOwner}
+    >
       <Stack gap={24}>
         <div className="rules slip">
           <div className="rules__item">

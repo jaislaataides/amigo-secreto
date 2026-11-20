@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { GeneratedCover } from "@/shared/components/GeneratedCover";
-import { Page, PageHeader } from "@/shared/components/ui";
+import { Page, PageHeader, ButtonLink } from "@/shared/components/ui";
 import { EmptyState, ErrorBanner, FullPageSpinner } from "@/shared/components/Feedback";
 import { ApiClientError } from "@/shared/api/client";
 import { ParticipantTabs } from "./ParticipantTabs";
@@ -11,6 +11,8 @@ export function ParticipantLayout(props: {
   name: string;
   imageUrl: string | null;
   subtitle?: ReactNode;
+  /** Mostra um link de volta pro painel de organizador (quem criou a party também é participante dela). */
+  isOwner?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -19,6 +21,13 @@ export function ParticipantLayout(props: {
         <img src={props.imageUrl} alt="" className="cover" />
       ) : (
         <GeneratedCover seed={props.partyId} className="cover" ratio={3} />
+      )}
+      {props.isOwner && (
+        <div style={{ marginBottom: 12 }}>
+          <ButtonLink to={`/owner/parties/${props.partyId}/participants`} variant="secondary" size="sm" icon="arrowLeft">
+            Voltar pro painel da party
+          </ButtonLink>
+        </div>
       )}
       <PageHeader title={props.name} subtitle={props.subtitle} />
       <ParticipantTabs partyId={props.partyId} />

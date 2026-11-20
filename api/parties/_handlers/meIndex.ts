@@ -36,6 +36,7 @@ export const getMe = withErrorHandling(async (req: VercelRequest, res: VercelRes
       id: doc.id,
       name: participant.name,
       email: participant.email,
+      isOwner: participant.isOwner === true,
       rsvp: effectiveRsvp(participant),
       preferredCategories: participant.preferredCategories,
       sizes: participant.sizes ?? null,
