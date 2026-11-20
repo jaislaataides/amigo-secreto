@@ -6,6 +6,7 @@ import { Button, Card, IconButton, Input, Stack } from "@/shared/components/ui";
 import { Alert, EmptyState, ErrorBanner } from "@/shared/components/Feedback";
 import { LinkPreview } from "@/shared/components/LinkPreview";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
+import { ParticipantStepNav } from "./ParticipantStepNav";
 import { useMyPartyView } from "./useMyPartyView";
 
 const MAX_LINKS = 10;
@@ -115,6 +116,7 @@ export function ParticipantReferencesPage() {
             </div>
           )}
         </section>
+        <ParticipantStepNav partyId={partyId} currentKey="references" me={data.me} />
       </Stack>
     </ParticipantLayout>
   );

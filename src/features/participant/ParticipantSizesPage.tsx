@@ -5,6 +5,7 @@ import { api } from "@/shared/api/client";
 import { Button, ButtonLink, Field, Input, Stack } from "@/shared/components/ui";
 import { Alert, EmptyState, ErrorBanner } from "@/shared/components/Feedback";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
+import { ParticipantStepNav } from "./ParticipantStepNav";
 import { useMyPartyView, type MySizes } from "./useMyPartyView";
 
 const EMPTY: MySizes = { top: null, bottom: null, shoe: null, sock: null };
@@ -118,6 +119,7 @@ export function ParticipantSizesPage() {
           </Button>
           {dirty && <span className="hint">Alterações não salvas</span>}
         </div>
+        <ParticipantStepNav partyId={partyId} currentKey="sizes" me={data.me} />
       </Stack>
     </form>,
   );

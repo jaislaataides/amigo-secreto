@@ -5,6 +5,7 @@ import { api } from "@/shared/api/client";
 import { Button, CheckOption, Stack } from "@/shared/components/ui";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
+import { ParticipantStepNav } from "./ParticipantStepNav";
 import { useMyPartyView } from "./useMyPartyView";
 
 export function ParticipantPreferencesPage() {
@@ -59,6 +60,7 @@ export function ParticipantPreferencesPage() {
           </Button>
           {dirty && <span className="hint">Alterações não salvas</span>}
         </div>
+        <ParticipantStepNav partyId={partyId} currentKey="preferences" me={data.me} />
       </Stack>
     </ParticipantLayout>
   );

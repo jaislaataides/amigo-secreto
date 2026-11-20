@@ -5,6 +5,7 @@ import { Badge, Stack } from "@/shared/components/ui";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
 import { Icon, type IconName } from "@/shared/components/Icon";
 import { ParticipantLayout, ParticipantLoadState } from "./ParticipantLayout";
+import { ParticipantStepNav } from "./ParticipantStepNav";
 import { useMyPartyView } from "./useMyPartyView";
 import { parseMicos } from "@/shared/micos";
 
@@ -89,6 +90,7 @@ export function ParticipantRsvpPage() {
             Presença confirmada! Aproveite pra marcar suas categorias favoritas e deixar referências de presente.
           </Alert>
         )}
+        <ParticipantStepNav partyId={partyId} currentKey="rsvp" me={me} />
       </Stack>
     </ParticipantLayout>
   );
