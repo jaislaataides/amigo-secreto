@@ -14,6 +14,7 @@ import { PartyEditPage } from "@/features/owner/PartyEditPage";
 import { PartyParticipantsPage } from "@/features/owner/PartyParticipantsPage";
 import { PartyExclusionsPage } from "@/features/owner/PartyExclusionsPage";
 import { PartyDrawPage } from "@/features/owner/PartyDrawPage";
+import { ParticipantGuard } from "@/features/participant/ParticipantGuard";
 import { ParticipantPreferencesPage } from "@/features/participant/ParticipantPreferencesPage";
 import { ParticipantReferencesPage } from "@/features/participant/ParticipantReferencesPage";
 import { ParticipantRsvpPage } from "@/features/participant/ParticipantRsvpPage";
@@ -110,36 +111,38 @@ export function App() {
                 }
               />
 
+              {/* ParticipantGuard em vez de Protected: quem chega pelo convite autentica
+                na própria página, sem round-trip pra "/" (ver ParticipantGuard.tsx). */}
               <Route
                 path="/p/:partyId/preferences"
                 element={
-                  <Protected>
+                  <ParticipantGuard>
                     <ParticipantPreferencesPage />
-                  </Protected>
+                  </ParticipantGuard>
                 }
               />
               <Route
                 path="/p/:partyId/sizes"
                 element={
-                  <Protected>
+                  <ParticipantGuard>
                     <ParticipantSizesPage />
-                  </Protected>
+                  </ParticipantGuard>
                 }
               />
               <Route
                 path="/p/:partyId/references"
                 element={
-                  <Protected>
+                  <ParticipantGuard>
                     <ParticipantReferencesPage />
-                  </Protected>
+                  </ParticipantGuard>
                 }
               />
               <Route
                 path="/p/:partyId/rsvp"
                 element={
-                  <Protected>
+                  <ParticipantGuard>
                     <ParticipantRsvpPage />
-                  </Protected>
+                  </ParticipantGuard>
                 }
               />
 
