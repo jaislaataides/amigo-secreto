@@ -1,16 +1,21 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/shared/api/client";
 import { Button, CheckOption } from "@/shared/components/ui";
 import { Alert, ErrorBanner } from "@/shared/components/Feedback";
 import type { MyPartyCategory } from "./useMyPartyView";
+import type { SaveHandle } from "./SaveHandle";
 
-/** Categorias favoritas — usado pela página de participante e pela do organizador (ver PartyCreatorGiftPage). */
-export function PreferenceCategoriesForm(props: {
-  partyId: string;
-  categories: MyPartyCategory[];
-  preferredCategories: string[];
-}) {
+/**
+ * Categorias favoritas — usado pela página de participante e pela do
+ * organizador (ver PartyCreatorGiftPage). Expõe `saveIfDirty` via ref pra
+ * o botão "Próximo" (ParticipantStepNav) salvar antes de navegar, em vez
+ * de perder silenciosamente o que a pessoa marcou e não salvou.
+ */
+export const PreferenceCategoriesForm = forwardRef<
+  SaveHandle,
+  { partyId: string; categories: MyPartyCategory[]; preferredCategories: string[] }
+>(function PreferenceCategoriesForm(props, ref) {
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState<string[]>(props.preferredCategories);
 
@@ -24,6 +29,12 @@ export function PreferenceCategoriesForm(props: {
   });
 
   const dirty = [...selected].sort().join("|") !== [...props.preferredCategories].sort().join("|");
+
+  useImperativeHandle(ref, () => ({
+    saveIfDirty: async () => {
+      if (dirty) await save.mutateAsync();
+    },
+  }));
 
   return (
     <section>
@@ -58,4 +69,4 @@ export function PreferenceCategoriesForm(props: {
       </div>
     </section>
   );
-}
+});
