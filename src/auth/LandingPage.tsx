@@ -59,12 +59,14 @@ export function LandingPage() {
             Organize o sorteio do seu grupo com confirmação por e-mail, resultado privado pra cada pessoa e uma lista
             do que ninguém quer ganhar.
           </p>
-          <ButtonLink to="/login" size="lg">
-            Entrar
-          </ButtonLink>
-          <Link to="/solicitar-acesso" className="landing-hero__secondary">
-            Quero organizar uma party
-          </Link>
+          <div className="landing-hero__cta">
+            <ButtonLink to="/login" size="lg">
+              Entrar
+            </ButtonLink>
+            <Link to="/solicitar-acesso" className="landing-hero__secondary">
+              Quero organizar uma party
+            </Link>
+          </div>
         </div>
       </section>
 
