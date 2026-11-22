@@ -1666,15 +1666,20 @@ select {
   max-width: 48ch;
 }
 
-.landing-hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  justify-content: center;
+.landing-hero__secondary {
+  color: var(--color-on-brand-muted);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.landing-hero__secondary:hover {
+  color: var(--color-on-brand);
 }
 
 .landing-section {
-  max-width: 1040px;
+  max-width: 920px;
   margin: 0 auto;
   padding: var(--space-7) var(--space-4);
 }
@@ -1687,74 +1692,162 @@ select {
   margin-bottom: var(--space-6);
 }
 
-.landing-steps,
-.landing-features {
-  display: grid;
-  gap: var(--space-4);
-  grid-template-columns: 1fr;
+/* Vitrine "como funciona": print + texto lado a lado, alternando os lados —
+   em vez de 3 cards iguais, cada passo ganha espaço real pra mostrar a tela. */
+.landing-showcase {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
 }
 
-@media (min-width: 720px) {
-  .landing-steps,
-  .landing-features {
-    grid-template-columns: repeat(3, 1fr);
+.landing-showcase__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  align-items: center;
+}
+
+@media (min-width: 760px) {
+  .landing-showcase__row {
+    grid-template-columns: 1.1fr 1fr;
+    gap: var(--space-6);
+  }
+
+  .landing-showcase__row.is-reversed {
+    grid-template-columns: 1fr 1.1fr;
+  }
+
+  .landing-showcase__row.is-reversed .landing-showcase__frame {
+    order: 2;
   }
 }
 
-.landing-card {
-  background: var(--color-surface);
+.landing-showcase__frame {
+  background: var(--color-surface-2);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
-  padding: var(--space-5);
+  overflow: hidden;
+}
+
+.landing-showcase__chrome {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.landing-showcase__chrome span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+}
+
+.landing-showcase__img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top;
+}
+
+.landing-showcase__placeholder {
+  width: 100%;
+  aspect-ratio: 16 / 10;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: var(--space-2);
+  color: var(--color-fg-subtle);
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.landing-card__icon {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-control);
-  background: var(--color-primary-soft);
-  color: var(--color-primary-ink);
-  margin-bottom: var(--space-2);
-}
-
-.landing-card__step {
+.landing-showcase__step {
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--color-fg-subtle);
+  color: var(--color-primary-ink);
 }
 
-.landing-card__title {
-  font-size: 18px;
-  font-weight: 700;
-  margin: 0;
+.landing-showcase__title {
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: var(--space-1) 0 var(--space-2);
 }
 
-.landing-card__body {
+.landing-showcase__body {
   color: var(--color-fg-muted);
-  font-size: 15px;
-  margin: 0;
+  font-size: 16px;
+  max-width: 48ch;
 }
 
-.landing-footer-cta {
-  background: var(--color-surface-2);
-  text-align: center;
+/* Confidencialidade é o grande diferencial do produto — uma seção só,
+   com destaque real, em vez de dividir em 3 cards do mesmo peso. */
+.landing-trust {
+  background: var(--color-brand);
+  color: var(--color-on-brand);
   padding: var(--space-7) var(--space-4);
 }
 
-.landing-footer-cta__inner {
-  max-width: 480px;
+.landing-trust__inner {
+  max-width: 560px;
   margin: 0 auto;
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
+}
+
+.landing-trust__icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-brand);
+  margin-bottom: var(--space-2);
+}
+
+.landing-trust__title {
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.landing-trust__body {
+  color: var(--color-on-brand-muted);
+  font-size: 16px;
+  max-width: 48ch;
+}
+
+.landing-trust__list {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-self: stretch;
+  text-align: left;
+}
+
+.landing-trust__list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--color-on-brand-muted);
+}
+
+.landing-trust__list svg {
+  flex: none;
+  color: var(--color-primary);
 }
 
 .btn--google {
