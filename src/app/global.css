@@ -1626,6 +1626,12 @@ select {
   padding: var(--space-4);
 }
 
+/* .brand usa --color-on-brand (claro) pensado pro header escuro do app
+   logado; aqui o fundo é claro, então o nome precisa da cor de texto normal. */
+.landing-header .brand {
+  color: var(--color-fg);
+}
+
 @media (min-width: 720px) {
   .landing-header {
     padding: var(--space-5);
@@ -1851,6 +1857,7 @@ select {
   align-items: center;
   gap: 10px;
   font-size: 15px;
+  text-align: left;
   color: var(--color-on-brand-muted);
 }
 
